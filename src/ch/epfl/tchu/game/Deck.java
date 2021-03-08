@@ -131,7 +131,7 @@ public final class Deck <C extends Comparable<C>>{
     }
 
     private void test(){
-
+        System.out.println("Theo le bg !!");
     }
 
 
