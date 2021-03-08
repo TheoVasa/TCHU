@@ -1,6 +1,7 @@
 package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.SortedBag;
+import ch.epfl.tchu.gui.Info;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +56,10 @@ public class Main {
 
         Trail t = Trail.longest(routes);
         System.out.println(t.toString());
+
+        System.out.println(Info.cardName(Card.BLUE, 1));
+        System.out.println(Info.cardName(Card.BLUE, 0));
+
 
     }
 }
