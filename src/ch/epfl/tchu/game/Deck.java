@@ -46,7 +46,7 @@ public final class Deck <C extends Comparable<C>>{
 
         SortedBag<C> shuffleCards = SortedBag.of(shuffleList);
 
-        return new Deck<C>(shuffleCards);
+        return new Deck<>(shuffleCards);
 
     }
 
@@ -127,6 +127,10 @@ public final class Deck <C extends Comparable<C>>{
     private boolean countIsGood(int count){
 
         return count>=0 && count<= cards.size();
+
+    }
+
+    private void test(){
 
     }
 
