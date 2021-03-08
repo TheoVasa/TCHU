@@ -37,7 +37,7 @@ public final class Route {
         //Check NullPointerException or init vars
         this.station1 = Objects.requireNonNull(station1);
         this.station2 = Objects.requireNonNull(station2);
-        this.level =Objects.requireNonNull(level);
+        this.level = Objects.requireNonNull(level);
         this.id = Objects.requireNonNull(id);
 
         //Check Precondition on length and stations
