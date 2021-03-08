@@ -129,10 +129,4 @@ public final class Deck <C extends Comparable<C>>{
         return count>=0 && count<= cards.size();
 
     }
-
-    private void test(){
-        System.out.println("Theo le bg !!");
-    }
-
-
 }
