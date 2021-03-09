@@ -36,7 +36,6 @@ public final class Info {
      */
     public static String cardName(Card card, int count){
 
-        Preconditions.checkArgument(countIsGood(count));
         String name;
 
         switch(card) {
@@ -81,7 +80,7 @@ public final class Info {
             throw new IllegalArgumentException();
         }
 
-        return name + StringsFr.plural(count);
+        return name + generatePlural(count);
 
     }
 
@@ -244,18 +243,13 @@ public final class Info {
      */
 
 
-    private static boolean countIsGood(int count){
-        return count==0 || count ==1;
-    }
-
 
     private static String generatePlural(int i){
 
-        Preconditions.checkArgument(!(i<0));
-        if (i>1){
-            return StringsFr.plural(0);
+        if (i==1 || i==-1){
+            return StringsFr.plural(1);
 
-        } else return StringsFr.plural(1);
+        } else return StringsFr.plural(0);
 
     }
 
@@ -279,7 +273,7 @@ public final class Info {
         for(int i=0; i<orderedCard.size(); i++){
 
             int numberOfThisCard = orderedCard.countOf(orderedCard.get(i));
-            listOfCard = listOfCard + numberOfThisCard + " " + orderedCard.get(i) +  generatePlural(numberOfThisCard);
+            listOfCard = listOfCard + numberOfThisCard + " " + cardName(orderedCard.get(i), numberOfThisCard) +  generatePlural(numberOfThisCard);
 
             if(i==orderedCard.size()-2){
                 listOfCard = listOfCard + StringsFr.AND_SEPARATOR;
