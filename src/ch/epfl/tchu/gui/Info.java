@@ -3,15 +3,13 @@ package ch.epfl.tchu.gui;
 import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.Card;
-import ch.epfl.tchu.game.Color;
 import ch.epfl.tchu.game.Route;
 import ch.epfl.tchu.game.Trail;
 
-import javax.print.DocFlavor;
 import java.util.List;
 
 /**
- * this class is use to generate all type of text during the game, final immutable
+ * this class is use to generate all type of text during the game, final, immutable
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
  */
@@ -33,7 +31,7 @@ public final class Info {
     /**
      * generate the name of the given card
      * @param card we want print
-     * @param count 1 if plural, 0 if not
+     * @param count 0 if plural, 1 if not
      * @return the name of the card
      */
     public static String cardName(Card card, int count){
@@ -118,7 +116,7 @@ public final class Info {
      */
     public String keptTickets(int count){
 
-        return String.format(StringsFr.KEPT_N_TICKETS, playerName, count, StringsFr.plural(testPlural(count)));
+        return String.format(StringsFr.KEPT_N_TICKETS, playerName, count, generatePlural(count));
 
 
     }
@@ -139,7 +137,7 @@ public final class Info {
      */
     public  String drewTickets(int count){
 
-        return String.format(StringsFr.DREW_TICKETS, playerName, count, StringsFr.plural(testPlural(count)));
+        return String.format(StringsFr.DREW_TICKETS, playerName, count, generatePlural(count));
 
     }
 
@@ -159,8 +157,8 @@ public final class Info {
      * @return the text
      */
     public String drewVisibleCard(Card card){
-        return String.format(StringsFr.DREW_VISIBLE_CARD, playerName, cardName(card, 1));
 
+        return String.format(StringsFr.DREW_VISIBLE_CARD, playerName, cardName(card, 1));
     }
 
     /**
@@ -172,8 +170,6 @@ public final class Info {
     public String claimedRoute(Route route, SortedBag<Card> cards){
 
         return String.format(StringsFr.CLAIMED_ROUTE, playerName, generateRouteName(route), generateListOfCard(cards));
-
-
     }
 
     /**
@@ -183,40 +179,84 @@ public final class Info {
      * @return the text
      */
     public String attemptsTunnelClaim(Route route, SortedBag<Card> cards){
+
         return String.format(StringsFr.ATTEMPTS_TUNNEL_CLAIM, playerName, generateRouteName(route), generateListOfCard(cards));
-
     }
 
+    /**
+     * Generate a text saying that the player draw cards and saying the additional cost it implies
+     * @param drawnCards the cards drawn from the deck by the player
+     * @param additionalCost made by the drawnCards
+     * @return the text
+     */
     public String drewAdditionalCards(SortedBag<Card> drawnCards, int additionalCost){
-return null;
+
+        String text = String.format(StringsFr.ADDITIONAL_CARDS_ARE, generateListOfCard(drawnCards));
+
+        return (additionalCost==0) ? text + StringsFr.NO_ADDITIONAL_COST : text + String.format(StringsFr.SOME_ADDITIONAL_COST, additionalCost, generatePlural(additionalCost));
     }
 
+    /**
+     * Generate a text saying that the player dont want to claim the given route
+     * @param route the player don't want to claim
+     * @return the text
+     */
     public String didNotClaimRoute (Route route){
-return null;
+
+    return String.format(StringsFr.DID_NOT_CLAIM_ROUTE, playerName, generateRouteName(route));
     }
 
+    /**
+     * Generate a text saying that it left carCount cars for the player and that the last turn begin
+     * @param carCount number of cars left for the player
+     * @return the text
+     */
     public String lastTurnBegins (int carCount){
-return null;
+
+    return String.format(StringsFr.LAST_TURN_BEGINS, playerName, carCount,generatePlural(carCount));
     }
 
+    /**
+     * Generate a text saying that the player win the bonus with the given longestTrail
+     * @param longestTrail of the game
+     * @return the text
+     */
     public String getsLongestTrailBonus(Trail longestTrail){
-return null;
+
+    return String.format(StringsFr.GETS_BONUS, playerName, longestTrail.toString());
     }
 
+    /**
+     * generate the ending text announcing the winner, the loser and the points
+     * @param points of the winner
+     * @param loserPoints of the loser
+     * @return the text
+     */
     public String won(int points, int loserPoints){
-return null;
+
+    return String.format(StringsFr.WINS, playerName, points, generatePlural(points), loserPoints, generatePlural(loserPoints));
     }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * private methods
+     */
+
 
     private static boolean countIsGood(int count){
         return count==0 || count ==1;
     }
 
-    private static int testPlural(int i){
 
+    private static String generatePlural(int i){
+
+        Preconditions.checkArgument(!(i<0));
         if (i>1){
-            return 1;
-        }
-        else return 0;
+            return StringsFr.plural(0);
+
+        } else return StringsFr.plural(1);
+
     }
 
     private static String generateListOfCard(SortedBag<Card> card){
@@ -239,7 +279,7 @@ return null;
         for(int i=0; i<orderedCard.size(); i++){
 
             int numberOfThisCard = orderedCard.countOf(orderedCard.get(i));
-            listOfCard = listOfCard + numberOfThisCard + " " + orderedCard.get(i) +  StringsFr.plural(testPlural(numberOfThisCard));
+            listOfCard = listOfCard + numberOfThisCard + " " + orderedCard.get(i) +  generatePlural(numberOfThisCard);
 
             if(i==orderedCard.size()-2){
                 listOfCard = listOfCard + StringsFr.AND_SEPARATOR;
