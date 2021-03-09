@@ -253,7 +253,7 @@ public final class Info {
 
     }
 
-    private static String generateListOfCard(SortedBag<Card> card){
+    public static String generateListOfCard(SortedBag<Card> card){
 
         String listOfCard = "";
         int counter=0;
@@ -263,12 +263,13 @@ public final class Info {
             for(Card c : card){
                 if(c.ordinal()==i){
                     int numberOfThisCard = card.countOf(c);
-                    listOfCard = listOfCard + numberOfThisCard + " " + cardName(c, numberOfThisCard) +  generatePlural(numberOfThisCard);
+                    listOfCard = listOfCard + numberOfThisCard + " " + cardName(c, numberOfThisCard);
                     counter++;
 
-                    if(counter==card.size()-1) listOfCard = listOfCard + StringsFr.AND_SEPARATOR;
-                    else if(counter==card.size()) break;
-                    else   listOfCard = listOfCard + ", ";
+                    if(counter==card.toSet().size()-1) listOfCard = listOfCard + StringsFr.AND_SEPARATOR;
+                    else if(counter==card.toSet().size()) break;
+                    else  listOfCard = listOfCard + ", ";
+                    break;
 
                 }
             }

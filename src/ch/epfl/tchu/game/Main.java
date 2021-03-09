@@ -60,6 +60,16 @@ public class Main {
         System.out.println(Info.cardName(Card.BLUE, 1));
         System.out.println(Info.cardName(Card.BLUE, 0));
 
+        SortedBag.Builder<Card> builder = new SortedBag.Builder<>();
+        builder.add(2, Card.BLACK);
+        builder.add(1, Card.GREEN);
+        builder.add(4, Card.VIOLET);
+        builder.add(5, Card.LOCOMOTIVE);
+
+        SortedBag<Card> listOfcard = builder.build();
+
+        System.out.println(Info.generateListOfCard(listOfcard));
+
 
     }
 }
