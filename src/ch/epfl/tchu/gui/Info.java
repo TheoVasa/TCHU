@@ -253,15 +253,14 @@ public final class Info {
 
     }
 
-    public static String generateListOfCard(SortedBag<Card> card){
+    private static String generateListOfCard(SortedBag<Card> card){
 
         String listOfCard = "";
         int counter=0;
 
 
-        for(int i=0; i<=Card.CARS.size(); i++){
-            for(Card c : card){
-                if(c.ordinal()==i){
+            for(Card c : Card.ALL){
+                if(card.contains(c)){
                     int numberOfThisCard = card.countOf(c);
                     listOfCard = listOfCard + numberOfThisCard + " " + cardName(c, numberOfThisCard);
                     counter++;
@@ -269,11 +268,10 @@ public final class Info {
                     if(counter==card.toSet().size()-1) listOfCard = listOfCard + StringsFr.AND_SEPARATOR;
                     else if(counter==card.toSet().size()) break;
                     else  listOfCard = listOfCard + ", ";
-                    break;
 
                 }
             }
-        }
+
 
         /**
         String listOfCard = "";

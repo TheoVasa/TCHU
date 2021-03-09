@@ -62,13 +62,16 @@ public class Main {
 
         SortedBag.Builder<Card> builder = new SortedBag.Builder<>();
         builder.add(2, Card.BLACK);
-        builder.add(1, Card.GREEN);
+        builder.add(1, Card.BLUE);
         builder.add(4, Card.VIOLET);
-        builder.add(5, Card.LOCOMOTIVE);
+        builder.add(100, Card.LOCOMOTIVE);
 
         SortedBag<Card> listOfcard = builder.build();
 
-        System.out.println(Info.generateListOfCard(listOfcard));
+        String playername ="PLAYER";
+
+        Info infplayer = new Info(playername);
+        System.out.println(infplayer.claimedRoute(ChMap.routes().get(10), listOfcard));
 
 
     }
