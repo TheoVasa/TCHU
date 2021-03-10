@@ -248,7 +248,6 @@ public final class Info {
 
         if (i==1 || i==-1){
             return StringsFr.plural(1);
-
         } else return StringsFr.plural(0);
 
     }
@@ -268,7 +267,6 @@ public final class Info {
                     if(counter==card.toSet().size()-1) listOfCard = listOfCard + StringsFr.AND_SEPARATOR;
                     else if(counter==card.toSet().size()) break;
                     else  listOfCard = listOfCard + ", ";
-
                 }
             }
 
@@ -302,15 +300,12 @@ public final class Info {
             }else{
                 listOfCard = listOfCard + ", ";
             }
-
         }
 **/
         return listOfCard;
-
     }
 
     private static String generateRouteName(Route route){
-
         return route.station1() + StringsFr.EN_DASH_SEPARATOR + route.station2();
     }
 

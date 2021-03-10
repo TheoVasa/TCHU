@@ -38,7 +38,7 @@ public final class CardState extends PublicCardState{
      * @param deck the deck for the new state
      * @return a new CardState with zero discard cards
      */
-    public CardState of (Deck<Card> deck){
+    public static CardState of (Deck<Card> deck){
         //Check correctness of argument
         Preconditions.checkArgument(deck.size() >= Constants.FACE_UP_CARDS_COUNT);
 
@@ -53,11 +53,11 @@ public final class CardState extends PublicCardState{
      */
     public CardState withDrawnFaceUpCard(int slot){
         //Check correctness of the argument
-        Preconditions.checkArgument(slot <= Constants.FACE_UP_CARDS_COUNT && slot >= 0);
+        Preconditions.checkArgument(!deck.isEmpty());
 
-        //Set the new face up cards
+        //Set the new face up cards, throws IndexOutOfBound if  0<=sloT<=Constant.FACE_UP_CARDS_COUNT
         List<Card> faceUpCards = this.faceUpCards();
-        faceUpCards.set(slot, deck.topCard());
+        faceUpCards.set(Objects.checkIndex(slot, Constants.FACE_UP_CARDS_COUNT), deck.topCard());
 
         return new CardState(faceUpCards, deck.withoutTopCard(), discard);
     }

@@ -35,8 +35,7 @@ public final class Deck <C extends Comparable<C>>{
      * @param <C> type
      * @return a new deck, with the cards we want, shuffle
      */
-
-    public static <C extends Comparable<C>> Deck<C> of(SortedBag<C> cards, Random rng){
+    public static <C extends Comparable<C>> Deck<C> of(SortedBag<C> cards, Random rng) {
         //Shuffel the cards of the deck
         List<C> shuffleList = cards.toList();
         Collections.shuffle(shuffleList, rng);
@@ -88,9 +87,10 @@ public final class Deck <C extends Comparable<C>>{
     public Deck<C> withoutTopCards(int count){
         //Check correctness of the argument
         Preconditions.checkArgument(countIsGood(count));
+        Preconditions.checkArgument(!cards.isEmpty());
+
         return new Deck<>(cards.difference(this.topCards(count)));
     }
-
 
     /**
      * Gives a new deck without the first card of the deck
@@ -100,7 +100,6 @@ public final class Deck <C extends Comparable<C>>{
     public Deck<C> withoutTopCard(){
         return withoutTopCards(1);
     }
-
 
     /**
      * Getter for the size of the deck
