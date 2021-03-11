@@ -6,6 +6,7 @@ import ch.epfl.tchu.game.Card;
 import ch.epfl.tchu.game.Route;
 import ch.epfl.tchu.game.Trail;
 
+import javax.print.DocFlavor;
 import java.util.List;
 
 /**
@@ -93,7 +94,7 @@ public final class Info {
     public static String draw(List<String> playerNames, int points){
 
 
-        String players = playerNames.get(0) + StringsFr.AND_SEPARATOR + playerNames.get(1);
+        String players = generatePlayersNames(playerNames);
 
         return String.format(StringsFr.DRAW, players, points);
 
@@ -103,7 +104,7 @@ public final class Info {
      * generate a text saying that the player will play first
      * @return the text
      */
-    public String willPLayFirst(){
+    public String willPlayFirst(){
 
         return String.format(StringsFr.WILL_PLAY_FIRST, playerName);
     }
@@ -222,7 +223,9 @@ public final class Info {
      */
     public String getsLongestTrailBonus(Trail longestTrail){
 
-    return String.format(StringsFr.GETS_BONUS, playerName, longestTrail.toString());
+        String trailName = longestTrail.station1().name() + StringsFr.EN_DASH_SEPARATOR + longestTrail.station2().name();
+
+    return String.format(StringsFr.GETS_BONUS, playerName, trailName);
     }
 
     /**
@@ -242,7 +245,21 @@ public final class Info {
      * private methods
      */
 
+    private static String generatePlayersNames(List<String> playerNames){
 
+        String names = "";
+        int counter =0;
+        for (String player : playerNames){
+
+            names = names + player;
+            counter++;
+            if(counter== playerNames.size())
+                break;
+            else names = names + StringsFr.AND_SEPARATOR;
+        }
+
+        return names;
+    }
 
     private static String generatePlural(int i){
 
@@ -257,7 +274,6 @@ public final class Info {
         String listOfCard = "";
         int counter=0;
 
-
             for(Card c : Card.ALL){
                 if(card.contains(c)){
                     int numberOfThisCard = card.countOf(c);
@@ -270,38 +286,6 @@ public final class Info {
                 }
             }
 
-
-        /**
-        String listOfCard = "";
-
-        Card[] cardsOrder = {Card.BLACK, Card.VIOLET, Card.BLUE, Card.GREEN, Card.YELLOW, Card.ORANGE, Card.RED, Card.WHITE, Card.LOCOMOTIVE};
-
-        SortedBag.Builder<Card> orderedCardBuilder = new SortedBag.Builder<>();
-
-        for(int i=0; i<cardsOrder.length; i++){
-            if(card.contains(cardsOrder[i])){
-                orderedCardBuilder.add(card.get(i));
-            }
-        }
-
-        SortedBag<Card> orderedCard = orderedCardBuilder.build();
-
-
-        for(int i=0; i<orderedCard.size(); i++){
-
-            int numberOfThisCard = orderedCard.countOf(orderedCard.get(i));
-            listOfCard = listOfCard + numberOfThisCard + " " + cardName(orderedCard.get(i), numberOfThisCard) +  generatePlural(numberOfThisCard);
-
-            if(i==orderedCard.size()-2){
-                listOfCard = listOfCard + StringsFr.AND_SEPARATOR;
-
-            }else if(i== orderedCard.size()-1){
-                break;
-            }else{
-                listOfCard = listOfCard + ", ";
-            }
-        }
-**/
         return listOfCard;
     }
 
