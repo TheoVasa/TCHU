@@ -1,239 +1,386 @@
 package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.SortedBag;
+import ch.epfl.tchu.game.Route.Level;
+import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class RouteTest {
+    private static final List<Color> COLORS =
+            List.of(
+                    Color.BLACK,
+                    Color.VIOLET,
+                    Color.BLUE,
+                    Color.GREEN,
+                    Color.YELLOW,
+                    Color.ORANGE,
+                    Color.RED,
+                    Color.WHITE);
+    private static final List<Card> CAR_CARDS =
+            List.of(
+                    Card.BLACK,
+                    Card.VIOLET,
+                    Card.BLUE,
+                    Card.GREEN,
+                    Card.YELLOW,
+                    Card.ORANGE,
+                    Card.RED,
+                    Card.WHITE);
 
     @Test
-    void constructorFailsOnEmptyId(){
-        assertThrows(NullPointerException.class, () -> {
-            new Route(null, ChMap.stations().get(0), ChMap.stations().get(1), 3, Route.Level.UNDERGROUND, Color.ORANGE);
-        });
-    }
-
-    @Test
-    void constructorFailsOnEmptyStations(){
-        //Station1
-        assertThrows(NullPointerException.class, () -> {
-            new Route("ID", null, ChMap.stations().get(1), 3, Route.Level.UNDERGROUND, Color.ORANGE);
-        });
-
-        //Station2
-        assertThrows(NullPointerException.class, () -> {
-            new Route("ID", ChMap.stations().get(0), null, 3, Route.Level.UNDERGROUND, Color.ORANGE);
-        });
-
-    }
-    @Test
-    void constructorFailsOnEmptyLevel(){
-        assertThrows(NullPointerException.class, () -> {
-            new Route("ID", ChMap.stations().get(0), ChMap.stations().get(1), 3, null, Color.ORANGE);
-        });
-    }
-
-    @Test
-    void constructorFailsOnIdenticalStations(){
+    void routeConstructorFailsWhenBothStationsAreEqual() {
+        var s = new Station(0, "Lausanne");
         assertThrows(IllegalArgumentException.class, () -> {
-            new Route("ID", ChMap.stations().get(0), ChMap.stations().get(0), 3, Route.Level.OVERGROUND, Color.ORANGE);
+            new Route("id", s, s, 1, Level.OVERGROUND, Color.BLACK);
         });
     }
 
     @Test
-    void constructorFailsLengthOutOfRange(){
-
-        //Out of range small number
+    void routeConstructorFailsWhenLengthIsInvalid() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
         assertThrows(IllegalArgumentException.class, () -> {
-            new Route("ID", ChMap.stations().get(0), ChMap.stations().get(1), -2, Route.Level.UNDERGROUND, Color.ORANGE);
+            new Route("id", s1, s2, 0, Level.OVERGROUND, Color.BLACK);
         });
-
-        //Out of range big number
         assertThrows(IllegalArgumentException.class, () -> {
-            new Route("ID", ChMap.stations().get(0), ChMap.stations().get(1), 10, Route.Level.UNDERGROUND, Color.ORANGE);
+            new Route("id", s1, s2, 7, Level.OVERGROUND, Color.BLACK);
         });
     }
 
-
     @Test
-    void stationsAreCorrectOnNonEmptyRoad() {
-
-        Station s1 = ChMap.stations().get(0);
-        Station s2 = ChMap.stations().get(1);
-        Route r = new Route ("ID", s1, s2,5, Route.Level.UNDERGROUND, Color.ORANGE );
-        assertEquals(s1, r.station1());
-        assertEquals(s2, r.station2());
+    void routeConstructorFailsWhenIdIsNull() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        assertThrows(NullPointerException.class, () -> {
+            new Route(null, s1, s2, 1, Level.OVERGROUND, Color.BLACK);
+        });
     }
 
     @Test
-    void lengthIsCorrectOnNonEmptyRoad() {
-
-        Station s1 = ChMap.stations().get(0);
-        Station s2 = ChMap.stations().get(1);
-        Route r = new Route ("ID", s1, s2,5, Route.Level.UNDERGROUND, Color.ORANGE );
-        assertEquals(5, r.length());
-
+    void routeConstructorFailsWhenOneStationIsNull() {
+        var s = new Station(0, "EPFL");
+        assertThrows(NullPointerException.class, () -> {
+            new Route("id", null, s, 1, Level.OVERGROUND, Color.BLACK);
+        });
+        assertThrows(NullPointerException.class, () -> {
+            new Route("id", s, null, 1, Level.OVERGROUND, Color.BLACK);
+        });
     }
 
     @Test
-    void levelIsCorrectOnNonEmptyRoad() {
-        Station s1 = ChMap.stations().get(0);
-        Station s2 = ChMap.stations().get(1);
-        Route r = new Route ("ID", s1, s2,5, Route.Level.UNDERGROUND, Color.ORANGE );
-        assertEquals(Route.Level.UNDERGROUND, r.level());
+    void routeConstructorFailsWhenLevelIsNull() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        assertThrows(NullPointerException.class, () -> {
+            new Route("id", s1, s2, 1, null, Color.BLACK);
+        });
     }
 
     @Test
-    void colorIsCorrectOnNonEmptyRoad() {
-        Station s1 = ChMap.stations().get(0);
-        Station s2 = ChMap.stations().get(1);
-        Route r = new Route ("ID", s1, s2,5, Route.Level.UNDERGROUND, Color.ORANGE );
-        assertEquals(Color.ORANGE, r.color());
+    void routeIdReturnsId() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var routes = new Route[100];
+        for (int i = 0; i < routes.length; i++)
+            routes[i] = new Route("id" + i, s1, s2, 1, Level.OVERGROUND, Color.BLACK);
+        for (int i = 0; i < routes.length; i++)
+            assertEquals("id" + i, routes[i].id());
     }
 
     @Test
-    void stationOppositeWorksOnNonEmptyRoad() {
-        Station s1 = ChMap.stations().get(0);
-        Station s2 = ChMap.stations().get(1);
-        Route r = new Route ("ID", s1, s2,5, Route.Level.UNDERGROUND, Color.ORANGE );
-        assertEquals(s2, r.stationOpposite(s1));
-        assertEquals(s1, r.stationOpposite(s2));
-    }
-
-    @Test
-    void possibleClaimCardsWorksOnColorOvergroundRoad() {
-
-        Station s1 = ChMap.stations().get(0);
-        Station s2 = ChMap.stations().get(1);
-        Route r = new Route ("ID", s1, s2,5, Route.Level.OVERGROUND, Color.ORANGE );
-
-        List<SortedBag<Card>> possibleCard = r.possibleClaimCards();
-        List<SortedBag<Card>> expectedCard = new ArrayList<>();
-
-        expectedCard.add(SortedBag.of(5, Card.ORANGE));
-
-        for(int i = 0; i<possibleCard.size(); i++){
-            assertEquals(possibleCard.get(i), expectedCard.get(i));
+    void routeStation1And2ReturnStation1And2() {
+        var rng = TestRandomizer.newRandom();
+        var stations = new Station[100];
+        for (int i = 0; i < stations.length; i++)
+            stations[i] = new Station(i, "Station " + i);
+        var routes = new Route[100];
+        for (int i = 0; i < stations.length; i++) {
+            var s1 = stations[i];
+            var s2 = stations[(i + 1) % 100];
+            var l = 1 + rng.nextInt(6);
+            routes[i] = new Route("r" + i, s1, s2, l, Level.OVERGROUND, Color.RED);
         }
-
-    }
-
-    @Test
-    void possibleClaimCardsWorksOnNonColorOvergroundRoad() {
-
-        Station s1 = ChMap.stations().get(0);
-        Station s2 = ChMap.stations().get(1);
-        Route r = new Route ("ID", s1, s2,5, Route.Level.OVERGROUND, null);
-
-        List<Card> allCards = Card.CARS;
-        List<SortedBag<Card>> possibleCard = r.possibleClaimCards();
-        List<SortedBag<Card>> expectedCard = new ArrayList<>();
-
-        for (Card card : allCards){
-            expectedCard.add(SortedBag.of(5, card));
+        for (int i = 0; i < stations.length; i++) {
+            var s1 = stations[i];
+            var s2 = stations[(i + 1) % 100];
+            var r = routes[i];
+            assertEquals(s1, r.station1());
+            assertEquals(s2, r.station2());
         }
+    }
 
-        for(int i = 0; i<possibleCard.size(); i++){
-            assertEquals(possibleCard.get(i), expectedCard.get(i));
+    @Test
+    void routeLengthReturnsLength() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        var routes = new Route[6];
+        for (var l = 1; l <= 6; l++)
+            routes[l - 1] = new Route(id, s1, s2, l, Level.OVERGROUND, Color.BLACK);
+        for (var l = 1; l <= 6; l++)
+            assertEquals(l, routes[l - 1].length());
+
+    }
+
+    @Test
+    void routeLevelReturnsLevel() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        var ro = new Route(id, s1, s2, 1, Level.OVERGROUND, Color.BLACK);
+        var ru = new Route(id, s1, s2, 1, Level.UNDERGROUND, Color.BLACK);
+        assertEquals(Level.OVERGROUND, ro.level());
+        assertEquals(Level.UNDERGROUND, ru.level());
+    }
+
+    @Test
+    void routeColorReturnsColor() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        var routes = new Route[8];
+        for (var c : COLORS)
+            routes[c.ordinal()] = new Route(id, s1, s2, 1, Level.OVERGROUND, c);
+        for (var c : COLORS)
+            assertEquals(c, routes[c.ordinal()].color());
+        var r = new Route(id, s1, s2, 1, Level.OVERGROUND, null);
+        assertNull(r.color());
+    }
+
+    @Test
+    void routeStationsReturnsStations() {
+        var rng = TestRandomizer.newRandom();
+        var stations = new Station[100];
+        for (int i = 0; i < stations.length; i++)
+            stations[i] = new Station(i, "Station " + i);
+        var routes = new Route[100];
+        for (int i = 0; i < stations.length; i++) {
+            var s1 = stations[i];
+            var s2 = stations[(i + 1) % 100];
+            var l = 1 + rng.nextInt(6);
+            routes[i] = new Route("r" + i, s1, s2, l, Level.OVERGROUND, Color.RED);
         }
-
+        for (int i = 0; i < stations.length; i++) {
+            var s1 = stations[i];
+            var s2 = stations[(i + 1) % 100];
+            assertEquals(List.of(s1, s2), routes[i].stations());
+        }
     }
 
     @Test
-    void additionalClaimCardsCountWorksOnUndergroundRoad() {
-        SortedBag.Builder d = new SortedBag.Builder();
-        d.add(Card.LOCOMOTIVE);
-        d.add(Card.BLACK);
-        d.add(Card.BLUE);
-        SortedBag<Card> draw = d.build();
-
-        SortedBag.Builder c = new SortedBag.Builder();
-        c.add(Card.LOCOMOTIVE);
-        c.add(Card.BLACK);
-        SortedBag<Card> claim = c.build();
-
-        int expectedCards = 2;
-        assertEquals(expectedCards, ChMap.routes().get(0).additionalClaimCardsCount(claim, draw));
-    }
-
-    @Test
-    void additionalClaimCardsCountWorksOnlyLocomotives() {
-        SortedBag.Builder d = new SortedBag.Builder();
-        d.add(Card.LOCOMOTIVE);
-        d.add(Card.LOCOMOTIVE);
-        d.add(Card.LOCOMOTIVE);
-        SortedBag<Card> draw = d.build();
-
-        SortedBag.Builder c = new SortedBag.Builder();
-        c.add(Card.LOCOMOTIVE);
-        c.add(Card.BLACK);
-        SortedBag<Card> claim = c.build();
-
-        int expectedCards = 3;
-        assertEquals(expectedCards, ChMap.routes().get(0).additionalClaimCardsCount(claim, draw));
-    }
-
-    @Test
-    void additionalClaimCardsCountWorksOnlyLocomotivesInPlayerHand() {
-        SortedBag.Builder d = new SortedBag.Builder();
-        d.add(Card.BLUE);
-        d.add(Card.BLUE);
-        d.add(Card.BLUE);
-        SortedBag<Card> draw = d.build();
-
-        SortedBag.Builder c = new SortedBag.Builder();
-        c.add(Card.LOCOMOTIVE);
-        c.add(Card.LOCOMOTIVE);
-        SortedBag<Card> claim = c.build();
-
-        int expectedCards = 0;
-        assertEquals(expectedCards, ChMap.routes().get(0).additionalClaimCardsCount(claim, draw));
-    }
-
-    @Test
-    void additionalClaimCardsCountWorksOnNonUndergroundRoad() {
-       /* assertThrows(IllegalArgumentException.class, () -> {
-            ChMap.routes().get(3).additionalClaimCardsCount();
-        });*/
-    }
-
-    @Test
-    void additionalClaimCardsCountWorksOnFalseArgument() {
-
-        SortedBag.Builder d = new SortedBag.Builder();
-        d.add(Card.BLUE);
-        d.add(Card.BLUE);
-        d.add(Card.BLUE);
-        d.add(Card.BLUE);
-        SortedBag<Card> draw = d.build();
-
-        SortedBag.Builder c = new SortedBag.Builder();
-        c.add(Card.LOCOMOTIVE);
-        c.add(Card.LOCOMOTIVE);
-        SortedBag<Card> claim = c.build();
-
+    void routeStationOppositeFailsWithInvalidStation() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var s3 = new Station(1, "EPFL");
+        var r = new Route("id", s1, s2, 1, Level.OVERGROUND, Color.RED);
         assertThrows(IllegalArgumentException.class, () -> {
-            ChMap.routes().get(0).additionalClaimCardsCount(claim, draw);
-        });
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            ChMap.routes().get(0).additionalClaimCardsCount(draw, claim);
+            r.stationOpposite(s3);
         });
     }
+
     @Test
-    void claimPointsWorksForNonEmptyRoad() {
+    void routeStationOppositeReturnsOppositeStation() {
+        var rng = TestRandomizer.newRandom();
+        var stations = new Station[100];
+        for (int i = 0; i < stations.length; i++)
+            stations[i] = new Station(i, "Station " + i);
+        var routes = new Route[100];
+        for (int i = 0; i < stations.length; i++) {
+            var s1 = stations[i];
+            var s2 = stations[(i + 1) % 100];
+            var l = 1 + rng.nextInt(6);
+            routes[i] = new Route("r" + i, s1, s2, l, Level.OVERGROUND, Color.RED);
+        }
+        for (int i = 0; i < stations.length; i++) {
+            var s1 = stations[i];
+            var s2 = stations[(i + 1) % 100];
+            var r = routes[i];
+            assertEquals(s1, r.stationOpposite(s2));
+            assertEquals(s2, r.stationOpposite(s1));
+        }
+    }
 
-        Station s1 = ChMap.stations().get(0);
-        Station s2 = ChMap.stations().get(1);
-        Route r = new Route ("ID", s1, s2,5, Route.Level.OVERGROUND, null);
+    @Test
+    void routePossibleClaimCardsWorksForOvergroundColoredRoute() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var i = 0; i < COLORS.size(); i++) {
+            var color = COLORS.get(i);
+            var card = CAR_CARDS.get(i);
+            for (var l = 1; l <= 6; l++) {
+                var r = new Route(id, s1, s2, l, Level.OVERGROUND, color);
+                assertEquals(List.of(SortedBag.of(l, card)), r.possibleClaimCards());
+            }
+        }
+    }
 
-        int normalPoints = 10;
+    @Test
+    void routePossibleClaimCardsWorksOnOvergroundNeutralRoute() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var l = 1; l <= 6; l++) {
+            var r = new Route(id, s1, s2, l, Level.OVERGROUND, null);
+            var expected = List.of(
+                    SortedBag.of(l, Card.BLACK),
+                    SortedBag.of(l, Card.VIOLET),
+                    SortedBag.of(l, Card.BLUE),
+                    SortedBag.of(l, Card.GREEN),
+                    SortedBag.of(l, Card.YELLOW),
+                    SortedBag.of(l, Card.ORANGE),
+                    SortedBag.of(l, Card.RED),
+                    SortedBag.of(l, Card.WHITE));
+            assertEquals(expected, r.possibleClaimCards());
+        }
+    }
 
-        assertEquals(normalPoints, r.claimPoints());
+    @Test
+    void routePossibleClaimCardsWorksOnUndergroundColoredRoute() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var i = 0; i < COLORS.size(); i++) {
+            var color = COLORS.get(i);
+            var card = CAR_CARDS.get(i);
+            for (var l = 1; l <= 6; l++) {
+                var r = new Route(id, s1, s2, l, Level.UNDERGROUND, color);
+
+                var expected = new ArrayList<SortedBag<Card>>();
+                for (var locomotives = 0; locomotives <= l; locomotives++) {
+                    var cars = l - locomotives;
+                    expected.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
+                }
+                assertEquals(expected, r.possibleClaimCards());
+            }
+        }
+    }
+
+    @Test
+    void routePossibleClaimCardsWorksOnUndergroundNeutralRoute() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var l = 1; l <= 6; l++) {
+            var r = new Route(id, s1, s2, l, Level.UNDERGROUND, null);
+
+            var expected = new ArrayList<SortedBag<Card>>();
+            for (var locomotives = 0; locomotives <= l; locomotives++) {
+                var cars = l - locomotives;
+                if (cars == 0)
+                    expected.add(SortedBag.of(locomotives, Card.LOCOMOTIVE));
+                else {
+                    for (var card : CAR_CARDS)
+                        expected.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
+                }
+            }
+            assertEquals(expected, r.possibleClaimCards());
+        }
+    }
+
+    @Test
+    void routeAdditionalClaimCardsCountWorksWithColoredCardsOnly() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+
+        for (var l = 1; l <= 6; l++) {
+            for (var color : COLORS) {
+                var matchingCard = CAR_CARDS.get(color.ordinal());
+                var nonMatchingCard = color == Color.BLACK
+                        ? Card.WHITE
+                        : Card.BLACK;
+                var claimCards = SortedBag.of(l, matchingCard);
+                var r = new Route(id, s1, s2, l, Level.UNDERGROUND, color);
+                for (var m = 0; m <= 3; m++) {
+                    for (var locomotives = 0; locomotives <= m; locomotives++) {
+                        var drawnB = new SortedBag.Builder<Card>();
+                        drawnB.add(locomotives, Card.LOCOMOTIVE);
+                        drawnB.add(m - locomotives, matchingCard);
+                        drawnB.add(3 - m, nonMatchingCard);
+                        var drawn = drawnB.build();
+                        assertEquals(m, r.additionalClaimCardsCount(claimCards, drawn));
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void routeAdditionalClaimCardsCountWorksWithLocomotivesOnly() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+
+        for (var l = 1; l <= 6; l++) {
+            for (var color : COLORS) {
+                var matchingCard = CAR_CARDS.get(color.ordinal());
+                var nonMatchingCard = color == Color.BLACK
+                        ? Card.WHITE
+                        : Card.BLACK;
+                var claimCards = SortedBag.of(l, Card.LOCOMOTIVE);
+                var r = new Route(id, s1, s2, l, Level.UNDERGROUND, color);
+                for (var m = 0; m <= 3; m++) {
+                    for (var locomotives = 0; locomotives <= m; locomotives++) {
+                        var drawnB = new SortedBag.Builder<Card>();
+                        drawnB.add(locomotives, Card.LOCOMOTIVE);
+                        drawnB.add(m - locomotives, matchingCard);
+                        drawnB.add(3 - m, nonMatchingCard);
+                        var drawn = drawnB.build();
+                        assertEquals(locomotives, r.additionalClaimCardsCount(claimCards, drawn));
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void routeAdditionalClaimCardsCountWorksWithMixedCards() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+
+        for (var l = 2; l <= 6; l++) {
+            for (var color : COLORS) {
+                var matchingCard = CAR_CARDS.get(color.ordinal());
+                var nonMatchingCard = color == Color.BLACK
+                        ? Card.WHITE
+                        : Card.BLACK;
+                for (var claimLoc = 1; claimLoc < l; claimLoc++) {
+                    var claimCards = SortedBag.of(
+                            l - claimLoc, matchingCard,
+                            claimLoc, Card.LOCOMOTIVE);
+                    var r = new Route(id, s1, s2, l, Level.UNDERGROUND, color);
+                    for (var m = 0; m <= 3; m++) {
+                        for (var locomotives = 0; locomotives <= m; locomotives++) {
+                            var drawnB = new SortedBag.Builder<Card>();
+                            drawnB.add(locomotives, Card.LOCOMOTIVE);
+                            drawnB.add(m - locomotives, matchingCard);
+                            drawnB.add(3 - m, nonMatchingCard);
+                            var drawn = drawnB.build();
+                            assertEquals(m, r.additionalClaimCardsCount(claimCards, drawn));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    void routeClaimPointsReturnsClaimPoints() {
+        var expectedClaimPoints =
+                List.of(Integer.MIN_VALUE, 1, 2, 4, 7, 10, 15);
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var l = 1; l <= 6; l++) {
+            var r = new Route(id, s1, s2, l, Level.OVERGROUND, Color.BLACK);
+            assertEquals(expectedClaimPoints.get(l), r.claimPoints());
+        }
     }
 }
