@@ -219,7 +219,11 @@ public final class Info {
     /**
      * private methods
      */
-
+    /**
+     * method generating the names of the players with "et" between
+     * @param playerNames we want to generate
+     * @return the text
+     */
     private static String generatePlayersNames(List<String> playerNames){
         String names = "";
         int counter =0;
@@ -235,30 +239,45 @@ public final class Info {
         return names;
     }
 
+    /**
+     * method generating the end of words depending if there is plural or not
+     * @param i number of objects
+     * @return "s" or not at the end of words
+     */
     private static String generatePlural(int i){
         if (i==1 || i==-1){
             return StringsFr.plural(1);
         } else return StringsFr.plural(0);
     }
 
-    private static String generateListOfCard(SortedBag<Card> card){
+    /**
+     * method generating the name of the cards in the right order given by Class.Card, with "," between each names and "et" for the last one
+     * @param cards we want to generate
+     * @return the text
+     */
+    private static String generateListOfCard(SortedBag<Card> cards){
         String listOfCard = "";
         int counter=0;
 
         for(Card c : Card.ALL){
-            if(card.contains(c)){
-                int numberOfThisCard = card.countOf(c);
+            if(cards.contains(c)){
+                int numberOfThisCard = cards.countOf(c);
                 listOfCard = listOfCard + numberOfThisCard + " " + cardName(c, numberOfThisCard);
                 counter++;
 
-                if(counter==card.toSet().size()-1) listOfCard = listOfCard + StringsFr.AND_SEPARATOR;
-                else if(counter==card.toSet().size()) break;
+                if(counter==cards.toSet().size()-1) listOfCard = listOfCard + StringsFr.AND_SEPARATOR;
+                else if(counter==cards.toSet().size()) break;
                 else  listOfCard = listOfCard + ", ";
             }
         }
         return listOfCard;
     }
 
+    /**
+     * generate the name of the with the form "station1 + - + station2"
+     * @param route we want to generate
+     * @return the text
+     */
     private static String generateRouteName(Route route){
         return route.station1() + StringsFr.EN_DASH_SEPARATOR + route.station2();
     }
