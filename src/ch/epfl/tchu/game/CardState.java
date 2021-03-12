@@ -42,8 +42,10 @@ public final class CardState extends PublicCardState{
         //Check correctness of argument
         Preconditions.checkArgument(deck.size() >= Constants.FACE_UP_CARDS_COUNT);
 
-        return new CardState(deck.topCards(Constants.FACE_UP_CARDS_COUNT).toList(),
-                deck.withoutTopCards(Constants.FACE_UP_CARDS_COUNT), SortedBag.of());
+        //Generate the facedUpCards (for the ordering we can't use deck.topCards(...))
+        List<Card> facedUpCards = deck.topCards(Constants.FACE_UP_CARDS_COUNT).toList();
+
+        return new CardState(facedUpCards,deck.withoutTopCards(Constants.FACE_UP_CARDS_COUNT), SortedBag.of());
     }
 
     /**
@@ -56,7 +58,7 @@ public final class CardState extends PublicCardState{
         Preconditions.checkArgument(!deck.isEmpty());
 
         //Set the new face up cards, throws IndexOutOfBound if  0<=sloT<=Constant.FACE_UP_CARDS_COUNT
-        List<Card> faceUpCards = this.faceUpCards();
+        List<Card> faceUpCards = super.faceUpCards();
         faceUpCards.set(Objects.checkIndex(slot, Constants.FACE_UP_CARDS_COUNT), deck.topCard());
 
         return new CardState(faceUpCards, deck.withoutTopCard(), discard);
@@ -79,7 +81,7 @@ public final class CardState extends PublicCardState{
     public CardState withoutTopDeckCard(){
         //Check correctness of argument
         Preconditions.checkArgument(!deck.isEmpty());
-        return new CardState(this.faceUpCards(), deck.withoutTopCard(), discard);
+        return new CardState(super.faceUpCards(), deck.withoutTopCard(), discard);
     }
 
     /**
@@ -96,7 +98,7 @@ public final class CardState extends PublicCardState{
         newDeckBuilder.add(deck.topCards(deck.size()));
         newDeckBuilder.add(discard);
 
-        return new CardState(faceUpCards(), Deck.of(newDeckBuilder.build(), rng), SortedBag.of());
+        return new CardState(super.faceUpCards(), Deck.of(newDeckBuilder.build(), rng), SortedBag.of());
     }
 
     /**
