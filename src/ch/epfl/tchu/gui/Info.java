@@ -36,8 +36,7 @@ public final class Info {
      * @return the name of the card
      */
     public static String cardName(Card card, int count){
-
-        String name;
+        String name = "";
 
         switch(card) {
 
@@ -82,7 +81,6 @@ public final class Info {
         }
 
         return name + generatePlural(count);
-
     }
 
     /**
@@ -92,12 +90,8 @@ public final class Info {
      * @return a draw text
      */
     public static String draw(List<String> playerNames, int points){
-
-
         String players = generatePlayersNames(playerNames);
-
         return String.format(StringsFr.DRAW, players, points);
-
     }
 
     /**
@@ -105,7 +99,6 @@ public final class Info {
      * @return the text
      */
     public String willPlayFirst(){
-
         return String.format(StringsFr.WILL_PLAY_FIRST, playerName);
     }
 
@@ -115,10 +108,7 @@ public final class Info {
      * @return the text
      */
     public String keptTickets(int count){
-
         return String.format(StringsFr.KEPT_N_TICKETS, playerName, count, generatePlural(count));
-
-
     }
 
     /**
@@ -126,7 +116,6 @@ public final class Info {
      * @return the text
      */
     public String canPlay(){
-
         return String.format(StringsFr.CAN_PLAY, playerName);
     }
 
@@ -136,9 +125,7 @@ public final class Info {
      * @return the text
      */
     public  String drewTickets(int count){
-
         return String.format(StringsFr.DREW_TICKETS, playerName, count, generatePlural(count));
-
     }
 
     /**
@@ -146,9 +133,7 @@ public final class Info {
      * @return the text
      */
     public String drewBlindCard(){
-
         return String.format(StringsFr.DREW_BLIND_CARD, playerName);
-
     }
 
     /**
@@ -157,7 +142,6 @@ public final class Info {
      * @return the text
      */
     public String drewVisibleCard(Card card){
-
         return String.format(StringsFr.DREW_VISIBLE_CARD, playerName, cardName(card, 1));
     }
 
@@ -168,7 +152,6 @@ public final class Info {
      * @return the text
      */
     public String claimedRoute(Route route, SortedBag<Card> cards){
-
         return String.format(StringsFr.CLAIMED_ROUTE, playerName, generateRouteName(route), generateListOfCard(cards));
     }
 
@@ -179,7 +162,6 @@ public final class Info {
      * @return the text
      */
     public String attemptsTunnelClaim(Route route, SortedBag<Card> cards){
-
         return String.format(StringsFr.ATTEMPTS_TUNNEL_CLAIM, playerName, generateRouteName(route), generateListOfCard(cards));
     }
 
@@ -190,9 +172,7 @@ public final class Info {
      * @return the text
      */
     public String drewAdditionalCards(SortedBag<Card> drawnCards, int additionalCost){
-
         String text = String.format(StringsFr.ADDITIONAL_CARDS_ARE, generateListOfCard(drawnCards));
-
         return (additionalCost==0) ? text + StringsFr.NO_ADDITIONAL_COST : text + String.format(StringsFr.SOME_ADDITIONAL_COST, additionalCost, generatePlural(additionalCost));
     }
 
@@ -202,8 +182,7 @@ public final class Info {
      * @return the text
      */
     public String didNotClaimRoute (Route route){
-
-    return String.format(StringsFr.DID_NOT_CLAIM_ROUTE, playerName, generateRouteName(route));
+        return String.format(StringsFr.DID_NOT_CLAIM_ROUTE, playerName, generateRouteName(route));
     }
 
     /**
@@ -212,8 +191,7 @@ public final class Info {
      * @return the text
      */
     public String lastTurnBegins (int carCount){
-
-    return String.format(StringsFr.LAST_TURN_BEGINS, playerName, carCount,generatePlural(carCount));
+        return String.format(StringsFr.LAST_TURN_BEGINS, playerName, carCount,generatePlural(carCount));
     }
 
     /**
@@ -222,10 +200,8 @@ public final class Info {
      * @return the text
      */
     public String getsLongestTrailBonus(Trail longestTrail){
-
         String trailName = longestTrail.station1().name() + StringsFr.EN_DASH_SEPARATOR + longestTrail.station2().name();
-
-    return String.format(StringsFr.GETS_BONUS, playerName, trailName);
+        return String.format(StringsFr.GETS_BONUS, playerName, trailName);
     }
 
     /**
@@ -235,8 +211,7 @@ public final class Info {
      * @return the text
      */
     public String won(int points, int loserPoints){
-
-    return String.format(StringsFr.WINS, playerName, points, generatePlural(points), loserPoints, generatePlural(loserPoints));
+        return String.format(StringsFr.WINS, playerName, points, generatePlural(points), loserPoints, generatePlural(loserPoints));
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -246,9 +221,9 @@ public final class Info {
      */
 
     private static String generatePlayersNames(List<String> playerNames){
-
         String names = "";
         int counter =0;
+
         for (String player : playerNames){
 
             names = names + player;
@@ -257,43 +232,34 @@ public final class Info {
                 break;
             else names = names + StringsFr.AND_SEPARATOR;
         }
-
         return names;
     }
 
     private static String generatePlural(int i){
-
         if (i==1 || i==-1){
             return StringsFr.plural(1);
         } else return StringsFr.plural(0);
-
     }
 
     private static String generateListOfCard(SortedBag<Card> card){
-
         String listOfCard = "";
         int counter=0;
 
-            for(Card c : Card.ALL){
-                if(card.contains(c)){
-                    int numberOfThisCard = card.countOf(c);
-                    listOfCard = listOfCard + numberOfThisCard + " " + cardName(c, numberOfThisCard);
-                    counter++;
+        for(Card c : Card.ALL){
+            if(card.contains(c)){
+                int numberOfThisCard = card.countOf(c);
+                listOfCard = listOfCard + numberOfThisCard + " " + cardName(c, numberOfThisCard);
+                counter++;
 
-                    if(counter==card.toSet().size()-1) listOfCard = listOfCard + StringsFr.AND_SEPARATOR;
-                    else if(counter==card.toSet().size()) break;
-                    else  listOfCard = listOfCard + ", ";
-                }
+                if(counter==card.toSet().size()-1) listOfCard = listOfCard + StringsFr.AND_SEPARATOR;
+                else if(counter==card.toSet().size()) break;
+                else  listOfCard = listOfCard + ", ";
             }
-
+        }
         return listOfCard;
     }
 
     private static String generateRouteName(Route route){
         return route.station1() + StringsFr.EN_DASH_SEPARATOR + route.station2();
     }
-
-
-
 }
-
