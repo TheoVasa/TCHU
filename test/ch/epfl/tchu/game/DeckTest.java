@@ -22,10 +22,14 @@ public final class DeckTest {
         nonEmptyCardsBuilder.add(Card.ORANGE);
         nonEmptyCardsBuilder.add(3 ,Card.YELLOW);
     }
+    Deck<Card> deck = Deck.of(nonEmptyCardsBuilder.build(), random);
+    Deck<Card> emptyDeck = Deck.of(emptyCardsBuilder.build(), random);
 
     //No need to test the constructor on error
-    //No need to test the methode "of" because will be tested troth the other methods
+    //No need to test the methode "of" because will be tested through the other methods
 
+
+//isEmpty()
     @Test
     public void isEmptyWorksOnEmptyDeck(){
         assertTrue(Deck.of(emptyCardsBuilder.build(), random).isEmpty());
@@ -36,9 +40,10 @@ public final class DeckTest {
         assertFalse(Deck.of(nonEmptyCardsBuilder.build(), random).isEmpty());
     }
 
+
+//topCard()
     @Test
-    public  void topCardThrowsThowsIllegalArgumentOnEmptyDeck(){
-        var emptyDeck = Deck.of(emptyCardsBuilder.build(), random);
+    public  void topCardThrowsIllegalArgumentOnEmptyDeck(){
         assertThrows(IllegalArgumentException.class, () -> {
             emptyDeck.topCard();
         });
@@ -46,16 +51,45 @@ public final class DeckTest {
 
     @Test
     public void topCardWorkOnNonEmptyDeck(){
-        assertEquals(Card.BLACK, Deck.of(nonEmptyCardsBuilder.build(), random).topCard());
+        assertEquals(Card.BLACK, deck.topCard());
     }
 
-    //Test en meme temps la methode withoutTopCard()
+//withoutTopCard()
     @Test
-    public void withoutTopCardsThrowsIllegalArgumentOnEmptyDeck(){
-        var emptyDeck = Deck.of(emptyCardsBuilder.build(), random);
+    public void withoutTopCardWorksOnIllegalArgument(){
         assertThrows(IllegalArgumentException.class, () -> {
             emptyDeck.withoutTopCard();
         });
+    }
+
+    @Test
+    public void withoutTopCardWorksNonEmptyDeck(){
+        var cardsBuilder = new SortedBag.Builder<Card>();
+        cardsBuilder.add(Card.BLUE);
+        cardsBuilder.add(Card.ORANGE);
+        cardsBuilder.add(3 ,Card.YELLOW);
+        assertArrayEquals(cardsBuilder.build().toList().toArray(),deck.withoutTopCard().topCards(5).toList().toArray());
+    }
+
+//topCards(int count)
+    @Test
+    public  void topCardsThrowsIllegalArgumentOnEmptyDeck(){
+        assertThrows(IllegalArgumentException.class, () -> {
+            emptyDeck.topCards(-1);
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            emptyDeck.topCards(emptyDeck.size()+1);
+        });
+    }
+
+    @Test
+    public void topCardsWorkOnNonEmptyDeck(){
+        assertArrayEquals(SortedBag.of(1,Card.BLACK,1,Card.BLUE).toList().toArray(), deck.topCards(2).toList().toArray());
+    }
+
+//withoutTopCards(int count)
+    @Test
+    public void withoutTopCardsThrowsIllegalArgumentOnEmptyDeck(){
         assertThrows(IllegalArgumentException.class, () -> {
             emptyDeck.withoutTopCards(0);
         });
@@ -63,12 +97,11 @@ public final class DeckTest {
 
     @Test
     public void withoutTopCardsThrowsIllegalArgumentOnCountOutOfRange(){
-        var nonEmptyDeck = Deck.of(nonEmptyCardsBuilder.build(), random);
         assertThrows(IllegalArgumentException.class, () -> {
-            nonEmptyDeck.withoutTopCards(-1);
+            deck.withoutTopCards(-1);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            nonEmptyDeck.withoutTopCards(nonEmptyCardsBuilder.build().size()+1);
+            deck.withoutTopCards(nonEmptyCardsBuilder.build().size()+1);
         });
     }
 
@@ -87,16 +120,18 @@ public final class DeckTest {
         var expectedDeck1 = Deck.of(expectedBag1.build(), random);
         var expectedDeck2 = Deck.of(expectedBag2.build(), random);
 
-        for (int i = 0; i < expectedBag1.build().size(); ++i ){
+        //!!!!Could have used assertArrayEquals
+        for (int i = 0; i < expectedDeck1.size(); ++i ){
             assertEquals(expectedDeck1.topCards(expectedDeck1.size()).get(i),
                     nonEmptyDeck.withoutTopCard().topCards(expectedDeck1.size()).get(i));
         }
-        for (int i = 0; i < expectedBag2.build().size(); ++i ){
+        for (int i = 0; i < expectedDeck2.size(); ++i ){
             assertEquals(expectedDeck2.topCards(expectedDeck2.size()).get(i),
                     nonEmptyDeck.withoutTopCards(2).topCards(expectedDeck2.size()).get(i));
         }
     }
 
+//size()
     @Test
     public void sizeWorks(){
         var emptyDeck = Deck.of(emptyCardsBuilder.build(), random);

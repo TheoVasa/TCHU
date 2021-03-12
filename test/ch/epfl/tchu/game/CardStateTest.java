@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CardStateTest {
 
+//of(Deck<Card>)
     @Test
     public void ofThrowsIllegalArgumentOnSmallDeck(){
         var cards = SortedBag.of(1, Card.BLUE,3, Card.YELLOW);
@@ -27,6 +28,7 @@ public class CardStateTest {
         assertEquals(CardState.of(deck).faceUpCards(), List.of(Card.BLUE, Card.BLUE, Card.BLUE, Card.YELLOW, Card.YELLOW));
     }
 
+//withDrawnFaceUpCard(int slot)
     @Test
     public void withDrawnFaceUpCardThrowsIndexOutOfBound(){
         var cardsBuilder = new SortedBag.Builder<Card>();
@@ -72,8 +74,10 @@ public class CardStateTest {
         var deck = Deck.of(cards, new Random(0L));
         var cardState = CardState.of(deck);
         assertEquals(Card.LOCOMOTIVE,cardState.withDrawnFaceUpCard(2).faceUpCard(2));
+        assertEquals(1, cardState.withDrawnFaceUpCard(2).deckSize());
     }
 
+//topDeckCard()
     @Test
     public void topDeckCardThrowsIllegalArgument(){
         var cards = SortedBag.of(3,Card.BLUE, 2, Card.LOCOMOTIVE);
@@ -86,12 +90,13 @@ public class CardStateTest {
 
     @Test
     public void topDeckCardWorks(){
-        var cards = SortedBag.of(3,Card.BLUE, 3, Card.LOCOMOTIVE);
+        var cards = SortedBag.of(4,Card.BLUE, 3, Card.LOCOMOTIVE);
         var deck = Deck.of(cards, new Random(0L));
         var cardState = CardState.of(deck);
         assertEquals(Card.LOCOMOTIVE, cardState.topDeckCard());
     }
 
+//withoutTopDeckCard()
     @Test
     public void withoutTopDeckCardThrowsIllegalArgument(){
         var cards = SortedBag.of(3,Card.BLUE, 2, Card.LOCOMOTIVE);
@@ -110,8 +115,9 @@ public class CardStateTest {
         assertEquals(Card.LOCOMOTIVE, cardState.topDeckCard());
     }
 
+//withRecreatedFromDiscards(Random rng)
     @Test
-    public void withRecreatedFromDiscardsThrowsIllegalArgument(){
+    public void withDeckRecreatedFromDiscardsThrowsIllegalArgument(){
         var cards = SortedBag.of(6,Card.BLUE, 1, Card.LOCOMOTIVE);
         var deck = Deck.of(cards, new Random(0L));
         var cardState = CardState.of(deck).withoutTopDeckCard();
@@ -121,24 +127,28 @@ public class CardStateTest {
     }
 
     @Test
-    public void withRecreatedFromDiscardsWorks(){
+    public void withDeckRecreatedFromDiscardsWorks(){
         var cards = SortedBag.of(5,Card.BLUE);
         var deck = Deck.of(cards, new Random(0L));
         var cardState = CardState.of(deck).withMoreDiscardedCards(SortedBag.of(2, Card.BLUE, 3, Card.LOCOMOTIVE));
         cardState = cardState.withDeckRecreatedFromDiscards(new Random(0L));
         assertEquals(5, cardState.deckSize());
+        assertEquals(0, cardState.discardsSize());
     }
 
+//withMoreDiscardedCards(SortedBag<Cards> additionalDiscards)
     @Test
-    public void withMoreDiscardedCardsWorksOnEmptyAdditionalCards(){
+    public void withMoreDiscardedCardsWorksOnNonEmptyAdditionalCards(){
         var cards = SortedBag.of(5,Card.BLUE);
         var deck = Deck.of(cards, new Random(0L));
         var cardState = CardState.of(deck).withMoreDiscardedCards(SortedBag.of(2, Card.BLUE, 3, Card.LOCOMOTIVE));
         assertEquals(5, cardState.discardsSize());
+        cardState = cardState.withMoreDiscardedCards(SortedBag.of(2, Card.BLUE, 3, Card.LOCOMOTIVE));
+        assertEquals(10, cardState.discardsSize());
     }
 
     @Test
-    public void withMoreDiscardedCardsWorksOnNonEmptyAddictionalCards(){
+    public void withMoreDiscardedCardsWorksOnEmptyAddictionalCards(){
         var cards = SortedBag.of(5,Card.BLUE);
         var deck = Deck.of(cards, new Random(0L));
         var cardState = CardState.of(deck).withMoreDiscardedCards(SortedBag.of());

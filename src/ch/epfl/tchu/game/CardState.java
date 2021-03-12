@@ -58,7 +58,6 @@ public final class CardState extends PublicCardState{
         //Set the new face up cards, throws IndexOutOfBound if  0<=sloT<=Constant.FACE_UP_CARDS_COUNT
         List<Card> faceUpCards = this.faceUpCards();
         faceUpCards.set(Objects.checkIndex(slot, Constants.FACE_UP_CARDS_COUNT), deck.topCard());
-
         return new CardState(faceUpCards, deck.withoutTopCard(), discard);
     }
 
@@ -96,7 +95,7 @@ public final class CardState extends PublicCardState{
         newDeckBuilder.add(deck.topCards(deck.size()));
         newDeckBuilder.add(discard);
 
-        return new CardState(faceUpCards(), Deck.of(newDeckBuilder.build(), rng), discard);
+        return new CardState(faceUpCards(), Deck.of(newDeckBuilder.build(), rng), SortedBag.of());
     }
 
     /**

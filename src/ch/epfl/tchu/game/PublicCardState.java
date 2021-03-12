@@ -22,7 +22,6 @@ public class PublicCardState {
 
     /**
      * Constructor
-     *
      * @param faceUpCards  List of the face up cards
      * @param deckSize     size of the deck
      * @param discardsSize size of the discards
@@ -40,7 +39,6 @@ public class PublicCardState {
 
     /**
      * Gives the total amount of cards that aren't on any players hand
-     *
      * @return the total of public cards
      */
     public int totalSize() {
@@ -59,7 +57,6 @@ public class PublicCardState {
 
     /**
      * Gives the card of the specified index of the list of faced up cards
-     *
      * @param slot the index of the card in the list
      * @return the card corresponding to the index
      */
@@ -70,7 +67,6 @@ public class PublicCardState {
 
     /**
      * Getter for the deck size
-     *
      * @return the size of the deck
      */
     public int deckSize() {
@@ -79,7 +75,6 @@ public class PublicCardState {
 
     /**
      * Gives the empty state of the deck
-     *
      * @return true iff the deck is empty
      */
     public boolean isDeckEmpty() {
@@ -88,7 +83,6 @@ public class PublicCardState {
 
     /**
      * Getter for the size of the discards
-     *
      * @return the size of the discards
      */
     public int discardsSize() {
