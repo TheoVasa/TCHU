@@ -90,8 +90,9 @@ public final class DeckTest {
 //withoutTopCards(int count)
     @Test
     public void withoutTopCardsThrowsIllegalArgumentOnEmptyDeck(){
+        //Be careful to test first IllegalArgument before IndexOUtOfBound (with Objects.checkIndex(...)) !!!!
         assertThrows(IllegalArgumentException.class, () -> {
-            emptyDeck.withoutTopCards(0);
+            emptyDeck.withoutTopCards(-1);
         });
     }
 
@@ -107,24 +108,13 @@ public final class DeckTest {
 
     @Test
     public void withoutTopCardsWorksOnNonEmptyDeck(){
-        var expectedBag1 = new SortedBag.Builder<Card>();
         var expectedBag2 = new SortedBag.Builder<Card>();
-
-        expectedBag1.add(Card.BLUE);
-        expectedBag1.add(Card.ORANGE);
-        expectedBag1.add(3 ,Card.YELLOW);
         expectedBag2.add(Card.ORANGE);
         expectedBag2.add(3 ,Card.YELLOW);
-
         var nonEmptyDeck = Deck.of(nonEmptyCardsBuilder.build(), random);
-        var expectedDeck1 = Deck.of(expectedBag1.build(), random);
         var expectedDeck2 = Deck.of(expectedBag2.build(), random);
 
         //!!!!Could have used assertArrayEquals
-        for (int i = 0; i < expectedDeck1.size(); ++i ){
-            assertEquals(expectedDeck1.topCards(expectedDeck1.size()).get(i),
-                    nonEmptyDeck.withoutTopCard().topCards(expectedDeck1.size()).get(i));
-        }
         for (int i = 0; i < expectedDeck2.size(); ++i ){
             assertEquals(expectedDeck2.topCards(expectedDeck2.size()).get(i),
                     nonEmptyDeck.withoutTopCards(2).topCards(expectedDeck2.size()).get(i));

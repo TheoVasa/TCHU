@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CardStateTest {
 
-//of(Deck<Card>)
+//of(Deck<Card> deck)
     @Test
     public void ofThrowsIllegalArgumentOnSmallDeck(){
         var cards = SortedBag.of(1, Card.BLUE,3, Card.YELLOW);
@@ -122,7 +122,7 @@ public class CardStateTest {
         var deck = Deck.of(cards, new Random(0L));
         var cardState = CardState.of(deck).withoutTopDeckCard();
         assertThrows(IllegalArgumentException.class, () -> {
-           cardState.withDeckRecreatedFromDiscards(new Random(0L));
+            cardState.withDeckRecreatedFromDiscards(new Random(0L));
         });
     }
 

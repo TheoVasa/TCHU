@@ -18,6 +18,7 @@ public class PublicCardState {
      */
     private final int deckSize;
     private final int discardsSize;
+    private final int totalSize;
     private final List<Card> faceUpCards;
 
     /**
@@ -35,6 +36,7 @@ public class PublicCardState {
         this.deckSize = deckSize;
         this.discardsSize = discardsSize;
         this.faceUpCards = faceUpCards;
+        this.totalSize = faceUpCards.size() + deckSize + discardsSize;
     }
 
     /**
@@ -42,12 +44,11 @@ public class PublicCardState {
      * @return the total of public cards
      */
     public int totalSize() {
-        return faceUpCards.size() + deckSize + discardsSize;
+        return totalSize;
     }
 
     /**
      * Gives the five faces up cards
-     *
      * @return a list the faced up cards
      */
     public List<Card> faceUpCards() {
