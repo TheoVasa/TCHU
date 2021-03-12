@@ -36,7 +36,7 @@ public final class Deck <C extends Comparable<C>>{
      * @return a new deck, with the cards we want, shuffle
      */
     public static <C extends Comparable<C>> Deck<C> of(SortedBag<C> cards, Random rng) {
-        //Shuffel the cards of the deck
+        //Shuffle the cards of the deck
         List<C> shuffleList = cards.toList();
         Collections.shuffle(shuffleList, rng);
         SortedBag<C> shuffleCards = SortedBag.of(shuffleList);

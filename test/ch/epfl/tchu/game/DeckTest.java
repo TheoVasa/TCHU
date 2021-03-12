@@ -1,8 +1,11 @@
 package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.SortedBag;
+import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,18 +15,17 @@ public final class DeckTest {
     /**
      * Attributes used multiple times
      */
-    public Random random = new Random(0L);
-    public SortedBag.Builder<Card> emptyCardsBuilder = new SortedBag.Builder<>();
+    private SortedBag.Builder<Card> emptyCardsBuilder = new SortedBag.Builder<>();
     //Create non empty SortedBag.Builder
-    public SortedBag.Builder<Card> nonEmptyCardsBuilder = new SortedBag.Builder<>();
+    private SortedBag.Builder<Card> nonEmptyCardsBuilder = new SortedBag.Builder<>();
     {
         nonEmptyCardsBuilder.add(Card.BLACK);
         nonEmptyCardsBuilder.add(Card.BLUE);
         nonEmptyCardsBuilder.add(Card.ORANGE);
         nonEmptyCardsBuilder.add(3 ,Card.YELLOW);
     }
-    Deck<Card> deck = Deck.of(nonEmptyCardsBuilder.build(), random);
-    Deck<Card> emptyDeck = Deck.of(emptyCardsBuilder.build(), random);
+    private Deck<Card> deck = Deck.of(nonEmptyCardsBuilder.build(), TestRandomizer.newRandom());
+    Deck<Card> emptyDeck = Deck.of(emptyCardsBuilder.build(), TestRandomizer.newRandom());
 
     //No need to test the constructor on error
     //No need to test the methode "of" because will be tested through the other methods
@@ -32,12 +34,12 @@ public final class DeckTest {
 //isEmpty()
     @Test
     public void isEmptyWorksOnEmptyDeck(){
-        assertTrue(Deck.of(emptyCardsBuilder.build(), random).isEmpty());
+        assertTrue(Deck.of(emptyCardsBuilder.build(), TestRandomizer.newRandom()).isEmpty());
     }
 
     @Test
     public void isEmptyWorksOnNonEmptyDeck(){
-        assertFalse(Deck.of(nonEmptyCardsBuilder.build(), random).isEmpty());
+        assertFalse(Deck.of(nonEmptyCardsBuilder.build(), TestRandomizer.newRandom()).isEmpty());
     }
 
 
@@ -51,7 +53,9 @@ public final class DeckTest {
 
     @Test
     public void topCardWorkOnNonEmptyDeck(){
-        assertEquals(Card.BLACK, deck.topCard());
+        var expectedShuffled = nonEmptyCardsBuilder.build();
+        Collections.shuffle(expectedShuffled.toList(), TestRandomizer.newRandom());
+        assertEquals(expectedShuffled.get(0), deck.topCard());
     }
 
 //withoutTopCard()
@@ -68,6 +72,7 @@ public final class DeckTest {
         cardsBuilder.add(Card.BLUE);
         cardsBuilder.add(Card.ORANGE);
         cardsBuilder.add(3 ,Card.YELLOW);
+        Collections.shuffle(cardsBuilder.build().toList(), TestRandomizer.newRandom());
         assertArrayEquals(cardsBuilder.build().toList().toArray(),deck.withoutTopCard().topCards(5).toList().toArray());
     }
 
@@ -84,7 +89,9 @@ public final class DeckTest {
 
     @Test
     public void topCardsWorkOnNonEmptyDeck(){
-        assertArrayEquals(SortedBag.of(1,Card.BLACK,1,Card.BLUE).toList().toArray(), deck.topCards(2).toList().toArray());
+        var expectedShuffled = nonEmptyCardsBuilder.build().toList();
+        Collections.shuffle(expectedShuffled, TestRandomizer.newRandom());
+        assertArrayEquals(List.of(expectedShuffled.get(0), expectedShuffled.get(1)).toArray(), deck.topCards(2).toList().toArray());
     }
 
 //withoutTopCards(int count)
@@ -108,24 +115,21 @@ public final class DeckTest {
 
     @Test
     public void withoutTopCardsWorksOnNonEmptyDeck(){
-        var expectedBag2 = new SortedBag.Builder<Card>();
-        expectedBag2.add(Card.ORANGE);
-        expectedBag2.add(3 ,Card.YELLOW);
-        var nonEmptyDeck = Deck.of(nonEmptyCardsBuilder.build(), random);
-        var expectedDeck2 = Deck.of(expectedBag2.build(), random);
+        var expectedShuffle = nonEmptyCardsBuilder.build().toList();
+        Collections.shuffle(expectedShuffle, TestRandomizer.newRandom());
 
         //!!!!Could have used assertArrayEquals
-        for (int i = 0; i < expectedDeck2.size(); ++i ){
-            assertEquals(expectedDeck2.topCards(expectedDeck2.size()).get(i),
-                    nonEmptyDeck.withoutTopCards(2).topCards(expectedDeck2.size()).get(i));
+        for (int i = 0; i < expectedShuffle.size()-2; ++i ){
+            assertEquals(expectedShuffle.get(i+2),
+                    deck.withoutTopCards(2).topCards(4).toList().get(i));
         }
     }
 
 //size()
     @Test
     public void sizeWorks(){
-        var emptyDeck = Deck.of(emptyCardsBuilder.build(), random);
-        var nonEmptyDeck = Deck.of(nonEmptyCardsBuilder.build(), random);
+        var emptyDeck = Deck.of(emptyCardsBuilder.build(), TestRandomizer.newRandom());
+        var nonEmptyDeck = Deck.of(nonEmptyCardsBuilder.build(), TestRandomizer.newRandom());
         assertEquals(0, emptyDeck.size());
         assertEquals(6, nonEmptyDeck.size());
         assertEquals(5, nonEmptyDeck.withoutTopCard().size());
