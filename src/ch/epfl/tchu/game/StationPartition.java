@@ -94,15 +94,10 @@ public final class StationPartition implements StationConnectivity {
         private int representative(int id){
             int representativeIndex = id;
 
-            while(builderPartition[representativeIndex] == representativeIndex)
+            while(builderPartition[representativeIndex] == representativeIndex) {
                 representativeIndex = builderPartition[representativeIndex];
+            }
             return representativeIndex;
         }
-
     }
-
-
-
-
-
 }
