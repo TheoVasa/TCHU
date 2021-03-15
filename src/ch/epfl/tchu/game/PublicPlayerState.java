@@ -3,6 +3,7 @@ package ch.epfl.tchu.game;
 import ch.epfl.tchu.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PublicPlayerState {
@@ -37,9 +38,8 @@ public class PublicPlayerState {
 
         //Create a copy of the list of Rout given in parameter
         this.routes = new ArrayList<>();
-        for (Route r: routes){
-            routes.add(r);
-        }
+        for (Route r: routes)
+            Collections.addAll(this.routes(), r);
     }
 
     /**
