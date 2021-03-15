@@ -13,8 +13,6 @@ public enum PlayerId {
     public final static List<PlayerId> ALL = List.of(PlayerId.values());
     public final static int COUNT = ALL.size();
 
-
-    //
     /**
      * Gives the PlayerId of the next Player
      * @return the PlayerId of the next player of the list
@@ -23,5 +21,4 @@ public enum PlayerId {
         Iterator<PlayerId> it = ALL.iterator();
         return it.next();
     }
-
 }

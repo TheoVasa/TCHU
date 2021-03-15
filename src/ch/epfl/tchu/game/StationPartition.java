@@ -22,7 +22,7 @@ public final class StationPartition implements StationConnectivity {
      */
     private StationPartition(int[] partition){
         this.partition = partition;
-}
+    }
 
     @Override
     public boolean connected(Station s1, Station s2) {
@@ -30,10 +30,8 @@ public final class StationPartition implements StationConnectivity {
         int s1Index = ChMap.stations().indexOf(s1);
         int s2Index = ChMap.stations().indexOf(s2);
 
-        if(s1Index> partition.length || s2Index> partition.length)
-            return s1Index==s2Index;
-        else
-        return partition[s1Index] == partition[s2Index];
+        return (s1Index> partition.length || s2Index> partition.length) ?
+                s1Index==s2Index : partition[s1Index] == partition[s2Index];
     }
 
     /**
