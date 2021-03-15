@@ -19,9 +19,9 @@ public class PublicPlayerState {
 
     /**
      * Constructor
-     * @param ticketCount
-     * @param cardCount
-     * @param routes
+     * @param ticketCount the number of tickets of the player
+     * @param cardCount the number of cards of the player
+     * @param routes a list of all the routes of the player
      * @throws IllegalArgumentException if ticketCount and cardCount are negative
      */
     public PublicPlayerState(int ticketCount, int cardCount, List<Route> routes){
