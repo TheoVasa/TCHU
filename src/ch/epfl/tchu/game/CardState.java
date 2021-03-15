@@ -71,7 +71,7 @@ public final class CardState extends PublicCardState{
     public Card topDeckCard(){
         //Check correctness of argument
         Preconditions.checkArgument(!deck.isEmpty());
-        return deck.topCard();
+        return deck.topCard(); 
     }
 
     /**
@@ -95,7 +95,6 @@ public final class CardState extends PublicCardState{
 
         //Create the new list of cards for the deck (containing the discards cards)
         SortedBag.Builder<Card> newDeckBuilder = new SortedBag.Builder<>();
-        newDeckBuilder.add(deck.topCards(deck.size()));
         newDeckBuilder.add(discard);
 
         return new CardState(super.faceUpCards(), Deck.of(newDeckBuilder.build(), rng), SortedBag.of());

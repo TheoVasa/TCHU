@@ -2,197 +2,204 @@ package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.test.TestRandomizer;
-import com.sun.tools.jconsole.JConsoleContext;
 import org.junit.jupiter.api.Test;
 
-import java.nio.channels.ShutdownChannelGroupException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class CardStateTest {
+public final class CardStateTest {
+    private static final List<Card> ALL_CARDS = List.of(Card.values());
+    private static final int FACE_UP_CARDS_COUNT = 5;
 
-    /**
-     * Attriutes
-     */
-    //Lists
-    private SortedBag.Builder bagBuilder= new SortedBag.Builder();
-    {
-        bagBuilder.add(1,Card.BLACK);
-        bagBuilder.add(1,Card.BLUE);
-        bagBuilder.add(1,Card.ORANGE);
-        bagBuilder.add(3,Card.YELLOW);
-        bagBuilder.add(2,Card.LOCOMOTIVE);
-    }
-    private SortedBag cards = bagBuilder.build();
-    private List<Card> shuffledCards = cards.toList();
-    {
-        Collections.shuffle(shuffledCards, TestRandomizer.newRandom());
-    }
-
-
-//of(Deck<Card> deck)
     @Test
-    public void ofThrowsIllegalArgumentOnSmallDeck(){
-        var cards = SortedBag.of(1, Card.BLUE,3, Card.YELLOW);
-        var deck = Deck.of(cards, TestRandomizer.newRandom());
-        assertThrows(IllegalArgumentException.class, () -> {
-            CardState.of(deck);
-        });
+    void cardStateOfFailsIfDeckIsTooSmall() {
+        for (int i = 0; i < FACE_UP_CARDS_COUNT; i++) {
+            var deck = Deck.of(SortedBag.of(i, Card.RED), new Random(i));
+            assertThrows(IllegalArgumentException.class, () -> {
+                CardState.of(deck);
+            });
+        }
     }
 
     @Test
-    public  void ofWorksFacedUpCards(){
-        var deck = Deck.of(cards, TestRandomizer.newRandom());
-        var faceUpCards = SortedBag.of(CardState.of(deck).faceUpCards());
-        var expectedFacedUpCardsBuilder = new SortedBag.Builder<Card>();
-        for (int i = 0; i < Constants.FACE_UP_CARDS_COUNT; ++i)
-            expectedFacedUpCardsBuilder.add(shuffledCards.get(i));
-        var expectedFacedUpCards = expectedFacedUpCardsBuilder.build();
-        for (int i = 0; i < Constants.FACE_UP_CARDS_COUNT; ++i)
-            assertTrue(expectedFacedUpCards.contains(faceUpCards) && faceUpCards.contains(expectedFacedUpCards));
-    }
+    void cardStateOfCorrectlyDrawsFaceUpCards() {
+        var cards = allCards();
 
-//withDrawnFaceUpCard(int slot)
-    @Test
-    public void withDrawnFaceUpCardThrowsIndexOutOfBound(){
-        var cardsBuilder = new SortedBag.Builder<Card>();
-        cardsBuilder.add(2, Card.YELLOW);
-        cardsBuilder.add(Card.LOCOMOTIVE);
-        cardsBuilder.add(Card.ORANGE);
-        cardsBuilder.add(3,Card.BLACK);
+        for (int i = 0; i < 10; i++) {
+            var deck = Deck.of(cards, new Random(i));
 
-        var cards = cardsBuilder.build();
-        var deck = Deck.of(cards, TestRandomizer.newRandom());
-        var cardState = CardState.of(deck);
+            var top5 = new ArrayList<Card>();
+            var deck1 = deck;
+            for (int j = 0; j < 5; j++) {
+                top5.add(deck1.topCard());
+                deck1 = deck1.withoutTopCard();
+            }
 
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            cardState.withDrawnFaceUpCard(Constants.FACE_UP_CARDS_COUNT);
-        });
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            cardState.withDrawnFaceUpCard(-1);
-        });
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            cardState.withDrawnFaceUpCard(500);
-        });
+            var cardState = CardState.of(deck);
+            var faceUpCards = new ArrayList<>(cardState.faceUpCards());
+
+            // Sort the cards, as the assignment was not explicit about preserving order
+            Collections.sort(top5);
+            Collections.sort(faceUpCards);
+
+            assertEquals(top5, faceUpCards);
+            assertEquals(deck.size() - 5, cardState.deckSize());
+            assertEquals(0, cardState.discardsSize());
+        }
     }
 
     @Test
-    public void withDrawnFacedUpCardThrowsIllegalArgument(){
-        var cards = SortedBag.of(5,Card.BLUE);
-        var deck = Deck.of(cards, TestRandomizer.newRandom());
-        var cardState = CardState.of(deck);
-        assertThrows(IllegalArgumentException.class, () -> {
-            cardState.withDrawnFaceUpCard(2);
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            cardState.withDrawnFaceUpCard(1);
-        });
-        assertThrows(IllegalArgumentException.class, () -> {
-            cardState.withDrawnFaceUpCard(0);
-        });
+    void cardStateWithDrawnFaceUpCardCorrectlyReplacesIt() {
+        var cards = allCards();
+
+        for (int i = 0; i < 10; i++) {
+            var deck = Deck.of(cards, new Random(-i));
+
+            var deck1 = deck.withoutTopCards(5);
+            var next5 = new ArrayList<Card>();
+            for (int j = 0; j < 5; j++) {
+                next5.add(deck1.topCard());
+                deck1 = deck1.withoutTopCard();
+            }
+
+            var cardState = CardState.of(deck);
+            var next5It = next5.iterator();
+            var slots = new ArrayList<>(List.of(0, 1, 2, 3, 4));
+            Collections.shuffle(slots, new Random(i * i));
+            for (int slot : slots) {
+                cardState = cardState.withDrawnFaceUpCard(slot);
+                assertEquals(next5It.next(), cardState.faceUpCard(slot));
+            }
+        }
     }
 
     @Test
-    public void withDrawnFacedUpCardWorks(){
-        var deck = Deck.of(cards, TestRandomizer.newRandom());
-        var cardState = CardState.of(deck);
-        var expectedCard = shuffledCards.get(Constants.FACE_UP_CARDS_COUNT);
-        assertEquals(expectedCard, cardState.withDrawnFaceUpCard(2).faceUpCard(2));
-        assertEquals(shuffledCards.size() -(Constants.FACE_UP_CARDS_COUNT + 1), cardState.withDrawnFaceUpCard(2).deckSize());
-    }
-
-//topDeckCard()
-    @Test
-    public void topDeckCardThrowsIllegalArgument(){
-        var cards = SortedBag.of(3,Card.BLUE, 2, Card.LOCOMOTIVE);
-        var deck = Deck.of(cards, TestRandomizer.newRandom());
-        var cardState = CardState.of(deck);
+    void cardStateTopDeckCardFailsWithEmptyDeck() {
+        var cardState = CardState.of(Deck.of(SortedBag.of(5, Card.ORANGE), TestRandomizer.newRandom()));
         assertThrows(IllegalArgumentException.class, () -> {
             cardState.topDeckCard();
         });
     }
 
     @Test
-    public void topDeckCardWorks(){
-        var deck = Deck.of(cards, TestRandomizer.newRandom());
-        var cardState = CardState.of(deck);
-        var expectedCard = shuffledCards.get(Constants.FACE_UP_CARDS_COUNT);
-        assertEquals(expectedCard, cardState.topDeckCard());
-        assertEquals(shuffledCards.size() - (Constants.FACE_UP_CARDS_COUNT), cardState.deckSize());
+    void cardStateTopDeckCardReturnsTopDeckCard() {
+        var cards = allCards();
+        for (int i = 0; i < 10; i++) {
+            var deck = Deck.of(cards, new Random((i + 35) * 7));
+            var topDeckCard = deck.withoutTopCards(5).topCard();
+            var cardState = CardState.of(deck);
+            assertEquals(topDeckCard, cardState.topDeckCard());
+        }
     }
 
-//withoutTopDeckCard()
     @Test
-    public void withoutTopDeckCardThrowsIllegalArgument(){
-        var cards = SortedBag.of(3,Card.BLUE, 2, Card.LOCOMOTIVE);
-        var deck = Deck.of(cards, TestRandomizer.newRandom());
-        var cardState = CardState.of(deck);
+    void cardStateWithoutTopDeckCardFailsWithEmptyDeck() {
+        var cardState = CardState.of(Deck.of(SortedBag.of(5, Card.ORANGE), TestRandomizer.newRandom()));
         assertThrows(IllegalArgumentException.class, () -> {
             cardState.withoutTopDeckCard();
         });
     }
 
     @Test
-    public void withoutTopDeckCardWorks(){
-        var deck = Deck.of(cards, TestRandomizer.newRandom());
-        for (int i = Constants.FACE_UP_CARDS_COUNT+1; i < shuffledCards.size()-1; ++i) {
-            var cardState = CardState.of(deck).withoutTopDeckCard();
-            assertEquals(shuffledCards.get(i), cardState.topDeckCard());
-            assertEquals(shuffledCards.size() - (Constants.FACE_UP_CARDS_COUNT+1), cardState.deckSize());
+    void cardStateWithoutTopDeckCardWorks() {
+        var cards = allCards();
+
+        for (int i = 0; i < 10; i++) {
+            var deck = Deck.of(cards, new Random(2021 - i));
+
+            var expectedCards = new ArrayList<Card>();
+            var deck1 = deck.withoutTopCards(5);
+            while (!deck1.isEmpty()) {
+                expectedCards.add(deck1.topCard());
+                deck1 = deck1.withoutTopCard();
+            }
+
+            var actualCards = new ArrayList<Card>();
+            var cardState = CardState.of(deck);
+            while (!cardState.isDeckEmpty()) {
+                actualCards.add(cardState.topDeckCard());
+                cardState = cardState.withoutTopDeckCard();
+            }
+
+            assertEquals(expectedCards, actualCards);
         }
     }
 
-//withRecreatedFromDiscards(Random rng)
     @Test
-    public void withDeckRecreatedFromDiscardsThrowsIllegalArgument(){
-        var cards = SortedBag.of(6,Card.BLUE, 1, Card.LOCOMOTIVE);
-        var deck = Deck.of(cards, TestRandomizer.newRandom());
-        var cardState = CardState.of(deck).withoutTopDeckCard();
+    void cardStateWithDeckRecreatedFromDiscardsFailsWhenDeckIsNotEmpty() {
+        var deck = Deck.of(SortedBag.of(6, Card.RED), TestRandomizer.newRandom());
+        var cardState = CardState.of(deck);
         assertThrows(IllegalArgumentException.class, () -> {
             cardState.withDeckRecreatedFromDiscards(TestRandomizer.newRandom());
         });
     }
 
     @Test
-    public void withDeckRecreatedFromDiscardsWorks(){
-        var cards = SortedBag.of(5, Card.BLUE);
-        var deck = Deck.of(cards, TestRandomizer.newRandom());
-        var discard = List.of(Card.BLUE,Card.BLUE, Card.LOCOMOTIVE, Card.LOCOMOTIVE, Card.LOCOMOTIVE);
-        var cardState = CardState.of(deck).withMoreDiscardedCards(SortedBag.of(discard));
+    void cardStateWithDeckRecreatedFromDiscardsWorksWithEmptyDiscards() {
+        var deck = Deck.of(
+                SortedBag.of(FACE_UP_CARDS_COUNT, Card.RED),
+                TestRandomizer.newRandom());
+        var cardState = CardState.of(deck);
+        var cardState1 = cardState.withDeckRecreatedFromDiscards(TestRandomizer.newRandom());
+        assertEquals(0, cardState1.deckSize());
+        assertEquals(0, cardState1.discardsSize());
+    }
 
-        cardState = cardState.withDeckRecreatedFromDiscards(TestRandomizer.newRandom());
-
-        assertEquals(discard.size(), cardState.deckSize());
-
-        //Checker si les elements sont bien ajoutées
-        for (int i = 0; i < discard.size(); ++i) {
-            assertTrue(discard.contains(cardState.topDeckCard()));
-            if (cardState.deckSize()>0)
-                cardState = cardState.withoutTopDeckCard();
+    @Test
+    void cardStateWithDeckRecreatedFromDiscardsWorksWithNonEmptyDiscards() {
+        var deck = Deck.of(
+                SortedBag.of(FACE_UP_CARDS_COUNT, Card.RED),
+                TestRandomizer.newRandom());
+        var discardsCount = 10;
+        var discards = SortedBag.of(discardsCount, Card.BLUE);
+        var cardState = CardState.of(deck)
+                .withMoreDiscardedCards(discards)
+                .withDeckRecreatedFromDiscards(TestRandomizer.newRandom());
+        assertEquals(discardsCount, cardState.deckSize());
+        var deckCards = new SortedBag.Builder<Card>();
+        for (int i = 0; i < discardsCount; i++) {
+            var topDeckCard = cardState.topDeckCard();
+            cardState = cardState.withoutTopDeckCard();
+            deckCards.add(topDeckCard);
         }
-    }
-
-//withMoreDiscardedCards(SortedBag<Cards> additionalDiscards)
-    @Test
-    public void withMoreDiscardedCardsWorksOnNonEmptyAdditionalCards(){
-        var cards = SortedBag.of(5,Card.BLUE);
-        var deck = Deck.of(cards, new Random(0L));
-        var cardState = CardState.of(deck).withMoreDiscardedCards(SortedBag.of(2, Card.BLUE, 3, Card.LOCOMOTIVE));
-        assertEquals(5, cardState.discardsSize());
-        cardState = cardState.withMoreDiscardedCards(SortedBag.of(2, Card.BLUE, 3, Card.LOCOMOTIVE));
-        assertEquals(10, cardState.discardsSize());
+        assertTrue(cardState.isDeckEmpty());
+        assertEquals(discards, deckCards.build());
     }
 
     @Test
-    public void withMoreDiscardedCardsWorksOnEmptyAdditionalCards(){
-        var cards = SortedBag.of(5,Card.BLUE);
-        var deck = Deck.of(cards, TestRandomizer.newRandom());
-        var cardState = CardState.of(deck).withMoreDiscardedCards(SortedBag.of());
-        assertEquals(0, cardState.discardsSize());
-        assertEquals(0, cardState.deckSize());
+    void cardStateWithMoreDiscardedCardsWorks() {
+        var rng = TestRandomizer.newRandom();
+        var deck = Deck.of(
+                SortedBag.of(FACE_UP_CARDS_COUNT, Card.RED),
+                TestRandomizer.newRandom());
+        var expectedDeckBuilder = new SortedBag.Builder<Card>();
+        var cardState = CardState.of(deck);
+        for (Card card : ALL_CARDS) {
+            var count = rng.nextInt(12);
+            var discards = SortedBag.of(count, card);
+            cardState = cardState.withMoreDiscardedCards(discards);
+            expectedDeckBuilder.add(count, card);
+        }
+        cardState = cardState.withDeckRecreatedFromDiscards(new Random(rng.nextLong()));
+        var expectedDeck = expectedDeckBuilder.build();
+
+        var actualDeck = new SortedBag.Builder<Card>();
+        for (int i = 0; i < expectedDeck.size(); i++) {
+            var topDeckCard = cardState.topDeckCard();
+            cardState = cardState.withoutTopDeckCard();
+            actualDeck.add(topDeckCard);
+        }
+        assertTrue(cardState.isDeckEmpty());
+        assertEquals(expectedDeck, actualDeck.build());
+    }
+
+    private SortedBag<Card> allCards() {
+        var cardsBuilder = new SortedBag.Builder<Card>();
+        cardsBuilder.add(14, Card.LOCOMOTIVE);
+        for (Card card : Card.CARS)
+            cardsBuilder.add(12, card);
+        var cards = cardsBuilder.build();
+        return cards;
     }
 }

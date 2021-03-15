@@ -1,123 +1,124 @@
 package ch.epfl.tchu.game;
 
+import ch.epfl.test.TestRandomizer;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
-
-
-
-public class PublicCardStateTest {
-
-    private List<Card> faceUpCards = new ArrayList<>(Arrays.asList(Card.LOCOMOTIVE, Card.YELLOW, Card.YELLOW, Card.BLUE, Card.BLACK));
-    private int deckSize = 5;
-    private int discardSize=10;
+class PublicCardStateTest {
+    private static final List<Card> FACE_UP_CARDS =
+            List.of(Card.BLUE, Card.BLACK, Card.ORANGE, Card.ORANGE, Card.RED);
 
     @Test
-    public void constructorThrowsIllegalArgumentExceptionOnTooBigFaceUpCards(){
-        faceUpCards.add(Card.BLUE);
+    void publicCardStateConstructorFailsWithInvalidNumberOfFaceUpCards() {
+        for (int i = 0; i < 10; i++) {
+            if (i == FACE_UP_CARDS.size())
+                continue;
 
+            var faceUpCards = new ArrayList<>(Collections.nCopies(i, Card.BLACK));
+            assertThrows(IllegalArgumentException.class, () -> {
+                new PublicCardState(faceUpCards, 0, 0);
+            });
+        }
+    }
+
+    @Test
+    void constructorFailsWithNegativeDeckOrDiscardsSize() {
         assertThrows(IllegalArgumentException.class, () -> {
-            new PublicCardState(faceUpCards, deckSize, discardSize);
+            new PublicCardState(FACE_UP_CARDS, -1, 0);
         });
-    }
-
-    @Test
-    public void constructorThrowsIllegalArgumentExceptionOnNegativeDeckSize(){
-        deckSize = -1;
-
         assertThrows(IllegalArgumentException.class, () -> {
-            new PublicCardState(faceUpCards, deckSize, discardSize);
+            new PublicCardState(FACE_UP_CARDS, 0, -1);
         });
     }
 
     @Test
-    public void constructorThrowsIllegalArgumentExceptionOnNegativeDiscardSize(){
-        discardSize=-2;
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            new PublicCardState(faceUpCards, deckSize, discardSize);
-        });
+    void constructorCopiesFaceUpCards() {
+        var faceUpCards = new ArrayList<>(FACE_UP_CARDS);
+        var cardState = new PublicCardState(faceUpCards, 0, 0);
+        faceUpCards.clear();
+        assertEquals(FACE_UP_CARDS, cardState.faceUpCards());
     }
 
     @Test
-    public void totalSizeWorks(){
-
-        var test =  new PublicCardState(faceUpCards, deckSize, discardSize);
-
-        assertEquals(discardSize+deckSize+faceUpCards.size(),test.totalSize());
+    void totalSizeReturnsTotalSize() {
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                var cardState = new PublicCardState(FACE_UP_CARDS, i, j);
+                var expectedTotal = i + j + FACE_UP_CARDS.size();
+                assertEquals(expectedTotal, cardState.totalSize());
+            }
+        }
     }
 
     @Test
-    public void faceUpCardsWorks(){
-
-        var test =  new PublicCardState(faceUpCards, deckSize, discardSize);
-
-        assertEquals(faceUpCards,test.faceUpCards());
+    void faceUpCardsReturnsImmutableListOrCopy() {
+        var cardState = new PublicCardState(FACE_UP_CARDS, 0, 0);
+        try {
+            cardState.faceUpCards().clear();
+        } catch (UnsupportedOperationException e) {
+            // ignore
+        }
+        assertEquals(FACE_UP_CARDS, cardState.faceUpCards());
     }
 
     @Test
-    public void faceUpCardThrowsIndexOUtOfBound(){
-
-        var test =  new PublicCardState(faceUpCards, deckSize, discardSize);
-
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            test.faceUpCard(-1);
-        });
-        assertThrows(IndexOutOfBoundsException.class, () -> {
-            test.faceUpCard(5);
-        });
+    void faceUpCardFailsWithInvalidSlotIndex() {
+        var cardState = new PublicCardState(FACE_UP_CARDS, 0, 0);
+        for (int i = -20; i < 0; i++) {
+            var slot = i;
+            assertThrows(IndexOutOfBoundsException.class, () -> {
+                cardState.faceUpCard(slot);
+            });
+        }
+        for (int i = 6; i <= 20; i++) {
+            var slot = i;
+            assertThrows(IndexOutOfBoundsException.class, () -> {
+                cardState.faceUpCard(slot);
+            });
+        }
     }
 
     @Test
-    public void faceUpCardWorks(){
-
-        var test =  new PublicCardState(faceUpCards, deckSize, discardSize);
-
-        assertEquals(Card.YELLOW, test.faceUpCard(2));
-        assertEquals(Card.LOCOMOTIVE, test.faceUpCard(0));
-
+    void faceUpCardReturnsCorrectCard() {
+        var rng = TestRandomizer.newRandom();
+        for (int i = 0; i < TestRandomizer.RANDOM_ITERATIONS; i++) {
+            var cards = new ArrayList<>(Card.ALL);
+            Collections.shuffle(cards, new Random(i * 2021L));
+            var faceUpCards = List.copyOf(cards.subList(0, 5));
+            var cardState = new PublicCardState(faceUpCards, 0, 0);
+            for (int j = 0; j < faceUpCards.size(); j++)
+                assertEquals(faceUpCards.get(j), cardState.faceUpCard(j));
+        }
     }
 
     @Test
-    public void deckSizeWorks(){
-        deckSize= 50;
-
-        var test =  new PublicCardState(faceUpCards, deckSize, discardSize);
-
-      assertEquals(deckSize, test.deckSize());
-    }
-
-
-    @Test
-    public void isDeckEmptyWorksOnEmptyDeck(){
-        deckSize= 0;
-
-        var test =  new PublicCardState(faceUpCards, deckSize, discardSize);
-
-        assertTrue(test.isDeckEmpty());
+    void deckSizeReturnsDeckSize() {
+        for (int i = 0; i < 100; i++) {
+            var cardState = new PublicCardState(FACE_UP_CARDS, i, i + 1);
+            assertEquals(i, cardState.deckSize());
+        }
     }
 
     @Test
-    public void isDeckEmptyWorksOnNonEmptyDeck(){
-
-        var test =  new PublicCardState(faceUpCards, deckSize, discardSize);
-
-        assertFalse(test.isDeckEmpty());
+    void isDeckEmptyReturnsTrueOnlyWhenDeckEmpty() {
+        assertTrue(new PublicCardState(FACE_UP_CARDS, 0, 1).isDeckEmpty());
+        for (int i = 0; i < 100; i++) {
+            var cardState = new PublicCardState(FACE_UP_CARDS, i + 1, i);
+            assertFalse(cardState.isDeckEmpty());
+        }
     }
 
     @Test
-    public void discardSizeWorks(){
-
-        var test =  new PublicCardState(faceUpCards, deckSize, discardSize);
-
-        assertEquals(discardSize, test.discardsSize());
+    void discardsSizeReturnsDiscardsSize() {
+        for (int i = 0; i < 100; i++) {
+            var cardState = new PublicCardState(FACE_UP_CARDS, i + 1, i);
+            assertEquals(i, cardState.discardsSize());
+        }
     }
 }

@@ -2,6 +2,9 @@ package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.Preconditions;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,11 +36,12 @@ public class PublicCardState {
         Preconditions.checkArgument(deckSize >= 0 && discardsSize >= 0);
 
         //Init vars
+        this.faceUpCards = faceUpCards;
         this.deckSize = deckSize;
         this.discardsSize = discardsSize;
-        this.faceUpCards = faceUpCards;
         this.totalSize = faceUpCards.size() + deckSize + discardsSize;
     }
+
 
     /**
      * Gives the total amount of cards that aren't on any players hand

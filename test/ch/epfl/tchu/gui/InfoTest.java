@@ -2,227 +2,273 @@ package ch.epfl.tchu.gui;
 
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class InfoTest {
+class InfoTest {
 
-    Info info = new Info("a");
-    Route route = new Route("AT1_STG_1",AT1, STG, 4,Route.Level.UNDERGROUND, null);
-
-    // Stations - cities
-    private static final Station BAD = new Station(0, "Baden");
-    private static final Station BAL = new Station(1, "Bâle");
-    private static final Station BEL = new Station(2, "Bellinzone");
-    private static final Station BER = new Station(3, "Berne");
-    private static final Station BRI = new Station(4, "Brigue");
-    private static final Station BRU = new Station(5, "Brusio");
-    private static final Station COI = new Station(6, "Coire");
-    private static final Station DAV = new Station(7, "Davos");
-    private static final Station DEL = new Station(8, "Delémont");
-    private static final Station FRI = new Station(9, "Fribourg");
-    private static final Station GEN = new Station(10, "Genève");
-    private static final Station INT = new Station(11, "Interlaken");
-    private static final Station KRE = new Station(12, "Kreuzlingen");
-    private static final Station LAU = new Station(13, "Lausanne");
-    private static final Station LCF = new Station(14, "La Chaux-de-Fonds");
-    private static final Station LOC = new Station(15, "Locarno");
-    private static final Station LUC = new Station(16, "Lucerne");
-    private static final Station LUG = new Station(17, "Lugano");
-    private static final Station MAR = new Station(18, "Martigny");
-    private static final Station NEU = new Station(19, "Neuchâtel");
-    private static final Station OLT = new Station(20, "Olten");
-    private static final Station PFA = new Station(21, "Pfäffikon");
-    private static final Station SAR = new Station(22, "Sargans");
-    private static final Station SCE = new Station(23, "Schaffhouse");
-    private static final Station SCZ = new Station(24, "Schwyz");
-    private static final Station SIO = new Station(25, "Sion");
-    private static final Station SOL = new Station(26, "Soleure");
-    private static final Station STG = new Station(27, "Saint-Gall");
-    private static final Station VAD = new Station(28, "Vaduz");
-    private static final Station WAS = new Station(29, "Wassen");
-    private static final Station WIN = new Station(30, "Winterthour");
-    private static final Station YVE = new Station(31, "Yverdon");
-    private static final Station ZOU = new Station(32, "Zoug");
-    private static final Station ZUR = new Station(33, "Zürich");
-
-    // Stations - countries
-    private static final Station DE1 = new Station(34, "Allemagne");
-    private static final Station DE2 = new Station(35, "Allemagne");
-    private static final Station DE3 = new Station(36, "Allemagne");
-    private static final Station DE4 = new Station(37, "Allemagne");
-    private static final Station DE5 = new Station(38, "Allemagne");
-    private static final Station AT1 = new Station(39, "Autriche");
-    private static final Station AT2 = new Station(40, "Autriche");
-    private static final Station AT3 = new Station(41, "Autriche");
-    private static final Station IT1 = new Station(42, "Italie");
-    private static final Station IT2 = new Station(43, "Italie");
-    private static final Station IT3 = new Station(44, "Italie");
-    private static final Station IT4 = new Station(45, "Italie");
-    private static final Station IT5 = new Station(46, "Italie");
-    private static final Station FR1 = new Station(47, "France");
-    private static final Station FR2 = new Station(48, "France");
-    private static final Station FR3 = new Station(49, "France");
-    private static final Station FR4 = new Station(50, "France");
 
     @Test
-    void showsCardNamesCorrectly(){
-        assertEquals(StringsFr.BLACK_CARD, Info.cardName(Card.BLACK, 1));
-        assertEquals(StringsFr.BLACK_CARD + "s", Info.cardName(Card.BLACK, 2));
+    void infoCardNameWorks() {
+        var actualK1 = Info.cardName(Card.BLACK, 1);
+        var expectedK1 = "noire";
+        assertEquals(expectedK1, actualK1);
+        var actualK9 = Info.cardName(Card.BLACK, 9);
+        var expectedK9 = "noires";
+        assertEquals(expectedK9, actualK9);
+
+        var actualB1 = Info.cardName(Card.BLUE, 1);
+        var expectedB1 = "bleue";
+        assertEquals(expectedB1, actualB1);
+        var actualB9 = Info.cardName(Card.BLUE, 9);
+        var expectedB9 = "bleues";
+        assertEquals(expectedB9, actualB9);
+
+        var actualG1 = Info.cardName(Card.GREEN, 1);
+        var expectedG1 = "verte";
+        assertEquals(expectedG1, actualG1);
+        var actualG9 = Info.cardName(Card.GREEN, 9);
+        var expectedG9 = "vertes";
+        assertEquals(expectedG9, actualG9);
+
+        var actualO1 = Info.cardName(Card.ORANGE, 1);
+        var expectedO1 = "orange";
+        assertEquals(expectedO1, actualO1);
+        var actualO9 = Info.cardName(Card.ORANGE, 9);
+        var expectedO9 = "oranges";
+        assertEquals(expectedO9, actualO9);
+
+        var actualR1 = Info.cardName(Card.RED, 1);
+        var expectedR1 = "rouge";
+        assertEquals(expectedR1, actualR1);
+        var actualR9 = Info.cardName(Card.RED, 9);
+        var expectedR9 = "rouges";
+        assertEquals(expectedR9, actualR9);
+
+        var actualV1 = Info.cardName(Card.VIOLET, 1);
+        var expectedV1 = "violette";
+        assertEquals(expectedV1, actualV1);
+        var actualV9 = Info.cardName(Card.VIOLET, 9);
+        var expectedV9 = "violettes";
+        assertEquals(expectedV9, actualV9);
+
+        var actualW1 = Info.cardName(Card.WHITE, 1);
+        var expectedW1 = "blanche";
+        assertEquals(expectedW1, actualW1);
+        var actualW9 = Info.cardName(Card.WHITE, 9);
+        var expectedW9 = "blanches";
+        assertEquals(expectedW9, actualW9);
+
+        var actualY1 = Info.cardName(Card.YELLOW, 1);
+        var expectedY1 = "jaune";
+        assertEquals(expectedY1, actualY1);
+        var actualY9 = Info.cardName(Card.YELLOW, 9);
+        var expectedY9 = "jaunes";
+        assertEquals(expectedY9, actualY9);
+
+        var actualL1 = Info.cardName(Card.LOCOMOTIVE, 1);
+        var expectedL1 = "locomotive";
+        assertEquals(expectedL1, actualL1);
+        var actualL9 = Info.cardName(Card.LOCOMOTIVE, 9);
+        var expectedL9 = "locomotives";
+        assertEquals(expectedL9, actualL9);
     }
 
     @Test
-    void drawWorks(){
-        List<String> names = new ArrayList<String>();
-        names.add("a");
-        names.add("b");
-        names.add("c");
-
-        assertEquals("\na et b et c sont ex æqo avec 5 points !\n", Info.draw(names, 5));
+    void infoDrawWorks() {
+        var actual = Info.draw(List.of("Ada", "Ada"), 17);
+        var expected = "\nAda et Ada sont ex æqo avec 17 points !\n";
+        assertEquals(expected, actual);
     }
 
     @Test
-    void WillPlayFirstWorks(){
-        assertEquals("a jouera en premier.\n\n", info.willPlayFirst());
+    void infoWillPlayFirstWorks() {
+        var info = new Info("Niklaus");
+        var actual = info.willPlayFirst();
+        var expected = "Niklaus jouera en premier.\n\n";
+        assertEquals(expected, actual);
     }
 
     @Test
-    void keptTicketsWorks(){
-        assertEquals("a a gardé 1 billet.\n", info.keptTickets(1));
-        assertEquals("a a gardé 5 billets.\n", info.keptTickets(5));
+    void infoKeptTicketsWorks() {
+        var info = new Info("Edsger");
+
+        var actual1 = info.keptTickets(1);
+        var expected1 = "Edsger a gardé 1 billet.\n";
+        assertEquals(expected1, actual1);
+
+        var actual5 = info.keptTickets(5);
+        var expected5 = "Edsger a gardé 5 billets.\n";
+        assertEquals(expected5, actual5);
     }
 
     @Test
-    void canPlayWorks(){
-        assertEquals("\nC'est à a de jouer.\n", info.canPlay());
+    void infoCanPlayWorks() {
+        var info = new Info("Charles");
+
+        var actual = info.canPlay();
+        var expected = "\nC'est à Charles de jouer.\n";
+        assertEquals(expected, actual);
     }
 
     @Test
-    void drewTicketsWorks(){
-        assertEquals("a a tiré 1 billet...\n", info.drewTickets(1));
-        assertEquals("a a tiré 5 billets...\n", info.drewTickets(5));
+    void infoDrewTicketsWorks() {
+        var info = new Info("Linus");
+
+        var actual1 = info.drewTickets(1);
+        var expected1 = "Linus a tiré 1 billet...\n";
+        assertEquals(expected1, actual1);
+
+        var actual5 = info.drewTickets(5);
+        var expected5 = "Linus a tiré 5 billets...\n";
+        assertEquals(expected5, actual5);
     }
 
     @Test
-    void drewBlindCardWorks(){
-        assertEquals("a a tiré une carte de la pioche.\n", info.drewBlindCard());
+    void infoDrewBlindCardWorks() {
+        var info = new Info("Alan");
+
+        var actual = info.drewBlindCard();
+        var expected = "Alan a tiré une carte de la pioche.\n";
+        assertEquals(expected, actual);
     }
 
     @Test
-    void drewVisibleCardWorks(){
-        assertEquals("a a tiré une carte noire visible.\n", info.drewVisibleCard(Card.BLACK));
+    void infoDrewVisibleCardWorks() {
+        var info = new Info("John");
+
+        var actual = info.drewVisibleCard(Card.GREEN);
+        var expected = "John a tiré une carte verte visible.\n";
+        assertEquals(expected, actual);
     }
 
     @Test
-    void claimedRouteWorks(){
+    void infoClaimedRouteWorks() {
+        var info = new Info("Brian");
 
-        SortedBag.Builder<Card> biggerBag = new SortedBag.Builder<Card>();
-        biggerBag.add(1, Card.LOCOMOTIVE);
-        biggerBag.add(2, Card.BLACK);
-        biggerBag.add(3, Card.GREEN);
+        var s1 = new Station(0, "Neuchâtel");
+        var s2 = new Station(1, "Lausanne");
 
-        assertEquals("a a pris possession de la route Autriche" + StringsFr.EN_DASH_SEPARATOR +
-                        "Saint-Gall au moyen de 2 bleues et 1 locomotive.\n",
-                info.claimedRoute(route, SortedBag.of(1, Card.LOCOMOTIVE, 2, Card.BLUE)));
+        var route1 = new Route("1", s1, s2, 1, Route.Level.OVERGROUND, Color.ORANGE);
+        var actual1 = info.claimedRoute(route1, SortedBag.of(Card.ORANGE));
+        var expected1 = "Brian a pris possession de la route Neuchâtel – Lausanne au moyen de 1 orange.\n";
+        assertEquals(expected1, actual1);
 
-        assertEquals("a a pris possession de la route Autriche" + StringsFr.EN_DASH_SEPARATOR +
-                        "Saint-Gall au moyen de 1 locomotive.\n",
-                info.claimedRoute(route, SortedBag.of(1, Card.LOCOMOTIVE)));
+        var route2 = new Route("1", s1, s2, 2, Route.Level.OVERGROUND, null);
+        var actual2 = info.claimedRoute(route2, SortedBag.of(2, Card.RED));
+        var expected2 = "Brian a pris possession de la route Neuchâtel – Lausanne au moyen de 2 rouges.\n";
+        assertEquals(expected2, actual2);
 
-        assertEquals("a a pris possession de la route Autriche" + StringsFr.EN_DASH_SEPARATOR +
-                        "Saint-Gall au moyen de 2 noires, 3 vertes et 1 locomotive.\n",
-                info.claimedRoute(route, biggerBag.build()));
+        var route3 = new Route("1", s1, s2, 4, Route.Level.UNDERGROUND, null);
+        var actual3 = info.claimedRoute(route3, SortedBag.of(4, Card.BLUE, 2, Card.LOCOMOTIVE));
+        var expected3 = "Brian a pris possession de la route Neuchâtel – Lausanne au moyen de 4 bleues et 2 locomotives.\n";
+        assertEquals(expected3, actual3);
     }
 
     @Test
-    void attemptsTunnelClaimWorks(){
+    void infoAttemptsTunnelClaimWorks() {
+        var info = new Info("Grace");
 
-        SortedBag.Builder<Card> biggerBag = new SortedBag.Builder<Card>();
-        biggerBag.add(1, Card.LOCOMOTIVE);
-        biggerBag.add(2, Card.BLACK);
-        biggerBag.add(3, Card.GREEN);
+        var s1 = new Station(0, "Wassen");
+        var s2 = new Station(1, "Coire");
 
-        assertEquals("a tente de s'emparer du tunnel Autriche" + StringsFr.EN_DASH_SEPARATOR +
-                        "Saint-Gall au moyen de 2 bleues et 1 locomotive !\n",
-                info.attemptsTunnelClaim(route, SortedBag.of(1, Card.LOCOMOTIVE, 2, Card.BLUE)));
+        var route1 = new Route("1", s1, s2, 1, Route.Level.UNDERGROUND, Color.ORANGE);
+        var actual1 = info.attemptsTunnelClaim(route1, SortedBag.of(Card.ORANGE));
+        var expected1 = "Grace tente de s'emparer du tunnel Wassen – Coire au moyen de 1 orange !\n";
+        assertEquals(expected1, actual1);
 
-        assertEquals("a tente de s'emparer du tunnel Autriche" + StringsFr.EN_DASH_SEPARATOR +
-                        "Saint-Gall au moyen de 1 locomotive !\n",
-                info.attemptsTunnelClaim(route, SortedBag.of(1, Card.LOCOMOTIVE)));
+        var route2 = new Route("1", s1, s2, 2, Route.Level.UNDERGROUND, null);
+        var actual2 = info.attemptsTunnelClaim(route2, SortedBag.of(2, Card.RED));
+        var expected2 = "Grace tente de s'emparer du tunnel Wassen – Coire au moyen de 2 rouges !\n";
+        assertEquals(expected2, actual2);
 
-        assertEquals("a tente de s'emparer du tunnel Autriche" + StringsFr.EN_DASH_SEPARATOR +
-                        "Saint-Gall au moyen de 2 noires, 3 vertes et 1 locomotive !\n",
-                info.attemptsTunnelClaim(route, biggerBag.build()));
+        var route3 = new Route("1", s1, s2, 4, Route.Level.UNDERGROUND, null);
+        var actual3 = info.attemptsTunnelClaim(route3, SortedBag.of(4, Card.BLUE, 2, Card.LOCOMOTIVE));
+        var expected3 = "Grace tente de s'emparer du tunnel Wassen – Coire au moyen de 4 bleues et 2 locomotives !\n";
+        assertEquals(expected3, actual3);
     }
 
     @Test
-    void drewAdditionalCardsWorks(){
+    void infoDrewAdditionalCardsWorks() {
+        var info = new Info("Margaret");
 
-        SortedBag.Builder<Card> biggerBag = new SortedBag.Builder<Card>();
-        biggerBag.add(1, Card.LOCOMOTIVE);
-        biggerBag.add(1, Card.BLACK);
-        biggerBag.add(1, Card.GREEN);
+        var actual1 = info.drewAdditionalCards(SortedBag.of(3, Card.ORANGE), 0);
+        var expected1 = "Les cartes supplémentaires sont 3 oranges. Elles n'impliquent aucun coût additionnel.\n";
+        assertEquals(expected1, actual1);
 
-        assertEquals("Les cartes supplémentaires sont 2 bleues et 1 locomotive. " +
-                        "Elles impliquent un coût additionnel de 2 cartes.\n",
-                info.drewAdditionalCards(SortedBag.of(1, Card.LOCOMOTIVE, 2, Card.BLUE), 2));
+        var actual2 = info.drewAdditionalCards(SortedBag.of(1, Card.WHITE, 2, Card.RED), 1);
+        var expected2 = "Les cartes supplémentaires sont 2 rouges et 1 blanche. Elles impliquent un coût additionnel de 1 carte.\n";
+        assertEquals(expected2, actual2);
 
-        assertEquals("Les cartes supplémentaires sont 3 locomotives. " +
-                        "Elles impliquent un coût additionnel de 1 carte.\n",
-                info.drewAdditionalCards(SortedBag.of(3, Card.LOCOMOTIVE), 1));
+        var actual3 = info.drewAdditionalCards(SortedBag.of(1, Card.YELLOW, 2, Card.GREEN), 2);
+        var expected3 = "Les cartes supplémentaires sont 2 vertes et 1 jaune. Elles impliquent un coût additionnel de 2 cartes.\n";
+        assertEquals(expected3, actual3);
 
-        assertEquals("Les cartes supplémentaires sont 1 noire, 1 verte et 1 locomotive. " +
-                        "Elles n'impliquent aucun coût additionnel.\n",
-                info.drewAdditionalCards(biggerBag.build(), 0));
+        var actual4 = info.drewAdditionalCards(SortedBag.of(1, Card.VIOLET, 2, Card.LOCOMOTIVE), 3);
+        var expected4 = "Les cartes supplémentaires sont 1 violette et 2 locomotives. Elles impliquent un coût additionnel de 3 cartes.\n";
+        assertEquals(expected4, actual4);
     }
 
     @Test
-    void didNotClaimRuteWorks(){
-        assertEquals("a n'a pas pu (ou voulu) s'emparer de la route Autriche" + StringsFr.EN_DASH_SEPARATOR +
-                        "Saint-Gall.\n", info.didNotClaimRoute(route));
+    void infoDidNotClaimRouteWorks() {
+        var info = new Info("Guido");
+        var s1 = new Station(0, "Zernez");
+        var s2 = new Station(1, "Klosters");
+
+        var route = new Route("1", s1, s2, 4, Route.Level.UNDERGROUND, Color.ORANGE);
+        var actual = info.didNotClaimRoute(route);
+        var expected = "Guido n'a pas pu (ou voulu) s'emparer de la route Zernez – Klosters.\n";
+        assertEquals(expected, actual);
     }
 
     @Test
-    void lastTurnBeginsWorks(){
-        assertEquals("\na n'a plus que 2 wagons, le dernier tour commence !\n",
-                info.lastTurnBegins(2));
-        assertEquals("\na n'a plus que 1 wagon, le dernier tour commence !\n",
-                info.lastTurnBegins(1));
+    void infoLastTurnBeginsWorks() {
+        var info = new Info("Martin");
+
+        var actual1 = info.lastTurnBegins(0);
+        var expected1 = "\nMartin n'a plus que 0 wagons, le dernier tour commence !\n";
+        assertEquals(expected1, actual1);
+
+        var actual2 = info.lastTurnBegins(1);
+        var expected2 = "\nMartin n'a plus que 1 wagon, le dernier tour commence !\n";
+        assertEquals(expected2, actual2);
+
+        var actual3 = info.lastTurnBegins(2);
+        var expected3 = "\nMartin n'a plus que 2 wagons, le dernier tour commence !\n";
+        assertEquals(expected3, actual3);
     }
 
     @Test
-    void getsLongestTrailBonusWorks(){
+    void infoGetsLongestTrailBonusWorks() {
+        var info = new Info("Larry");
 
-        Route route_a = new Route("NEU_YVE_1", NEU, YVE, 2, Route.Level.OVERGROUND, Color.BLACK);
-        Route route_b = new Route("NEU_SOL_1", NEU, SOL, 4, Route.Level.OVERGROUND, Color.GREEN);
-        Route route_c = new Route("BER_NEU_1", BER, NEU, 2, Route.Level.OVERGROUND, Color.RED);
-        Route route_d = new Route("BER_SOL_1", BER, SOL, 2, Route.Level.OVERGROUND, Color.BLACK);
-        Route route_e = new Route("BER_LUC_1", BER, LUC, 4, Route.Level.OVERGROUND, null);
-        Route route_f = new Route("BER_FRI_1", BER, FRI, 1, Route.Level.OVERGROUND, Color.ORANGE);
+        var s1 = new Station(0, "Montreux");
+        var s2 = new Station(1, "Montreux");
 
-        List <Route> roads = new ArrayList<Route>();
-        roads.add(route_a);
-        roads.add(route_b);
-        roads.add(route_c);
-        roads.add(route_d);
-        roads.add(route_e);
-        roads.add(route_f);
+        var route = new Route("1", s1, s2, 1, Route.Level.UNDERGROUND, Color.ORANGE);
+        var trail = Trail.longest(List.of(route));
 
-        assertEquals("\na reçoit un bonus de 10 points pour le plus long trajet (Lucerne" +
-                        StringsFr.EN_DASH_SEPARATOR + "Fribourg).\n",
-                info.getsLongestTrailBonus(Trail.longest(roads)));
+        var actual = info.getsLongestTrailBonus(trail);
+        var expected = "\nLarry reçoit un bonus de 10 points pour le plus long trajet (Montreux – Montreux).\n";
+        assertEquals(expected, actual);
     }
 
     @Test
-    void wonWorks(){
-        assertEquals("\na remporte la victoire avec 40 points, contre 20 points !\n",
-                info.won(40, 20));
+    void infoWonWorks() {
+        var info = new Info("Bjarne");
 
-        assertEquals("\na remporte la victoire avec 1 point, contre 1 point !\n",
-                info.won(1, 1));
+        var actual1 = info.won(2, 1);
+        var expected1 = "\nBjarne remporte la victoire avec 2 points, contre 1 point !\n";
+        assertEquals(expected1, actual1);
+
+        var actual2 = info.won(3, 2);
+        var expected2 = "\nBjarne remporte la victoire avec 3 points, contre 2 points !\n";
+        assertEquals(expected2, actual2);
     }
 }
