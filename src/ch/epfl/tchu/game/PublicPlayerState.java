@@ -37,9 +37,7 @@ public class PublicPlayerState {
 
 
         //Create a copy of the list of Rout given in parameter
-        this.routes = new ArrayList<>();
-        for (Route r: routes)
-            Collections.addAll(this.routes(), r);
+        this.routes = new ArrayList<>(routes);
     }
 
     /**

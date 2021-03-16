@@ -21,7 +21,8 @@ public final class StationPartition implements StationConnectivity {
      * @param partition, tab of int representing the partition
      */
     private StationPartition(int[] partition){
-        this.partition = partition;
+        //copy of the tab by values
+        this.partition = partition.clone();
     }
 
     @Override
@@ -50,7 +51,7 @@ public final class StationPartition implements StationConnectivity {
          * @throws IllegalArgumentException if the count is negative
          */
         public Builder(int stationCount) {
-            Preconditions.checkArgument(!(stationCount<0));
+            Preconditions.checkArgument(stationCount>=0);
 
             builderPartition = new int[stationCount];
             for(int i=0; i<stationCount; ++i){

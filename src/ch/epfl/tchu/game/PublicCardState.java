@@ -3,10 +3,7 @@ package ch.epfl.tchu.game;
 import ch.epfl.tchu.Preconditions;
 
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * generic class representing the public state of the cards, immutable
@@ -36,7 +33,7 @@ public class PublicCardState {
         Preconditions.checkArgument(deckSize >= 0 && discardsSize >= 0);
 
         //Init vars
-        this.faceUpCards = faceUpCards;
+        this.faceUpCards = new ArrayList<>(faceUpCards);
         this.deckSize = deckSize;
         this.discardsSize = discardsSize;
         this.totalSize = faceUpCards.size() + deckSize + discardsSize;
@@ -56,7 +53,7 @@ public class PublicCardState {
      * @return a list the faced up cards
      */
     public List<Card> faceUpCards() {
-        return faceUpCards;
+        return List.copyOf(faceUpCards);
     }
 
 

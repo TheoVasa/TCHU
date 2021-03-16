@@ -4,7 +4,6 @@ import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -13,8 +12,8 @@ public final class PlayerState extends PublicPlayerState {
     /**
      * Attributes
      */
-    private SortedBag<Ticket> tickets;
-    private SortedBag<Card> cards;
+    private final SortedBag<Ticket> tickets;
+    private final SortedBag<Card> cards;
 
 
     /**
@@ -26,9 +25,8 @@ public final class PlayerState extends PublicPlayerState {
      */
     public PlayerState(SortedBag<Ticket> tickets, SortedBag<Card> cards, List<Route> routes){
         super(tickets.size(), cards.size(),routes);
-        this.cards = cards;
-        this.tickets = tickets;
-
+        this.cards = SortedBag.of(cards);
+        this.tickets = SortedBag.of(tickets);
     }
 
     /**
@@ -73,7 +71,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return a player state with the added ticket
      */
     public PlayerState withAddedTickets(SortedBag<Ticket> newTickets){
-        SortedBag.Builder newTicketsBuilder = new SortedBag.Builder();
+        SortedBag.Builder<Ticket> newTicketsBuilder = new SortedBag.Builder<>();
         newTicketsBuilder.add(tickets);
         newTicketsBuilder.add(newTickets);
 
@@ -87,7 +85,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return a new player state with the added cards
      */
     public PlayerState withAddedCards(SortedBag<Card> newCards){
-        SortedBag.Builder newCardsBuilder = new SortedBag.Builder();
+        SortedBag.Builder<Card> newCardsBuilder = new SortedBag.Builder<>();
         newCardsBuilder.add(cards);
         newCardsBuilder.add(newCards);
 
@@ -133,8 +131,8 @@ public final class PlayerState extends PublicPlayerState {
         //Set the new cards of the player
         SortedBag<Card> newCards = cards.difference(claimCards);
         //Add the route to the list of routes
-        List<Route> newRoutes = new ArrayList<>();
-        newRoutes.addAll(routes());
+        List<Route> newRoutes = new ArrayList<>(routes());
+       // newRoutes.addAll(routes());
         newRoutes.add(route);
         return new PlayerState(tickets, newCards, newRoutes);
     }
@@ -146,8 +144,10 @@ public final class PlayerState extends PublicPlayerState {
     public int ticketPoints(){
         //Get the biggest id
         int maxId = 0;
-        for (Route r: routes())
-            maxId = (ChMap.stations().indexOf(r) > maxId) ? ChMap.stations().indexOf(r) : maxId;
+        for (Route r: routes()) {
+            maxId = Math.max(ChMap.stations().indexOf(r.station1()), maxId);
+            maxId = Math.max(ChMap.stations().indexOf(r.station2()), maxId);
+        }
 
         //Create the partition of the connectivity
         StationPartition.Builder partitionBuilder = new StationPartition.Builder(maxId);
@@ -157,7 +157,7 @@ public final class PlayerState extends PublicPlayerState {
         //Calculate the total points given by the ticket
         int totalTicketPoint = 0;
         for (Ticket t: tickets)
-            totalTicketPoint+=t.points(partitionBuilder.build());
+            totalTicketPoint += t.points(partitionBuilder.build());
 
         return totalTicketPoint;
     }
@@ -193,7 +193,7 @@ public final class PlayerState extends PublicPlayerState {
         }
 
         //Construct a list containing all possible set of card that can be played as additional cards
-        List<SortedBag<Card>> options = List.copyOf(playableCards.build().subsetsOfSize(additionalCardsCount));
+        List<SortedBag<Card>> options = new ArrayList<>(playableCards.build().subsetsOfSize(additionalCardsCount));
 
         //Sort the List of possible additional cards depending on the amount of locomotives
         options.sort(Comparator.comparing(cs -> cs.countOf(Card.LOCOMOTIVE)));

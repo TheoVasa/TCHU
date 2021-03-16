@@ -58,7 +58,7 @@ public final class CardState extends PublicCardState{
         Preconditions.checkArgument(!deck.isEmpty());
 
         //Set the new face up cards, throws IndexOutOfBound if  0<=sloT<=Constant.FACE_UP_CARDS_COUNT
-        List<Card> faceUpCards = super.faceUpCards();
+        List<Card> faceUpCards = new ArrayList<>(super.faceUpCards());
         faceUpCards.set(Objects.checkIndex(slot, Constants.FACE_UP_CARDS_COUNT), deck.topCard());
 
         return new CardState(faceUpCards, deck.withoutTopCard(), discard);
