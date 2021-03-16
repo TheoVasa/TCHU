@@ -23,7 +23,7 @@ public final class PlayerState extends PublicPlayerState {
      * @param routes the routes of the player (that he already claimed)
      *
      */
-    PlayerState(SortedBag<Ticket> tickets, SortedBag<Card> cards, List<Route> routes){
+    public PlayerState(SortedBag<Ticket> tickets, SortedBag<Card> cards, List<Route> routes){
         super(tickets.size(), cards.size(),routes);
         this.cards = cards;
         this.tickets = tickets;
@@ -35,7 +35,7 @@ public final class PlayerState extends PublicPlayerState {
      * @param initialCards the initial cards of the player
      * @return the new PlayerState withe initial cards
      */
-    public PlayerState initial(SortedBag<Card> initialCards){
+    public static PlayerState initial(SortedBag<Card> initialCards){
         //Check correctness of the arguments
         Preconditions.checkArgument(initialCards.size() == 4);
         return new PlayerState(SortedBag.of(), initialCards, List.of());
@@ -71,7 +71,7 @@ public final class PlayerState extends PublicPlayerState {
      * @param newTickets the ticket to add to the player state
      * @return a player state with the added ticket
      */
-    public PlayerState withAddedTicket(SortedBag<Ticket> newTickets){
+    public PlayerState withAddedTickets(SortedBag<Ticket> newTickets){
         SortedBag.Builder newTicketsBuilder = new SortedBag.Builder();
         newTicketsBuilder.add(tickets);
         newTicketsBuilder.add(newTickets);
@@ -116,7 +116,7 @@ public final class PlayerState extends PublicPlayerState {
      * @param route the route to claim
      * @return all the possible list of cards to claim the route
      */
-    public List<SortedBag<Card>> possibleClaimCard(Route route){
+    public List<SortedBag<Card>> possibleClaimCards(Route route){
         //Check correctness of the argument
         Preconditions.checkArgument(route.length() <= carCount());
         return route.possibleClaimCards();
@@ -128,7 +128,7 @@ public final class PlayerState extends PublicPlayerState {
      * @param claimCards the cards used to claim the rout
      * @return A new PlayerState with the new list of routes
      */
-    public PlayerState withClaimRoute(Route route, SortedBag<Card> claimCards){
+    public PlayerState withClaimedRoute(Route route, SortedBag<Card> claimCards){
         //Set the new cards of the player
         SortedBag<Card> newCards = cards.difference(claimCards);
         //Add the route to the list of routes
@@ -142,7 +142,7 @@ public final class PlayerState extends PublicPlayerState {
      * Gives the amount of points of the tickets (can be negative)
      * @return The amount of points of the tickets
      */
-    public int ticketPoint(){
+    public int ticketPoints(){
         //Get the biggest id
         int maxId = 0;
         for (Route r: routes())
@@ -166,7 +166,7 @@ public final class PlayerState extends PublicPlayerState {
      * @return The total points
      */
     public int finalPoints(){
-        return claimPoints() + ticketPoint();
+        return claimPoints() + ticketPoints();
     }
 
     /**
