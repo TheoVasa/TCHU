@@ -16,6 +16,7 @@ public final class PlayerState extends PublicPlayerState {
     private SortedBag<Ticket> tickets;
     private SortedBag<Card> cards;
 
+
     /**
      * Constructor
      * @param tickets the tickets of the player
