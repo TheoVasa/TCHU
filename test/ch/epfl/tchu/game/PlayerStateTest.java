@@ -4,15 +4,40 @@ import ch.epfl.tchu.SortedBag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PlayerStateTest {
 
+    /**
+     * Attributes
+     */
+    private static final List<Color> COLORS =
+            List.of(
+                    Color.BLACK,
+                    Color.VIOLET,
+                    Color.BLUE,
+                    Color.GREEN,
+                    Color.YELLOW,
+                    Color.ORANGE,
+                    Color.RED,
+                    Color.WHITE);
+    private static final List<Card> CAR_CARDS =
+            List.of(
+                    Card.BLACK,
+                    Card.VIOLET,
+                    Card.BLUE,
+                    Card.GREEN,
+                    Card.YELLOW,
+                    Card.ORANGE,
+                    Card.RED,
+                    Card.WHITE);
+
 //Constructor(...)
     @Test
     void constructorCopiesLists(){
-        var routes = new ArrayList<Route>(ChMap.routes());
+        var routes = new ArrayList<>(ChMap.routes());
         var tickets = SortedBag.of(ChMap.tickets());
         var cards = SortedBag.of(Card.ALL);
 
@@ -64,7 +89,7 @@ public class PlayerStateTest {
  // tickets()
     @Test
     void ticketsReturnUnmodifiableOrCopiedSortedBag(){
-        var routes = new ArrayList<Route>(ChMap.routes());
+        var routes = new ArrayList<>(ChMap.routes());
         var tickets = SortedBag.of(ChMap.tickets());
         var cards = SortedBag.of(Card.ALL);
         var playerState  = new PlayerState(tickets, cards, routes);
@@ -82,7 +107,7 @@ public class PlayerStateTest {
         var ticket3 = new Ticket(new Station(1, "Bâle"), new Station(4, "Saint Galle"), 8);
         var ticket4 = new Ticket(new Station(3, "Berne"), new Station(6, "Lauanne"), 10);
 
-        var routes = new ArrayList<Route>(ChMap.routes());
+        var routes = new ArrayList<>(ChMap.routes());
         var cards = SortedBag.of(Card.ALL);
 
         //Create the list of the tickets
@@ -111,6 +136,7 @@ public class PlayerStateTest {
     }
 
 //withAddedCard()
+    @Test
     void withAddedCardWorks(){
         var initCards = SortedBag.of(4, Card.BLUE);
         var playerState = PlayerState.initial(initCards);
@@ -133,5 +159,204 @@ public class PlayerStateTest {
     }
 
 //canClaimRoute(...)
+    @Test
+    void canClaimRouteOnTrue(){
+        //Station
+        var COI = new Station(0, "Coire");
+        var WAS = new Station(1, "Wassen");
+        var DAV = new Station(2, "Davos");
+        var AT3 = new Station(3, "Vienne");
+        var IT1 = new Station(4, "Milan");
+        var BRU = new  Station(5, "Brosio");
+        //Routes
+        var route1 = new Route("COI_WAS_1", COI, WAS, 5, Route.Level.UNDERGROUND, null);
+        var route2 = new Route("DAV_AT3_1", DAV, AT3, 3, Route.Level.UNDERGROUND, null);
+        var route3= new Route("DAV_IT1_1", DAV, IT1, 3, Route.Level.UNDERGROUND, null);
+        var routeTarget = new Route("BRU_DAV_1", BRU, DAV, 4, Route.Level.UNDERGROUND, Color.BLUE);
 
+        //List et SortedBag
+        var routes = List.of(route1, route2, route3);
+        var cards = SortedBag.of(5, Card.BLUE);
+        var tickets = SortedBag.of(ChMap.tickets());
+
+
+        var playerState = new PlayerState(tickets, cards, routes);
+        assertTrue(playerState.canClaimRoute(routeTarget));
+    }
+
+    @Test
+    void canClaimRouteOnTrueOrFalseBecauseCars(){
+        //Station
+        var COI = new Station(0, "Coire");
+        var WAS = new Station(1, "Wassen");
+        var DAV = new Station(2, "Davos");
+        var AT3 = new Station(3, "Vienne");
+        var IT1 = new Station(4, "Milan");
+        var BRU = new  Station(5, "Brosio");
+        //Routes
+        var route1 = new Route("COI_WAS_1", COI, WAS, 6, Route.Level.UNDERGROUND, null);
+        var route2 = new Route("DAV_AT3_1", DAV, AT3, 6, Route.Level.UNDERGROUND, null);
+        var route3 = new Route("DAV_IT1_1", DAV, IT1, 6, Route.Level.UNDERGROUND, null);
+        var route4 = new Route("DAS_IT1_1", BRU, IT1, 6, Route.Level.UNDERGROUND, null);
+        var route5 = new Route("DAO_IT1_1", DAV, COI, 6, Route.Level.UNDERGROUND, null);
+        var route6 = new Route("DAE_IT1_1", AT3, COI, 6, Route.Level.UNDERGROUND, null);
+
+
+        //List et SortedBag
+        var routes = List.of(route1, route2, route3, route4, route5, route6);
+        var cards = SortedBag.of(6, Card.BLUE);
+        var tickets = SortedBag.of(ChMap.tickets());
+
+
+        var playerState = new PlayerState(tickets, cards, routes);
+
+        //Should have Jus enough cards -----> Should be true
+        var routeTarget1 = new Route("BRU_DAV_1", BRU, DAV, 4, Route.Level.UNDERGROUND, Color.BLUE);
+        assertTrue(playerState.canClaimRoute(routeTarget1));
+
+        //Shouldn't have enough cards ------> Should be false
+        var routeTarget2 = new Route("BRU_DAV_1", BRU, DAV, 6, Route.Level.UNDERGROUND, Color.BLUE);
+        assertFalse(playerState.canClaimRoute(routeTarget2));
+    }
+
+    @Test
+    void canClaimRouteOnFalseBecauseCards(){
+        //Station
+        var COI = new Station(0, "Coire");
+        var WAS = new Station(1, "Wassen");
+        var DAV = new Station(2, "Davos");
+        var AT3 = new Station(3, "Vienne");
+        var IT1 = new Station(4, "Milan");
+        var BRU = new  Station(5, "Brosio");
+        //Routes
+        var route1 = new Route("COI_WAS_1", COI, WAS, 5, Route.Level.UNDERGROUND, null);
+        var route2 = new Route("DAV_AT3_1", DAV, AT3, 3, Route.Level.UNDERGROUND, null);
+        var route3= new Route("DAV_IT1_1", DAV, IT1, 3, Route.Level.UNDERGROUND, null);
+
+
+        //List et SortedBag
+        var routes = List.of(route1, route2, route3);
+        var cards = SortedBag.of(5, Card.RED);
+        var tickets = SortedBag.of(ChMap.tickets());
+
+
+        var playerState = new PlayerState(tickets, cards, routes);
+
+        //Need 6 RED cards but the playedState contains only 5 RED cards !
+        var routeTarget1 = new Route("BRU_DAV_1", BRU, DAV, 6, Route.Level.UNDERGROUND, Color.RED);
+        assertFalse(playerState.canClaimRoute(routeTarget1));
+
+        //Need 4 BLUE cards but the playedState contains only 5 RED cards !
+        var routeTarget2 = new Route("BRU_DAV_1", BRU, DAV, 4, Route.Level.UNDERGROUND, Color.BLUE);
+        assertFalse(playerState.canClaimRoute(routeTarget2));
+    }
+
+
+//possibleClaimCards(...)
+    @Test
+    void possibleClaimCardsWorksForOvergroundColoredRoute() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var i = 0; i < COLORS.size(); i++) {
+            var color = COLORS.get(i);
+            var card = CAR_CARDS.get(i);
+            for (var l = 1; l <= 6; l++) {
+                var r = new Route(id, s1, s2, l, Route.Level.OVERGROUND, color);
+                assertEquals(List.of(SortedBag.of(l, card)), PlayerState.possibleClaimCards(r));
+            }
+        }
+    }
+
+    @Test
+    void possibleClaimCardsWorksOnOvergroundNeutralRoute() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var l = 1; l <= 6; l++) {
+            var r = new Route(id, s1, s2, l, Route.Level.OVERGROUND, null);
+            var expected = List.of(
+                    SortedBag.of(l, Card.BLACK),
+                    SortedBag.of(l, Card.VIOLET),
+                    SortedBag.of(l, Card.BLUE),
+                    SortedBag.of(l, Card.GREEN),
+                    SortedBag.of(l, Card.YELLOW),
+                    SortedBag.of(l, Card.ORANGE),
+                    SortedBag.of(l, Card.RED),
+                    SortedBag.of(l, Card.WHITE));
+            assertEquals(expected, PlayerState.possibleClaimCards(r));
+        }
+    }
+
+    @Test
+    void possibleClaimCardsWorksOnUndergroundColoredRoute() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var i = 0; i < COLORS.size(); i++) {
+            var color = COLORS.get(i);
+            var card = CAR_CARDS.get(i);
+            for (var l = 1; l <= 6; l++) {
+                var r = new Route(id, s1, s2, l, Route.Level.UNDERGROUND, color);
+
+                var expected = new ArrayList<SortedBag<Card>>();
+                for (var locomotives = 0; locomotives <= l; locomotives++) {
+                    var cars = l - locomotives;
+                    expected.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
+                }
+                assertEquals(expected, PlayerState.possibleClaimCards(r));
+            }
+        }
+    }
+
+    @Test
+    void possibleClaimCardsWorksOnUndergroundNeutralRoute() {
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+        for (var l = 1; l <= 6; l++) {
+            var r = new Route(id, s1, s2, l, Route.Level.UNDERGROUND, null);
+
+            var expected = new ArrayList<SortedBag<Card>>();
+            for (var locomotives = 0; locomotives <= l; locomotives++) {
+                var cars = l - locomotives;
+                if (cars == 0)
+                    expected.add(SortedBag.of(locomotives, Card.LOCOMOTIVE));
+                else {
+                    for (var card : CAR_CARDS)
+                        expected.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
+                }
+            }
+            assertEquals(expected, PlayerState.possibleClaimCards(r));
+        }
+    }
+
+//possibleAdditionalCards(...)
+    @Test
+    void possibleAdditionalClaimCardsThrowsIllegalArgument(){
+
+    }
+
+    @Test
+    void possibleAdditionalClaimCardsWorks(){
+
+    }
+
+//withClaimedRoute(...)
+    @Test
+    void withClaimedRouteWorks(){
+
+    }
+
+//ticketPoints()
+    @Test
+    void ticketPointsWorks(){
+
+    }
+
+//finalPoints()
+    @Test
+    void finalPointsWorks(){
+
+    }
 }
