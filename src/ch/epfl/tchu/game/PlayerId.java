@@ -18,7 +18,7 @@ public enum PlayerId {
      * @return the PlayerId of the next player of the list
      */
     public PlayerId next(){
-        Iterator<PlayerId> it = ALL.iterator();
-        return it.next();
+        //Iterator<PlayerId> it = ALL.iterator();
+        return ALL.get((ALL.indexOf(this)+1) % ALL.size());
     }
 }

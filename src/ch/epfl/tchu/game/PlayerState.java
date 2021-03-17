@@ -132,8 +132,8 @@ public final class PlayerState extends PublicPlayerState {
         SortedBag<Card> newCards = cards.difference(claimCards);
         //Add the route to the list of routes
         List<Route> newRoutes = new ArrayList<>(routes());
-       // newRoutes.addAll(routes());
         newRoutes.add(route);
+
         return new PlayerState(tickets, newCards, newRoutes);
     }
 
