@@ -21,7 +21,7 @@ public final class PlayerState extends PublicPlayerState {
      * @param tickets the tickets of the player
      * @param cards the remaining cards of the player (that he can play)
      * @param routes the routes of the player (that he already claimed)
-     *
+     * @throws
      */
     public PlayerState(SortedBag<Ticket> tickets, SortedBag<Card> cards, List<Route> routes){
         super(tickets.size(), cards.size(),routes);

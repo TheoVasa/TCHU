@@ -29,15 +29,14 @@ public class PublicPlayerState {
         //Check correctness of arguments
         Preconditions.checkArgument(ticketCount>=0 && cardCount>=0);
 
+        //Create a copy of the list of Rout given in parameter
+        this.routes = new ArrayList<>(routes);
+
         //Init vars
         this.ticketCount = ticketCount;
         this.cardCount = cardCount;
         this.carCount = initCarsCount();
         this.claimPoints = initClaimPoints();
-
-
-        //Create a copy of the list of Rout given in parameter
-        this.routes = new ArrayList<>(routes);
     }
 
     /**
