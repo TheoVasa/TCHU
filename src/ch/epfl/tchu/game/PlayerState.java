@@ -117,7 +117,13 @@ public final class PlayerState extends PublicPlayerState {
     public List<SortedBag<Card>> possibleClaimCards(Route route){
         //Check correctness of the argument
         Preconditions.checkArgument(route.length() <= carCount());
-        return route.possibleClaimCards();
+        //Check if the player has the required cards
+        List<SortedBag<Card>> possibleClaimCards = new ArrayList<>();
+        for (SortedBag<Card> cardList : route.possibleClaimCards()){
+            if (cards.contains(cardList))
+                possibleClaimCards.add(cardList);
+        }
+        return possibleClaimCards;
     }
 
     /**
