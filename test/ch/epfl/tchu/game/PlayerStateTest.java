@@ -254,16 +254,66 @@ public class PlayerStateTest {
 
 //possibleClaimCards(...)
     @Test
+    void possibleClaimCardsThrowsIllegalArgument(){
+        //Station
+        var COI = new Station(0, "Coire");
+        var WAS = new Station(1, "Wassen");
+        var DAV = new Station(2, "Davos");
+        var AT3 = new Station(3, "Vienne");
+        var IT1 = new Station(4, "Milan");
+        var BRU = new  Station(5, "Brosio");
+        //Routes
+        var route1 = new Route("COI_WAS_1", COI, WAS, 6, Route.Level.UNDERGROUND, null);
+        var route2 = new Route("DAV_AT3_1", DAV, AT3, 6, Route.Level.UNDERGROUND, null);
+        var route3 = new Route("DAV_IT1_1", DAV, IT1, 6, Route.Level.UNDERGROUND, null);
+        var route4 = new Route("DAS_IT1_1", BRU, IT1, 6, Route.Level.UNDERGROUND, null);
+        var route5 = new Route("DAO_IT1_1", DAV, COI, 6, Route.Level.UNDERGROUND, null);
+        var route6 = new Route("DAE_IT1_1", AT3, COI, 6, Route.Level.UNDERGROUND, null);
+        var routeTarget = new Route("DAZ_IT1_1", BRU, COI, 6, Route.Level.UNDERGROUND, null);
+
+
+        //List et SortedBag
+        var routes = List.of(route1, route2, route3, route4, route5, route6);
+        var cards = SortedBag.of(6, Card.BLUE);
+        var tickets = SortedBag.of(ChMap.tickets());
+
+        //PlayerState to test
+        var playerState = new PlayerState(tickets, cards, routes);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+           playerState.possibleClaimCards(routeTarget);
+        });
+
+    }
+
+    @Test
     void possibleClaimCardsWorksForOvergroundColoredRoute() {
         var s1 = new Station(0, "Lausanne");
         var s2 = new Station(1, "EPFL");
         var id = "id";
+
         for (var i = 0; i < COLORS.size(); i++) {
             var color = COLORS.get(i);
             var card = CAR_CARDS.get(i);
             for (var l = 1; l <= 6; l++) {
                 var r = new Route(id, s1, s2, l, Route.Level.OVERGROUND, color);
-                assertEquals(List.of(SortedBag.of(l, card)), PlayerState.possibleClaimCards(r));
+
+                //Cards for playerStates
+                var cards1 = SortedBag.of(l, card);
+                var cards2 = SortedBag.of(l, Card.CARS.get((i+1)%CAR_CARDS.size()));
+                var cards3 = SortedBag.of(l, Card.LOCOMOTIVE);
+
+                //1.Same Cars, 2.Other cards, 3. Locomotives cards, 4. Empty cards,
+                var playerState1 = new PlayerState(SortedBag.of(), cards1, List.of());
+                var playerState2 = new PlayerState(SortedBag.of(), cards2, List.of());
+                var playerState3 = new PlayerState(SortedBag.of(), cards3, List.of());
+                var playerState4 = new PlayerState(SortedBag.of(), SortedBag.of(), List.of());
+
+                //Tests
+                assertEquals(List.of(SortedBag.of(l, card)), playerState1.possibleClaimCards(r));
+                assertEquals(List.of(SortedBag.of()), playerState2.possibleClaimCards(r));
+                assertEquals(List.of(SortedBag.of()), playerState3.possibleClaimCards(r));
+                assertEquals(List.of(SortedBag.of()), playerState4.possibleClaimCards(r));
             }
         }
     }
@@ -275,7 +325,7 @@ public class PlayerStateTest {
         var id = "id";
         for (var l = 1; l <= 6; l++) {
             var r = new Route(id, s1, s2, l, Route.Level.OVERGROUND, null);
-            var expected = List.of(
+            var allPossibleClaimCards = List.of(
                     SortedBag.of(l, Card.BLACK),
                     SortedBag.of(l, Card.VIOLET),
                     SortedBag.of(l, Card.BLUE),
@@ -284,7 +334,28 @@ public class PlayerStateTest {
                     SortedBag.of(l, Card.ORANGE),
                     SortedBag.of(l, Card.RED),
                     SortedBag.of(l, Card.WHITE));
-            assertEquals(expected, PlayerState.possibleClaimCards(r));
+
+            var cards1Builder = new SortedBag.Builder();
+            for (int i = 0; i < allPossibleClaimCards.size(); ++i)
+                cards1Builder.add(allPossibleClaimCards.get(i));
+
+
+            //PlayerStates cards : 1. All cards, 2. Only one type of cards, 3 Locomotive cards
+            var cards1 = cards1Builder.build();
+            var cards2 = SortedBag.of(l, Card.YELLOW, 2, Card.LOCOMOTIVE);
+            var cards3 = SortedBag.of(l, Card.LOCOMOTIVE);
+
+            //PlayerStates
+            var playerState1 = new PlayerState(SortedBag.of(), cards1,List.of());
+            var playerState2 = new PlayerState(SortedBag.of(), cards2, List.of());
+            var playerState3 = new PlayerState(SortedBag.of(), cards3,List.of());
+            var playerState4 = new PlayerState(SortedBag.of(), SortedBag.of(), List.of());
+
+            //Tests
+            assertEquals(allPossibleClaimCards, playerState1.possibleClaimCards(r));
+            assertEquals(List.of(SortedBag.of(l, Card.YELLOW)), playerState2.possibleClaimCards(r));
+            assertEquals(List.of(SortedBag.of()), playerState3.possibleClaimCards(r));
+            assertEquals(List.of(SortedBag.of()), playerState4.possibleClaimCards(r));
         }
     }
 
@@ -299,12 +370,47 @@ public class PlayerStateTest {
             for (var l = 1; l <= 6; l++) {
                 var r = new Route(id, s1, s2, l, Route.Level.UNDERGROUND, color);
 
-                var expected = new ArrayList<SortedBag<Card>>();
+                //Build the expected of full possibilities
+                var expected1 = new ArrayList<SortedBag<Card>>();
+                var cards1Builder = new SortedBag.Builder<Card>();
                 for (var locomotives = 0; locomotives <= l; locomotives++) {
                     var cars = l - locomotives;
-                    expected.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
+                    expected1.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
+                    cards1Builder.add(SortedBag.of(Card.ALL));
                 }
-                assertEquals(expected, PlayerState.possibleClaimCards(r));
+
+                //Expected with always one locomotive less
+                var expected2 = new ArrayList<SortedBag<Card>>();
+                for(var locomotives = 0; locomotives <= l-1; locomotives++){
+                    var cars = l - locomotives;
+                    expected2.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
+                }
+
+                //Expected with only colors
+                var expected3 = List.of(SortedBag.of(l, card);
+
+                //Expected with only loco
+                var expected4 = List.of(SortedBag.of(Card.LOCOMOTIVE));
+
+                //PlayerStates cards : 1. All cards, 2. Only one type of cards, 3 Locomotive cards
+                var cards1 = cards1Builder.build();
+                var cards2 = SortedBag.of(l, card, l-1, Card.LOCOMOTIVE);
+                var cards3 = SortedBag.of(l, card);
+                var cards4 = SortedBag.of(l, Card.LOCOMOTIVE);
+
+                //PlayerStates
+                var playerState1 = new PlayerState(SortedBag.of(), cards1, List.of());
+                var playerState2 = new PlayerState(SortedBag.of(), cards2, List.of());
+                var playerState3 = new PlayerState(SortedBag.of(), cards3, List.of());
+                var playerState4 = new PlayerState(SortedBag.of(), cards4, List.of());
+                var playerState5 = new PlayerState(SortedBag.of(), SortedBag.of(), List.of());
+
+                //Tests
+                assertEquals(expected1, playerState1.possibleClaimCards(r));
+                assertEquals(expected2, playerState2.possibleClaimCards(r));
+                assertEquals(expected3, playerState3.possibleClaimCards(r));
+                assertEquals(expected4, playerState4.possibleClaimCards(r));
+                assertEquals(List.of(SortedBag.of()), playerState5.possibleClaimCards(r));
             }
         }
     }
@@ -317,17 +423,58 @@ public class PlayerStateTest {
         for (var l = 1; l <= 6; l++) {
             var r = new Route(id, s1, s2, l, Route.Level.UNDERGROUND, null);
 
-            var expected = new ArrayList<SortedBag<Card>>();
+            //Expected1 with all possibilites
+            var cards1Builder = new SortedBag.Builder<Card>();
+            var expected1 = new ArrayList<SortedBag<Card>>();
             for (var locomotives = 0; locomotives <= l; locomotives++) {
                 var cars = l - locomotives;
                 if (cars == 0)
-                    expected.add(SortedBag.of(locomotives, Card.LOCOMOTIVE));
+                    expected1.add(SortedBag.of(locomotives, Card.LOCOMOTIVE));
                 else {
                     for (var card : CAR_CARDS)
-                        expected.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
+                        expected1.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
                 }
+                cards1Builder.add(SortedBag.of(Card.ALL));
             }
-            assertEquals(expected, PlayerState.possibleClaimCards(r));
+
+            //Expected with always one locomotive less
+            var expected2 = new ArrayList<SortedBag<Card>>();
+            var cards2Builder = new SortedBag.Builder<Card>();
+            for(var locomotives = 0; locomotives <= l-1; locomotives++){
+                var cars = l - locomotives;
+                for (var card : CAR_CARDS) {
+                    expected2.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
+                    cards2Builder.add(l, card);
+                }
+                if (locomotives > 0)
+                    cards2Builder.add(locomotives, Card.LOCOMOTIVE);
+            }
+
+            //Expected with only colors
+            var expected3 = List.of(SortedBag.of(l, Card.YELLOW);
+
+            //Expected with only loco
+            var expected4 = List.of(SortedBag.of(Card.LOCOMOTIVE));
+
+            //PlayerStates cards : 1. All cards, 2. Only one type of cards, 3 Locomotive cards
+            var cards1 = cards1Builder.build();
+            var cards2 = cards2Builder.build();
+            var cards3 = SortedBag.of(l, Card.YELLOW);
+            var cards4 = SortedBag.of(l, Card.LOCOMOTIVE);
+
+            //PlayerStates
+            var playerState1 = new PlayerState(SortedBag.of(), cards1, List.of());
+            var playerState2 = new PlayerState(SortedBag.of(), cards2, List.of());
+            var playerState3 = new PlayerState(SortedBag.of(), cards3, List.of());
+            var playerState4 = new PlayerState(SortedBag.of(), cards4, List.of());
+            var playerState5 = new PlayerState(SortedBag.of(), SortedBag.of(), List.of());
+
+            //Tests
+            assertEquals(expected1, playerState1.possibleClaimCards(r));
+            assertEquals(expected2, playerState2.possibleClaimCards(r));
+            assertEquals(expected3, playerState3.possibleClaimCards(r));
+            assertEquals(expected4, playerState4.possibleClaimCards(r));
+            assertEquals(List.of(SortedBag.of()), playerState5.possibleClaimCards(r));
         }
     }
 
@@ -339,6 +486,8 @@ public class PlayerStateTest {
 
     @Test
     void possibleAdditionalClaimCardsWorks(){
+
+        ///Je vais finir ca demain 18.03.2021
 
     }
 
