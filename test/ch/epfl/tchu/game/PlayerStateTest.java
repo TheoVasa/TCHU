@@ -549,9 +549,9 @@ public class PlayerStateTest {
             ticketList.add(ticketTest2);
 
         List<Route> routes = new ArrayList<>();
-            routesOfThePlayer.add( new Route("id", ChMap.stations().get(0), ChMap.stations().get(1), 5, Route.Level.OVERGROUND, Color.BLUE));
-            routesOfThePlayer.add(new Route("id2", ChMap.stations().get(2), ChMap.stations().get(8), 5, Route.Level.OVERGROUND, Color.BLUE));
-            routesOfThePlayer.add(new Route("id3", ChMap.stations().get(8), ChMap.stations().get(4), 5, Route.Level.OVERGROUND, Color.BLUE));
+            routes.add( new Route("id", ChMap.stations().get(0), ChMap.stations().get(1), 5, Route.Level.OVERGROUND, Color.BLUE));
+            routes.add(new Route("id2", ChMap.stations().get(2), ChMap.stations().get(8), 5, Route.Level.OVERGROUND, Color.BLUE));
+            routes.add(new Route("id3", ChMap.stations().get(8), ChMap.stations().get(4), 5, Route.Level.OVERGROUND, Color.BLUE));
 
         PlayerState playerTest1 = new PlayerState( SortedBag.of(ticketList), SortedBag.of(Card.ALL), routes);
 
@@ -562,8 +562,7 @@ public class PlayerStateTest {
 //finalPoints()
     @Test
     void finalPointsWorks(){
-        SortedBag<Card> cardsTest = SortedBag.of(cardsOfThePlayer);
-        PlayerState playerTest1 = new PlayerState( SortedBag.of(ticketsOfThePlayer), cardsTest, routesOfThePlayer);
+        PlayerState playerTest1 = new PlayerState( SortedBag.of(ticketsOfThePlayer), SortedBag.of(cardsOfThePlayer), routesOfThePlayer);
         assertEquals(playerTest1.claimPoints() + playerTest1.ticketPoints(), playerTest1.finalPoints());
     }
 }

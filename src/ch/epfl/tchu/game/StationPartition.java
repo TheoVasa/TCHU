@@ -31,7 +31,7 @@ public final class StationPartition implements StationConnectivity {
         int s1Index = ChMap.stations().indexOf(s1);
         int s2Index = ChMap.stations().indexOf(s2);
 
-        return (s1Index> partition.length || s2Index> partition.length) ?
+        return (s1Index>= partition.length || s2Index>= partition.length) ?
                 s1Index==s2Index : partition[s1Index] == partition[s2Index];
     }
 
@@ -79,7 +79,7 @@ public final class StationPartition implements StationConnectivity {
          * @return the new StationPartition
          */
         public StationPartition build(){
-            for(int i=0; i<builderPartition.length; i++){
+            for(int i=0; i<builderPartition.length; ++i){
                 builderPartition[i] = representative(i);
             }
             return new StationPartition(builderPartition);

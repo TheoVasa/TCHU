@@ -73,6 +73,8 @@ public class Main {
         Info infplayer = new Info(playername);
         System.out.println(infplayer.claimedRoute(ChMap.routes().get(10), listOfcard));
 
+        System.out.println(ChMap.stations().indexOf(ChMap.stations().get(10)));
+
 
     }
 }

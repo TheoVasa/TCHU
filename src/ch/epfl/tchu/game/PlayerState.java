@@ -149,7 +149,7 @@ public final class PlayerState extends PublicPlayerState {
         }
 
         //Create the partition of the connectivity
-        StationPartition.Builder partitionBuilder = new StationPartition.Builder(maxId);
+        StationPartition.Builder partitionBuilder = new StationPartition.Builder(maxId+1);
         for (Route r: routes())
             partitionBuilder.connect(r.station1(), r.station2());
 
