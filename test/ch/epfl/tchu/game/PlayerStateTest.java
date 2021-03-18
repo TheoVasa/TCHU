@@ -387,7 +387,7 @@ public class PlayerStateTest {
                 }
 
                 //Expected with only colors
-                var expected3 = List.of(SortedBag.of(l, card);
+                var expected3 = List.of(SortedBag.of(l, card));
 
                 //Expected with only loco
                 var expected4 = List.of(SortedBag.of(Card.LOCOMOTIVE));
@@ -451,7 +451,7 @@ public class PlayerStateTest {
             }
 
             //Expected with only colors
-            var expected3 = List.of(SortedBag.of(l, Card.YELLOW);
+            var expected3 = List.of(SortedBag.of(l, Card.YELLOW));
 
             //Expected with only loco
             var expected4 = List.of(SortedBag.of(Card.LOCOMOTIVE));
