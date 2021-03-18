@@ -27,9 +27,8 @@ public final class StationPartition implements StationConnectivity {
 
     @Override
     public boolean connected(Station s1, Station s2) {
-
-        int s1Index = ChMap.stations().indexOf(s1);
-        int s2Index = ChMap.stations().indexOf(s2);
+        int s1Index = s1.id();
+        int s2Index = s2.id();
 
         return (s1Index>= partition.length || s2Index>= partition.length) ?
                 s1Index==s2Index : partition[s1Index] == partition[s2Index];
@@ -66,8 +65,8 @@ public final class StationPartition implements StationConnectivity {
          * @return the current instance of the builder
          */
         public Builder connect(Station s1, Station s2){
-            int s1RepresentativeIndex = representative(ChMap.stations().indexOf(s1));
-            int s2RepresentativeIndex = representative(ChMap.stations().indexOf(s2));
+            int s1RepresentativeIndex = representative(s1.id());
+            int s2RepresentativeIndex = representative(s2.id());
 
             builderPartition[s1RepresentativeIndex] = s2RepresentativeIndex;
 
