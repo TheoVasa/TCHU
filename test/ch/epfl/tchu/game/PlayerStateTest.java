@@ -4,6 +4,8 @@ import ch.epfl.tchu.SortedBag;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -421,7 +423,7 @@ public class PlayerStateTest {
                 var expected3 = List.of(SortedBag.of(l, card));
 
                 //Expected with only loco
-                var expected4 = List.of(SortedBag.of(Card.LOCOMOTIVE));
+                var expected4 = List.of(SortedBag.of(l, Card.LOCOMOTIVE));
 
                 //PlayerStates cards : 1. All cards, 2. Only one type of cards, 3 Locomotive cards
                 var cards1 = cards1Builder.build();
@@ -475,17 +477,17 @@ public class PlayerStateTest {
                 var cars = l - locomotives;
                 for (var card : CAR_CARDS) {
                     expected2.add(SortedBag.of(cars, card, locomotives, Card.LOCOMOTIVE));
-                    cards2Builder.add(l, card);
                 }
-                if (locomotives > 0)
-                    cards2Builder.add(locomotives, Card.LOCOMOTIVE);
+                cards2Builder.add(SortedBag.of(Card.CARS));
             }
+            cards2Builder.add(l-1, Card.LOCOMOTIVE);
+
 
             //Expected with only colors
             var expected3 = List.of(SortedBag.of(l, Card.YELLOW));
 
             //Expected with only loco
-            var expected4 = List.of(SortedBag.of(Card.LOCOMOTIVE));
+            var expected4 = List.of(SortedBag.of(l, Card.LOCOMOTIVE));
 
             //PlayerStates cards : 1. All cards, 2. Only one type of cards, 3 Locomotive cards
             var cards1 = cards1Builder.build();
@@ -500,8 +502,6 @@ public class PlayerStateTest {
             var playerState4 = new PlayerState(SortedBag.of(), cards4, List.of());
             var playerState5 = new PlayerState(SortedBag.of(), SortedBag.of(), List.of());
 
-            System.out.println("Length of Loco : " + l);
-
             //Tests
             assertEquals(expected1, playerState1.possibleClaimCards(r));
             assertEquals(expected2, playerState2.possibleClaimCards(r));
@@ -513,32 +513,170 @@ public class PlayerStateTest {
 
 //possibleAdditionalCards(...)
     @Test
-    void possibleAdditionalClaimCardsThrowsIllegalArgument(){
+    void possibleAdditionalClaimCardsThrowsIllegalArgumentOnAdditionalCardsOutOfRange(){ //Range 1-3 (included)
+        var playerState = new PlayerState(SortedBag.of(), SortedBag.of(), List.of());
+        assertThrows(IllegalArgumentException.class, () -> {
+            playerState.possibleAdditionalCards(0, SortedBag.of(4,Card.BLUE), SortedBag.of(3, Card.BLUE));
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            playerState.possibleAdditionalCards(4, SortedBag.of(4,Card.BLUE), SortedBag.of(3, Card.BLUE));
+        });
+    }
 
-            //Expected with only loco
-            var expected4 = List.of(SortedBag.of(Card.LOCOMOTIVE));
+    @Test
+    void possibleAdditionalClaimCardsThrowsIllegalArgumentOnEmptyInit(){ //Range 1-3 (included)
+        var playerState = new PlayerState(SortedBag.of(), SortedBag.of(), List.of());
+        assertThrows(IllegalArgumentException.class, () -> {
+            playerState.possibleAdditionalCards(2, SortedBag.of(), SortedBag.of(3, Card.BLUE));
+        });
+    }
 
-            //PlayerStates cards : 1. All cards, 2. Only one type of cards, 3 Locomotive cards
-            var cards = cardsBuilder.build();
+    @Test
+    void possibleAdditionalClaimCardsThrowsIllegalArgumentOnInitCardTypeOutOfRange(){ //Range 1 or 2
+        var playerState = new PlayerState(SortedBag.of(), SortedBag.of(), List.of());
+        var initCardsBuilder = new SortedBag.Builder<Card>();
+        initCardsBuilder.add(1, Card.BLUE);
+        initCardsBuilder.add(1, Card.BLACK);
+        initCardsBuilder.add(1, Card.LOCOMOTIVE);
+        assertThrows(IllegalArgumentException.class, () -> {
+            playerState.possibleAdditionalCards(2, initCardsBuilder.build(), SortedBag.of(3, Card.BLUE));
+        });
+    }
 
-            //PlayerStates
-            var playerState1 = new PlayerState(SortedBag.of(), cards1, List.of());
-            var playerState2 = new PlayerState(SortedBag.of(), cards2, List.of());
-            var playerState3 = new PlayerState(SortedBag.of(), cards3, List.of());
-            var playerState4 = new PlayerState(SortedBag.of(), cards4, List.of());
-            var playerState5 = new PlayerState(SortedBag.of(), SortedBag.of(), List.of());
+    @Test
+    void possibleAdditionalClaimCardsThrowsIllegalArgumentDeckOutOfRange(){ //Range is exactly 3
+        var playerState = new PlayerState(SortedBag.of(), SortedBag.of(), List.of());
+        assertThrows(IllegalArgumentException.class, () -> {
+            playerState.possibleAdditionalCards(2, SortedBag.of(4,Card.BLUE), SortedBag.of(2, Card.BLUE));
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            playerState.possibleAdditionalCards(2, SortedBag.of(4,Card.BLUE), SortedBag.of(4, Card.BLUE));
+        });
+    }
 
-            //Tests
-            assertEquals(expected1, playerState1.possibleClaimCards(r));
-            assertEquals(expected2, playerState2.possibleClaimCards(r));
-            assertEquals(expected3, playerState3.possibleClaimCards(r));
-            assertEquals(expected4, playerState4.possibleClaimCards(r));
-            assertEquals(List.of(SortedBag.of()), playerState5.possibleClaimCards(r));
+
+    @Test
+    void possibleAdditionalClaimCardsWorksOnColorRoute(){
+        //For the routes
+        var s1 = new Station(0, "Lausanne");
+        var s2 = new Station(1, "EPFL");
+        var id = "id";
+
+        //Generate all possible claim cards possibilities
+        //var allPossibilities = new ArrayList<SortedBag<Card>>();
+        for (int l = 1; l < Constants.MAX_ROUTE_LENGTH; ++l){
+            for (int locomotives = 0; locomotives <= Constants.MAX_ROUTE_LENGTH; ++locomotives){
+                for (Card colorCard : CAR_CARDS){
+                    //allPossibilities.add(SortedBag.of(l-locomotives, colorCard, locomotives, Card.LOCOMOTIVE));
+                    var initCards = SortedBag.of(l-locomotives, colorCard, locomotives, Card.LOCOMOTIVE);
+
+                    //Build cards that will be given to the playerState1 ---> expected will be only Locos
+                    var cards1Builder = new SortedBag.Builder<Card>();
+                    cards1Builder.add(l-locomotives, colorCard);
+                    cards1Builder.add(locomotives + Constants.ADDITIONAL_TUNNEL_CARDS, Card.LOCOMOTIVE);
+                    var cards1 = cards1Builder.build();
+
+                    //Build cards that will be given to the playerState2 ----> expected will be colored cards and Locos
+                    var cards2Builder = new SortedBag.Builder<Card>();
+                    cards1Builder.add((l-locomotives) + Constants.ADDITIONAL_TUNNEL_CARDS, colorCard);
+                    cards1Builder.add(locomotives + Constants.ADDITIONAL_TUNNEL_CARDS, Card.LOCOMOTIVE);
+                    var cards2 = cards1Builder.build();
+
+                    //Build cards that will be given to the playerState3 ----> expected will be only colored cards
+                    var cards3Builder = new SortedBag.Builder<Card>();
+                    cards1Builder.add((l-locomotives) + Constants.ADDITIONAL_TUNNEL_CARDS, colorCard);
+                    cards1Builder.add(locomotives, Card.LOCOMOTIVE);
+                    var cards3 = cards1Builder.build();
+
+                    //drawnX ---> Arbitrary drawnCard
+                    var drawn = new ArrayList<SortedBag<Card>>();
+                    drawn.add(SortedBag.of(Constants.ADDITIONAL_TUNNEL_CARDS ,colorCard)); // Will require 0 additionalCards
+                    drawn.add(SortedBag.of(1, colorCard, 2,CAR_CARDS.get((colorCard.ordinal()+1) % CAR_CARDS.size()))); // will require 1 additional card
+                    drawn.add(SortedBag.of(2, Card.LOCOMOTIVE, 1,CAR_CARDS.get(colorCard.ordinal() % CAR_CARDS.size()))); // will require 2 additional card
+                    drawn.add(SortedBag.of(Constants.ADDITIONAL_TUNNEL_CARDS, Card.LOCOMOTIVE));
+
+                    //PlayerState
+                    var playerState1 = new PlayerState(SortedBag.of(), cards1, List.of());
+                    var playerState2 = new PlayerState(SortedBag.of(), cards2, List.of());
+                    var playerState3 = new PlayerState(SortedBag.of(), cards3, List.of());
+
+                    //PlayableCards : pc[cards][drawn] ---> all possibilites with the different cards (of the player) and drawn cards (of the deck) --> 15 possibilities
+                    var pc = new ArrayList<SortedBag.Builder<Card>>();
+                    pc.add(new SortedBag.Builder<>());
+                    pc.add(new SortedBag.Builder<>());
+                    pc.add(new SortedBag.Builder<>());
+                    for (Card card: cards1.difference(initCards)){
+
+                        for (int i = 0; i < drawn.size(); ++i){
+                            if (drawn.get(i).contains(card))
+                                pc.get(0).add(card);
+                            else if (card.equals(Card.LOCOMOTIVE))
+                                card.equals(Card.LOCOMOTIVE);
+                        }
+                    }
+                    for (Card card: cards2.difference(initCards)){
+                        for (int i = 0; i < drawn.size(); ++i){
+                            if (drawn.get(i).contains(card))
+                                pc.get(1).add(card);
+                            else if (card.equals(Card.LOCOMOTIVE))
+                                card.equals(Card.LOCOMOTIVE);
+                        }
+                    }
+                    for (Card card: cards3.difference(initCards)){
+                        for (int i = 0; i < drawn.size(); ++i){
+                            if (drawn.get(i).contains(card))
+                                pc.get(2).add(card);
+                            else if (card.equals(Card.LOCOMOTIVE))
+                                card.equals(Card.LOCOMOTIVE);
+                        }
+                    }
+
+                    //The expected additionalCardsCount
+                    var additionalCardsCount = new ArrayList<Integer>(); // index represent the drawn cards of the same index
+                    var route = new Route(id, s1, s2, l, Route.Level.UNDERGROUND, null);
+                    for (int i = 0; i < drawn.size(); ++i){
+                        additionalCardsCount.add(route.additionalClaimCardsCount(initCards, drawn.get(i)));
+                    }
+
+                    //Expected : expected_cardsX_drawnX ---> all possibilites with the different cards (of the player) and drawn cards (of the deck)
+                    var expected = new ArrayList<ArrayList<SortedBag<Card>>>();
+                    for (int i = 0; i < pc.size(); ++i){
+                        for (int j = 0; j < additionalCardsCount.size(); ++j){
+                            var options = new ArrayList<>(pc.get(i).build().subsetsOfSize(additionalCardsCount.get(j)));
+                            options.sort(Comparator.comparing(cs -> cs.countOf(Card.LOCOMOTIVE)));
+                            expected.add(options);
+                        }
+                    }
+
+                    for (int i = 0; i < drawn.size();++i){
+                        System.out.flush();
+                        System.out.println("player cards : " + playerState1.cards().toString());
+                        System.out.println("init cards: " + initCards.toString() );
+                        System.out.println("drawn cards : " + drawn.get(i));
+                        System.out.print("expected : " + expected.get(i));
+                        assertEquals(expected.get(i), playerState1.possibleAdditionalCards(additionalCardsCount.get(i), initCards, drawn.get(i)));
+                        System.out.flush();
+                        System.out.println("player cards : " + playerState2.cards().toString());
+                        System.out.println("init cards: " + initCards.toString() );
+                        System.out.println("drawn cards" + drawn.get(i));
+                        System.out.print("expected : " + expected.get(i+drawn.size()));
+                        assertEquals(expected.get(i + drawn.size()), playerState2.possibleAdditionalCards(additionalCardsCount.get(i), initCards, drawn.get(i)));
+                        System.out.flush();
+                        System.out.println("player cards : " + playerState3.cards().toString());
+                        System.out.println("init cards: " + initCards.toString() );
+                        System.out.println("drawn cards" + drawn.get(i));
+                        System.out.print("expected : " + expected.get(i+(2*drawn.size())));
+                        assertEquals(expected.get(i + (drawn.size()*2)), playerState3.possibleAdditionalCards(additionalCardsCount.get(i), initCards, drawn.get(i)));
+                    }
+                    if (locomotives == l)
+                        break;
+                }
+            }
         }
     }
-/*
+
     @Test
-    void possibleAdditionalClaimCardsWorks(){
+    void possibleAdditionalClaimCardsWorksOnNeutralRoute(){
         var s1 = new Station(0, "Lausanne");
         var s2 = new Station(1, "EPFL");
         var id = "id";
@@ -561,9 +699,9 @@ public class PlayerStateTest {
 
             //Expected with only colors
             var expected3 = List.of(SortedBag.of(l, Card.YELLOW));
-
+        }
     }
-    */
+
 
 //withClaimedRoute(...)
     @Test

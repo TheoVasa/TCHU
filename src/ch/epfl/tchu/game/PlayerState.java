@@ -188,7 +188,7 @@ public final class PlayerState extends PublicPlayerState {
                                     additionalCardsCount <= Constants.ADDITIONAL_TUNNEL_CARDS);
         Preconditions.checkArgument(!initialCards.isEmpty() && initialCards.toSet().size() <= 2);
         Preconditions.checkArgument(drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
-
+/*
         //Determine which cards can be played as additional cards
         //cards.difference(initialCards) gives a new List of the cards that can be played, without the initial cards
         SortedBag.Builder<Card> playableCards = new SortedBag.Builder<>();
@@ -204,5 +204,43 @@ public final class PlayerState extends PublicPlayerState {
         options.sort(Comparator.comparing(cs -> cs.countOf(Card.LOCOMOTIVE)));
 
         return options;
+        */
+
+
+        SortedBag.Builder<Card> playableCards = new SortedBag.Builder<>();
+        SortedBag<Card>  newCards = cards.difference(initialCards);
+        SortedBag.Builder<Card> additionalCard = new SortedBag.Builder<>();
+
+        for(Card c: drawnCards){
+            for(Card c2 : initialCards){
+                if( c.equals(c2)|| c.equals(Card.LOCOMOTIVE))
+                    additionalCard.add(c2);
+
+            }
+        }
+
+        for(Card c : newCards){
+            for(Card c2 : additionalCard.build()){
+                if( c.equals(c2)|| c.equals(Card.LOCOMOTIVE))
+                    playableCards.add(c);
+            }
+        }
+
+        //Construct a list containing all possible set of card that can be played as additional cards
+        List<SortedBag<Card>> options = new ArrayList<>(playableCards.build().subsetsOfSize(additionalCardsCount));
+
+        //Sort the List of possible additional cards depending on the amount of locomotives
+        options.sort(Comparator.comparing(cs -> cs.countOf(Card.LOCOMOTIVE)));
+
+        return options;
+
+
+
+
+
+
+
+
+
     }
 }
