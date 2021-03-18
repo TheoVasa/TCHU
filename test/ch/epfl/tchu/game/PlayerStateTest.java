@@ -34,7 +34,38 @@ public class PlayerStateTest {
                     Card.RED,
                     Card.WHITE);
 
-//Constructor(...)
+    private List<Route> routesOfThePlayer = new ArrayList<>();
+    {
+        routesOfThePlayer.add(ChMap.routes().get(0));
+        routesOfThePlayer.add(ChMap.routes().get(2));
+        routesOfThePlayer.add(ChMap.routes().get(4));
+        routesOfThePlayer.add(ChMap.routes().get(5));
+        routesOfThePlayer.add(ChMap.routes().get(10));
+    }
+
+    private List<Ticket> ticketsOfThePlayer = new ArrayList<>();
+    {
+        ticketsOfThePlayer.add(ChMap.tickets().get(0));
+        ticketsOfThePlayer.add(ChMap.tickets().get(3));
+        ticketsOfThePlayer.add(ChMap.tickets().get(5));
+        ticketsOfThePlayer.add(ChMap.tickets().get(8));
+        ticketsOfThePlayer.add(ChMap.tickets().get(9));
+    }
+
+
+    private List<Card> cardsOfThePlayer = new ArrayList<>();
+    {
+        cardsOfThePlayer.add(Card.BLUE);
+        cardsOfThePlayer.add(Card.BLUE);
+        cardsOfThePlayer.add(Card.BLUE);
+        cardsOfThePlayer.add(Card.LOCOMOTIVE);
+        cardsOfThePlayer.add(Card.ORANGE);
+    }
+
+
+
+
+    //Constructor(...)
     @Test
     void constructorCopiesLists(){
         var routes = new ArrayList<>(ChMap.routes());
@@ -494,18 +525,45 @@ public class PlayerStateTest {
 //withClaimedRoute(...)
     @Test
     void withClaimedRouteWorks(){
+        Route routeTest = new Route("id", ChMap.stations().get(0), ChMap.stations().get(1), 5, Route.Level.OVERGROUND, Color.BLUE);
+        SortedBag<Card> cardsTest = SortedBag.of(cardsOfThePlayer);
+        PlayerState playerTest1 = new PlayerState( SortedBag.of(ticketsOfThePlayer), cardsTest, routesOfThePlayer);
 
+        routesOfThePlayer.add(routeTest);
+        cardsOfThePlayer.remove(Card.BLUE);
+        SortedBag<Card> cardsTest2 = SortedBag.of(cardsOfThePlayer);
+        PlayerState playerTest2 = new PlayerState( SortedBag.of(ticketsOfThePlayer), cardsTest2, routesOfThePlayer);
+
+        assertEquals(playerTest2.routes(), playerTest1.withClaimedRoute(routeTest, SortedBag.of(Card.BLUE)).routes());
+        assertEquals(playerTest2.cards(), playerTest1.withClaimedRoute(routeTest, SortedBag.of(Card.BLUE)).cards());
     }
 
 //ticketPoints()
     @Test
     void ticketPointsWorks(){
 
+        Ticket ticketTest1 = new Ticket(ChMap.stations().get(1), ChMap.stations().get(0), 3);
+        Ticket ticketTest2 = new Ticket(ChMap.stations().get(2), ChMap.stations().get(5), 7);
+        List<Ticket> ticketList = new ArrayList<>();
+            ticketList.add(ticketTest1);
+            ticketList.add(ticketTest2);
+
+        List<Route> routes = new ArrayList<>();
+            routesOfThePlayer.add( new Route("id", ChMap.stations().get(0), ChMap.stations().get(1), 5, Route.Level.OVERGROUND, Color.BLUE));
+            routesOfThePlayer.add(new Route("id2", ChMap.stations().get(2), ChMap.stations().get(8), 5, Route.Level.OVERGROUND, Color.BLUE));
+            routesOfThePlayer.add(new Route("id3", ChMap.stations().get(8), ChMap.stations().get(4), 5, Route.Level.OVERGROUND, Color.BLUE));
+
+        PlayerState playerTest1 = new PlayerState( SortedBag.of(ticketList), SortedBag.of(Card.ALL), routes);
+
+        assertEquals(-4, playerTest1.ticketPoints());
     }
+
 
 //finalPoints()
     @Test
     void finalPointsWorks(){
-
+        SortedBag<Card> cardsTest = SortedBag.of(cardsOfThePlayer);
+        PlayerState playerTest1 = new PlayerState( SortedBag.of(ticketsOfThePlayer), cardsTest, routesOfThePlayer);
+        assertEquals(playerTest1.claimPoints() + playerTest1.ticketPoints(), playerTest1.finalPoints());
     }
 }
