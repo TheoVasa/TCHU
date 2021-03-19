@@ -91,7 +91,7 @@ public class PublicPlayerState {
         return claimPoints;
     }
 
-//Private methodes
+    //Private methodes
 
     /**
      * Initialize cars count of the player

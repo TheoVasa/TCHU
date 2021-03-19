@@ -89,7 +89,7 @@ public final class StationPartition implements StationConnectivity {
             return new StationPartition(builderPartition);
         }
 
-    //Private methodes
+        //Private methodes
 
         /**
          * find and return the index of the representative of a given station id
