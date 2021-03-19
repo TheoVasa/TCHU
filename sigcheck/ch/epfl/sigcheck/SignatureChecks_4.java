@@ -70,4 +70,5 @@ final class SignatureChecks_4 {
     ch.epfl.tchu.game.Route v15;
     java.util.List<ch.epfl.tchu.SortedBag<ch.epfl.tchu.game.Card>> v16;
     ch.epfl.tchu.game.Card v17;
+
 }

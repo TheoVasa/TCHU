@@ -220,14 +220,12 @@ public final class PlayerState extends PublicPlayerState {
                     additionalCard.add(c2);
             }
         }
-
         for(Card c : newCards){
             for(Card c2 : additionalCard.build()){
                 if( c.equals(c2)|| c.equals(Card.LOCOMOTIVE))
                     playableCards.add(c);
             }
         }
-
         //Construct a list containing all possible set of card that can be played as additional cards
         List<SortedBag<Card>> options = (additionalCardsCount <= playableCards.size()) ?
                                         new ArrayList<>(playableCards.build().subsetsOfSize(additionalCardsCount))
