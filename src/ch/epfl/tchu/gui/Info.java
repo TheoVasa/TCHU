@@ -214,11 +214,8 @@ public final class Info {
         return String.format(StringsFr.WINS, playerName, points, generatePlural(points), loserPoints, generatePlural(loserPoints));
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Private methodes
 
-    /**
-     * private methods
-     */
     /**
      * method generating the names of the players with "et" between
      * @param playerNames we want to generate

@@ -8,6 +8,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * represent the whole state of a player, public, final, immutable
+ *
+ * @author Selien Wicki (314357)
+ * @author Theo Vasarino (313191)
+ */
 public final class PlayerState extends PublicPlayerState {
 
     /**
@@ -18,11 +24,10 @@ public final class PlayerState extends PublicPlayerState {
 
 
     /**
-     * Constructor
+     * Constructor, public
      * @param tickets the tickets of the player
      * @param cards the remaining cards of the player (that he can play)
      * @param routes the routes of the player (that he already claimed)
-     * @throws
      */
     public PlayerState(SortedBag<Ticket> tickets, SortedBag<Card> cards, List<Route> routes){
         super(tickets.size(), cards.size(),routes);
@@ -33,7 +38,8 @@ public final class PlayerState extends PublicPlayerState {
     /**
      * Initialize the initial state of the player
      * @param initialCards the initial cards of the player
-     * @return the new PlayerState withe initial cards
+     * @return the new PlayerState with the initial cards
+     * @throws IllegalArgumentException if initial cards isn't equal to four
      */
     public static PlayerState initial(SortedBag<Card> initialCards){
         //Check correctness of the arguments
@@ -46,28 +52,11 @@ public final class PlayerState extends PublicPlayerState {
      * @return the tickets of the player
      */
     public SortedBag<Ticket> tickets(){
-        return tickets;
+        return SortedBag.of(tickets);
     }
 
     /**
-     * Getter for the cards of the player
-     * @return the cards of the player
-     */
-    public SortedBag<Card> cards(){
-        return cards;
-    }
-
-    /**
-     * Initiale a new PlayerState with the new given card
-     * @param card the new card we want to add to the player state
-     * @return a PlayerState with the added card
-     */
-    public PlayerState withAddedCard(Card card){
-        return withAddedCards(SortedBag.of(card));
-    }
-
-    /**
-     * Gives a player state with an added ticket
+     * Generate a new playerState with the new given tickets
      * @param newTickets the ticket to add to the player state
      * @return a player state with the added ticket
      */
@@ -79,22 +68,38 @@ public final class PlayerState extends PublicPlayerState {
         return new PlayerState(newTicketsBuilder.build(), cards, routes());
     }
 
+    /**
+     * Getter for the cards of the player
+     * @return the cards of the player
+     */
+    public SortedBag<Card> cards(){
+        return SortedBag.of(cards);
+    }
+
+    /**
+     * Generate a new PlayerState with the new given cards
+     * @param card the new card we want to add to the player state
+     * @return a PlayerState with the added card
+     */
+    public PlayerState withAddedCard(Card card){
+        return withAddedCards(SortedBag.of(card));
+    }
 
     /**
      * Gives a new player state with multiple added cards
-     * @param newCards the SortedBag of cards we want to add
+     * @param additionalCards the SortedBag of cards we want to add
      * @return a new player state with the added cards
      */
-    public PlayerState withAddedCards(SortedBag<Card> newCards){
+    public PlayerState withAddedCards(SortedBag<Card> additionalCards){
         SortedBag.Builder<Card> newCardsBuilder = new SortedBag.Builder<>();
         newCardsBuilder.add(cards);
-        newCardsBuilder.add(newCards);
+        newCardsBuilder.add(additionalCards);
 
         return new PlayerState(tickets, newCardsBuilder.build(), routes());
     }
 
     /**
-     * Determine if the player can claim a route depending on its state
+     * Determine if the player can claim a route depending on his state
      * @param route the route to check if it's claimable
      * @return true if the route is claimable
      */
@@ -111,7 +116,7 @@ public final class PlayerState extends PublicPlayerState {
     }
 
     /**
-     * Gives a multiset of all the possible combination of cards needed to claim the route
+     * Gives a multiset of all possible combinations of cards in order to claim the route
      * @param route the route to claim
      * @return all the possible list of cards to claim the route
      */
@@ -128,16 +133,62 @@ public final class PlayerState extends PublicPlayerState {
     }
 
     /**
-     * Gives a new PlayerState with a new claimed route added to the route list
+     * Gives all the possible combinations of additional cards a player can play to claim a underground route
+     * @param additionalCardsCount number of additional cards to play
+     * @param initialCards cards the player has played to claim the route
+     * @param drawnCards the 3 cards that are drawn from the deck
+     * @return A List of all possible SortedBag of cards that can be played to claim the underground
+     * @throws IllegalArgumentException if additionalCardsCount isn't bounded by 1 and 3 (included)
+     * @throws IllegalArgumentException if the initialCards is empty or contains more than 2 different type of cards
+     * @throws IllegalArgumentException if the size of drawnsCards isn't 3
+     */
+    public List<SortedBag<Card>> possibleAdditionalCards(int additionalCardsCount, SortedBag<Card> initialCards, SortedBag<Card> drawnCards){
+        //Check correctness of the arguments
+        Preconditions.checkArgument( 1 <= additionalCardsCount && additionalCardsCount <= Constants.ADDITIONAL_TUNNEL_CARDS);
+        Preconditions.checkArgument(!initialCards.isEmpty() && initialCards.toSet().size() <= 2);
+        Preconditions.checkArgument(drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
+
+        //Variables required to count list the additional cards
+        SortedBag.Builder<Card> playableCards = new SortedBag.Builder<>();
+        SortedBag<Card> newCards = cards.difference(initialCards);
+        SortedBag.Builder<Card> additionalCard = new SortedBag.Builder<>();
+
+        //Determine which cards can be played as additional cards
+        for(Card c: drawnCards){
+            for(Card c2 : initialCards.toSet()){
+                if( c.equals(c2) || c.equals(Card.LOCOMOTIVE))
+                    additionalCard.add(c2);
+            }
+        }
+        for(Card c : newCards){
+            for(Card c2 : additionalCard.build().toSet()){
+                if( c.equals(c2)|| c.equals(Card.LOCOMOTIVE))
+                    playableCards.add(c);
+            }
+        }
+
+        //Construct a list containing all possible set of card that can be played as additional cards
+        List<SortedBag<Card>> options = (additionalCardsCount <= playableCards.size())
+                ? new ArrayList<>(playableCards.build().subsetsOfSize(additionalCardsCount))
+                : new ArrayList<>(playableCards.build().subsetsOfSize(0));
+
+        //Sort the List of possible additional cards depending on the amount of locomotives
+        options.sort(Comparator.comparing(cs -> cs.countOf(Card.LOCOMOTIVE)));
+
+        return options;
+    }
+
+    /**
+     * Gives a new PlayerState with the new claimed route
      * @param route the newly claimed route
-     * @param claimCards the cards used to claim the rout
+     * @param claimCards the cards used to claim the route
      * @return A new PlayerState with the new list of routes
      */
     public PlayerState withClaimedRoute(Route route, SortedBag<Card> claimCards){
         //Set the new cards of the player
         SortedBag<Card> newCards = cards.difference(claimCards);
         //Add the route to the list of routes
-        List<Route> newRoutes = new ArrayList<>(routes());
+        List<Route> newRoutes = routes();
         newRoutes.add(route);
 
         return new PlayerState(tickets, newCards, newRoutes);
@@ -161,79 +212,19 @@ public final class PlayerState extends PublicPlayerState {
             partitionBuilder.connect(r.station1(), r.station2());
 
         //Calculate the total points given by the ticket
-        int totalTicketPoint = 0;
+        StationPartition partition = partitionBuilder.build();
+        int totalTicketsPoints = 0;
         for (Ticket t: tickets)
-            totalTicketPoint += t.points(partitionBuilder.build());
+            totalTicketsPoints += t.points(partition);
 
-        return totalTicketPoint;
+        return totalTicketsPoints;
     }
 
     /**
-     * Getter for the total points of the player
+     * Getter for the final points of the player (claimedPoints + ticketsPoints)
      * @return The total points
      */
     public int finalPoints(){
         return claimPoints() + ticketPoints();
-    }
-
-    /**
-     * Gives all the possible list of additional cards a player can play to claim a underground
-     * @param additionalCardsCount number of additional cards to play
-     * @param initialCards cards the player has already played
-     * @param drawnCards the 3 cards that are drawn
-     * @return A List of all possible SortedBag of cards that can be played to claim the underground
-     */
-    public List<SortedBag<Card>> possibleAdditionalCards(int additionalCardsCount, SortedBag<Card> initialCards, SortedBag<Card> drawnCards){
-        //Check correctness of the arguments
-        Preconditions.checkArgument( 1 <= additionalCardsCount &&
-                                    additionalCardsCount <= Constants.ADDITIONAL_TUNNEL_CARDS);
-        Preconditions.checkArgument(!initialCards.isEmpty() && initialCards.toSet().size() <= 2);
-        Preconditions.checkArgument(drawnCards.size() == Constants.ADDITIONAL_TUNNEL_CARDS);
-/*
-        //Determine which cards can be played as additional cards
-        //cards.difference(initialCards) gives a new List of the cards that can be played, without the initial cards
- */
-        //Variables required to count list the additional cards
-        SortedBag.Builder<Card> playableCards = new SortedBag.Builder<>();
-        SortedBag<Card> newCards = cards.difference(initialCards);
-
-/*
-        //Take all loco that the player has in a playableCards and remove them from newCards
-        playableCards.add(newCards.countOf(Card.LOCOMOTIVE), Card.LOCOMOTIVE);
-        newCards = newCards.difference(playableCards.build());
-
-        //Add the other cards that must be added (for colored cards)
-        for (Card type : initialCards.toSet()){
-            for (Card drawn : drawnCards.toSet()){
-                if ((drawn.equals(type) || drawn.equals(Card.LOCOMOTIVE)) && newCards.contains(type))
-                    playableCards.add(newCards.countOf(type), type);
-            }
-        }
-*/
-
-        //Variables required to count list the additional cards
-        SortedBag.Builder<Card> additionalCard = new SortedBag.Builder<>();
-
-        for(Card c: drawnCards){
-            for(Card c2 : initialCards){
-                if( c.equals(c2) || c.equals(Card.LOCOMOTIVE))
-                    additionalCard.add(c2);
-            }
-        }
-        for(Card c : newCards){
-            for(Card c2 : additionalCard.build()){
-                if( c.equals(c2)|| c.equals(Card.LOCOMOTIVE))
-                    playableCards.add(c);
-            }
-        }
-        //Construct a list containing all possible set of card that can be played as additional cards
-        List<SortedBag<Card>> options = (additionalCardsCount <= playableCards.size()) ?
-                                        new ArrayList<>(playableCards.build().subsetsOfSize(additionalCardsCount))
-                                        : new ArrayList<>(playableCards.build().subsetsOfSize(0)) ;
-
-        //Sort the List of possible additional cards depending on the amount of locomotives
-        options.sort(Comparator.comparing(cs -> cs.countOf(Card.LOCOMOTIVE)));
-
-        return options;
     }
 }
