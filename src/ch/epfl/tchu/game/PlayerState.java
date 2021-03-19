@@ -6,6 +6,7 @@ import ch.epfl.tchu.SortedBag;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 public final class PlayerState extends PublicPlayerState {
 
@@ -191,31 +192,32 @@ public final class PlayerState extends PublicPlayerState {
 /*
         //Determine which cards can be played as additional cards
         //cards.difference(initialCards) gives a new List of the cards that can be played, without the initial cards
+ */
+        //Variables required to count list the additional cards
         SortedBag.Builder<Card> playableCards = new SortedBag.Builder<>();
-        for (Card card: cards.difference(initialCards)){
-            if (drawnCards.contains(card) || card.equals(Card.LOCOMOTIVE))
-                playableCards.add(card);
+        SortedBag<Card> newCards = cards.difference(initialCards);
+
+        //Take all loco that the player has in a playableCards and remove them from newCards
+        playableCards.add(newCards.countOf(Card.LOCOMOTIVE), Card.LOCOMOTIVE);
+        newCards = newCards.difference(playableCards.build());
+
+        //Add the other cards that must be added (for colored cards)
+        for (Card type : initialCards.toSet()){
+            for (Card drawn : drawnCards){
+                if ((drawn.equals(type) || drawn.equals(Card.LOCOMOTIVE)) && newCards.contains(type)) {
+                    playableCards.add(newCards.countOf(type), type);
+                    newCards = newCards.difference(SortedBag.of(newCards.countOf(type), type));
+                }
+            }
         }
-
-        //Construct a list containing all possible set of card that can be played as additional cards
-        List<SortedBag<Card>> options = new ArrayList<>(playableCards.build().subsetsOfSize(additionalCardsCount));
-
-        //Sort the List of possible additional cards depending on the amount of locomotives
-        options.sort(Comparator.comparing(cs -> cs.countOf(Card.LOCOMOTIVE)));
-
-        return options;
-        */
-
-
-        SortedBag.Builder<Card> playableCards = new SortedBag.Builder<>();
-        SortedBag<Card>  newCards = cards.difference(initialCards);
+        /*
+        //Variables required to count list the additional cards
         SortedBag.Builder<Card> additionalCard = new SortedBag.Builder<>();
 
         for(Card c: drawnCards){
             for(Card c2 : initialCards){
-                if( c.equals(c2)|| c.equals(Card.LOCOMOTIVE))
+                if( c.equals(c2) || c.equals(Card.LOCOMOTIVE))
                     additionalCard.add(c2);
-
             }
         }
 
@@ -224,23 +226,16 @@ public final class PlayerState extends PublicPlayerState {
                 if( c.equals(c2)|| c.equals(Card.LOCOMOTIVE))
                     playableCards.add(c);
             }
-        }
+        }*/
 
         //Construct a list containing all possible set of card that can be played as additional cards
-        List<SortedBag<Card>> options = new ArrayList<>(playableCards.build().subsetsOfSize(additionalCardsCount));
+        List<SortedBag<Card>> options = (additionalCardsCount <= playableCards.size()) ?
+                                        new ArrayList<>(playableCards.build().subsetsOfSize(additionalCardsCount))
+                                        : new ArrayList<>(playableCards.build().subsetsOfSize(0)) ;
 
         //Sort the List of possible additional cards depending on the amount of locomotives
         options.sort(Comparator.comparing(cs -> cs.countOf(Card.LOCOMOTIVE)));
 
         return options;
-
-
-
-
-
-
-
-
-
     }
 }
