@@ -197,20 +197,20 @@ public final class PlayerState extends PublicPlayerState {
         SortedBag.Builder<Card> playableCards = new SortedBag.Builder<>();
         SortedBag<Card> newCards = cards.difference(initialCards);
 
+/*
         //Take all loco that the player has in a playableCards and remove them from newCards
         playableCards.add(newCards.countOf(Card.LOCOMOTIVE), Card.LOCOMOTIVE);
         newCards = newCards.difference(playableCards.build());
 
         //Add the other cards that must be added (for colored cards)
         for (Card type : initialCards.toSet()){
-            for (Card drawn : drawnCards){
-                if ((drawn.equals(type) || drawn.equals(Card.LOCOMOTIVE)) && newCards.contains(type)) {
+            for (Card drawn : drawnCards.toSet()){
+                if ((drawn.equals(type) || drawn.equals(Card.LOCOMOTIVE)) && newCards.contains(type))
                     playableCards.add(newCards.countOf(type), type);
-                    newCards = newCards.difference(SortedBag.of(newCards.countOf(type), type));
-                }
             }
         }
-        /*
+*/
+
         //Variables required to count list the additional cards
         SortedBag.Builder<Card> additionalCard = new SortedBag.Builder<>();
 
@@ -226,7 +226,7 @@ public final class PlayerState extends PublicPlayerState {
                 if( c.equals(c2)|| c.equals(Card.LOCOMOTIVE))
                     playableCards.add(c);
             }
-        }*/
+        }
 
         //Construct a list containing all possible set of card that can be played as additional cards
         List<SortedBag<Card>> options = (additionalCardsCount <= playableCards.size()) ?

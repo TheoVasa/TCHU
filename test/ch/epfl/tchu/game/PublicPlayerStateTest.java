@@ -70,6 +70,13 @@ class PublicPlayerStateTest {
     }
 
     @Test
+    void routeIsWorkingOnCopy(){
+        PublicPlayerState playerTest = new PublicPlayerState(ticketCountTest, cardCountTest, listOfRoute);
+        playerTest.routes().clear();
+        assertEquals(listOfRoute, playerTest.routes());
+    }
+
+    @Test
     void carCountIsWorking(){
         PublicPlayerState playerTest = new PublicPlayerState(ticketCountTest, cardCountTest, listOfRoute);
         int totalRouteLength = 0;

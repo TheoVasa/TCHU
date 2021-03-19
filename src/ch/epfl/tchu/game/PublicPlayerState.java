@@ -81,7 +81,7 @@ public class PublicPlayerState {
      * @return the routes of the player
      */
     public List<Route> routes(){
-        return routes;
+        return new ArrayList<>(routes);
     }
 
     /**

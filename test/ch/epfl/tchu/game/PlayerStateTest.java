@@ -131,7 +131,6 @@ public class PlayerStateTest {
         assertEquals(SortedBag.of(ChMap.tickets()), playerState.tickets());
     }
 
-
 //withAddedTickets(...)
     @Test
     void withAddedTicketsWorks(){
