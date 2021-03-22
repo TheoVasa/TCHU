@@ -16,8 +16,8 @@ public final class GameState extends PublicGameState {
     /**
      * attributs
      */
-    private final Deck<Ticket> tickets;
-    private final CardState cards;
+    private final Deck<Ticket> ticketDeck;
+    private final CardState cardState;
     private final Map<PlayerId, PlayerState> playerState;
 
     /**
@@ -31,8 +31,8 @@ public final class GameState extends PublicGameState {
     private GameState(Deck<Ticket> tickets, CardState cards, Map<PlayerId, PlayerState> playerState, PlayerId currentPlayerId, PlayerId lastPlayer){
         super(tickets.size(), cards, currentPlayerId, toPublic(playerState), lastPlayer);
 
-        this.tickets= tickets;
-        this.cards = cards;
+        this.ticketDeck = tickets;
+        this.cardState = cards;
         this.playerState = Collections.unmodifiableMap(playerState);
     }
 
@@ -95,7 +95,7 @@ public final class GameState extends PublicGameState {
     public SortedBag<Ticket> topTickets(int count){
         //check the correctness of the argument
         Preconditions.checkArgument(count>=0 && count<ticketsCount());
-        return tickets.topCards(count);
+        return ticketDeck.topCards(count);
     }
 
     /**
@@ -108,7 +108,7 @@ public final class GameState extends PublicGameState {
     public GameState withoutTopTickets(int count){
         //check the correctness of the argument
         Preconditions.checkArgument(count>=0 && count<ticketsCount());
-        return new GameState(tickets.withoutTopCards(count), cards, playerState, currentPlayerId(), lastPlayer());
+        return new GameState(ticketDeck.withoutTopCards(count), cardState, playerState, currentPlayerId(), lastPlayer());
     }
 
     /**
@@ -118,8 +118,8 @@ public final class GameState extends PublicGameState {
      */
     public Card topCard(){
         //check the correctness of the argument
-        Preconditions.checkArgument(!cards.isDeckEmpty());
-        return cards.topDeckCard();
+        Preconditions.checkArgument(!cardState.isDeckEmpty());
+        return cardState.topDeckCard();
     }
 
     /**
@@ -129,8 +129,8 @@ public final class GameState extends PublicGameState {
      */
     public GameState withoutTopCard(){
         //check the correctness of the argument
-        Preconditions.checkArgument(!cards.isDeckEmpty());
-        return new GameState(tickets, cards.withoutTopDeckCard(), playerState, currentPlayerId(), lastPlayer());
+        Preconditions.checkArgument(!cardState.isDeckEmpty());
+        return new GameState(ticketDeck, cardState.withoutTopDeckCard(), playerState, currentPlayerId(), lastPlayer());
     }
 
     /**
@@ -139,7 +139,7 @@ public final class GameState extends PublicGameState {
      * @return the new game state
      */
     public GameState withMoreDiscardedCards(SortedBag<Card> discardedCards){
-        return new GameState(tickets, cards.withMoreDiscardedCards(discardedCards), playerState, currentPlayerId(), lastPlayer());
+        return new GameState(ticketDeck, cardState.withMoreDiscardedCards(discardedCards), playerState, currentPlayerId(), lastPlayer());
     }
 
     /**
@@ -148,9 +148,122 @@ public final class GameState extends PublicGameState {
      * @return this if the deck is empty, else return the new GameState with the new deck
      */
     public GameState withCardsDeckRecreatedIfNeeded(Random rng){
-        return (cards.isDeckEmpty())
-                ? new GameState(tickets, cards.withDeckRecreatedFromDiscards(rng), playerState, currentPlayerId(), lastPlayer())
+        return (cardState.isDeckEmpty())
+                ? new GameState(ticketDeck, cardState.withDeckRecreatedFromDiscards(rng), playerState, currentPlayerId(), lastPlayer())
                 : this;
+    }
+
+    /**
+     * generate a new GameState with the given cards added tho the playerState of the given playerId
+     * @param playerId we want to modify the state
+     * @param chosenTickets we want to add to the given playerState
+     * @return a new GameState
+     * @throws IllegalArgumentException if the player already have at least one ticket
+    **/
+    public GameState withInitiallyChosenTickets(PlayerId playerId, SortedBag<Ticket> chosenTickets){
+        //Check the correctness of the argument
+        Preconditions.checkArgument(playerState.get(playerId).ticketCount()==0);
+        PlayerState newPlayer = playerState.get(playerId).withAddedTickets(chosenTickets);
+        //recreate the new playerState map
+        Map<PlayerId, PlayerState> newMap = new EnumMap<>(PlayerId.class);
+        newMap.put(playerId, newPlayer);
+        newMap.put(playerId.next(), playerState.get(playerId.next()));
+
+        return new GameState(ticketDeck, cardState, newMap, currentPlayerId(), lastPlayer());
+    }
+
+    /**
+     * generate a new GameState where the player draw drawnTicket and choose the chosenTickets
+     * @param drawnTickets the player draw
+     * @param chosenTickets the player choose
+     * @return a new GameState
+     * @throws IllegalArgumentException if the chosenTicket are not included in the drawnTickets
+     */
+    public GameState withChosenAdditionalTickets(SortedBag<Ticket> drawnTickets, SortedBag<Ticket> chosenTickets){
+        Preconditions.checkArgument(drawnTickets.contains(chosenTickets));
+        //modify the player
+        PlayerState newPlayer = playerState.get(currentPlayerId()).withAddedTickets(chosenTickets);
+        //create new Deck of tickets
+        Deck<Ticket> newTicketDeck = ticketDeck.withoutTopCards(drawnTickets.size());
+        //recreate the new playerState map
+        Map<PlayerId, PlayerState> newMap = new EnumMap<PlayerId, PlayerState>(playerState);
+        newMap.replace(currentPlayerId(), newPlayer);
+
+        return new GameState(newTicketDeck, cardState, newMap, currentPlayerId(), lastPlayer());
+    }
+
+    /**
+     * generate a new GameState where the player took a given card among the faceUpCards
+     * @param slot of the faceUpCards
+     * @return a new GameState
+     * @throws IllegalArgumentException if we can't draw new cards form the deck
+     */
+    public GameState withDrawnFaceUpCards(int slot){
+        Preconditions.checkArgument(canDrawCards());
+        //modify the cards
+        CardState newCards = cardState.withDrawnFaceUpCard(slot);
+        //create new playerState
+        PlayerState newPlayer = playerState.get(currentPlayerId()).withAddedCard(
+                cardState.faceUpCard(slot));
+        //recreate the new playerState map
+        Map<PlayerId, PlayerState> newMap = new EnumMap<PlayerId, PlayerState>(playerState);
+        newMap.replace(currentPlayerId(), newPlayer);
+
+        return new GameState(ticketDeck, newCards, newMap, currentPlayerId(), lastPlayer());
+    }
+
+    /**
+     * generate a new GameState where the top card of the deck is given to the current player
+     * @return a new GameState
+     * @throws IllegalArgumentException if we can't draw new cards
+     */
+    public GameState withBlindlyDrawnCards(){
+        Preconditions.checkArgument(canDrawCards());
+        //modify the cards
+        CardState newCards = cardState.withoutTopDeckCard();
+        //create new playerState
+        PlayerState newPlayer = playerState.get(currentPlayerId()).withAddedCard(
+                cardState.topDeckCard());
+        //recreate the new playerState map
+        Map<PlayerId, PlayerState> newMap = new EnumMap<PlayerId, PlayerState>(playerState);
+        newMap.replace(currentPlayerId(), newPlayer);
+
+        return new GameState(ticketDeck, newCards, newMap, currentPlayerId(), lastPlayer());
+    }
+
+    /**
+     * generate a new GameState where the player claimed the given route with the given cards
+     * @param route claimed by the player
+     * @param cards used by the player to claim the route
+     * @return a new GameState
+     */
+    public GameState withClaimedRoute(Route route, SortedBag<Card> cards){
+        //modify the player
+        PlayerState newPlayer = playerState.get(currentPlayerId()).withClaimedRoute(route, cards);
+        //recreate the new playerState map
+        Map<PlayerId, PlayerState> newMap = new EnumMap<PlayerId, PlayerState>(playerState);
+        newMap.replace(currentPlayerId(), newPlayer);
+
+        return new GameState(ticketDeck, cardState, newMap, currentPlayerId(), lastPlayer());
+    }
+
+    /**
+     * method to know if the last turn begins, meaning the current player has 2 cards or less and the lastPlayer is unknown
+     * @return true if the last turn begins
+     */
+    public boolean lastTurnBegins(){
+        return lastPlayer()==null && playerState.get(currentPlayerId()).carCount()<=2;
+    }
+
+    /**
+     * End the turn of the player, indeed this method change the current player and if the last turn begins, set the last player as the current player
+     * @return the new GameState
+     */
+    public GameState forNextTurn(){
+        PlayerId newCurrentPlayer = currentPlayerId().next();
+        return (lastTurnBegins())
+                ? new GameState(ticketDeck, cardState, playerState, newCurrentPlayer, newCurrentPlayer)
+                : new GameState(ticketDeck, cardState, playerState, newCurrentPlayer, lastPlayer());
     }
 
     /**
