@@ -16,7 +16,7 @@ public class PublicGameState {
      */
 
     private final int ticketsCount;
-    private final PublicCardState cardState;
+    private final PublicCardState publicCardState;
     private final PlayerId currentPlayerId;
     private final Map<PlayerId, PublicPlayerState> playerState;
     private final PlayerId lastPlayer;
@@ -43,8 +43,8 @@ public class PublicGameState {
          * init attributs and checking if they're null
          */
         this.ticketsCount = ticketsCount;
-        this.cardState = Objects.requireNonNull(cardState);;
-        this.currentPlayerId = Objects.requireNonNull(currentPlayerId);;
+        this.publicCardState = Objects.requireNonNull(cardState);
+        this.currentPlayerId = Objects.requireNonNull(currentPlayerId);
         this.playerState = Collections.unmodifiableMap(Objects.requireNonNull(playerState));
         this.lastPlayer = lastPlayer;
     }
@@ -70,7 +70,7 @@ public class PublicGameState {
      * @return the cardState
      */
     public PublicCardState cardState(){
-        return cardState;
+        return publicCardState;
     }
 
     /**
@@ -78,8 +78,10 @@ public class PublicGameState {
      * @return if we can draw new cards
      */
     public boolean canDrawCards(){
-        return cardState.totalSize()>=5;
-
+        /*
+        return publicCardState.totalSize()>=5; ---> .totalSize() contient en plus les 5 cartes retournees
+        */
+        return (publicCardState.deckSize()+ publicCardState.discardsSize()) >= 5;
     }
 
     /**
@@ -113,10 +115,18 @@ public class PublicGameState {
      */
     public List<Route> claimedRoutes(){
         List<Route> claimedRoute = new ArrayList<>();
+
+        /*
         for(Map.Entry<PlayerId, PublicPlayerState> m : playerState.entrySet())
             claimedRoute.addAll(m.getValue().routes());
 
         return claimedRoute;
+        */
+
+        for(PublicPlayerState m : playerState.values())
+            claimedRoute.addAll(m.routes());
+        return claimedRoute;
+
     }
 
     /**

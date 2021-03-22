@@ -179,6 +179,7 @@ public final class GameState extends PublicGameState {
      * @throws IllegalArgumentException if the chosenTicket are not included in the drawnTickets
      */
     public GameState withChosenAdditionalTickets(SortedBag<Ticket> drawnTickets, SortedBag<Ticket> chosenTickets){
+        //Check the correctness of the argument
         Preconditions.checkArgument(drawnTickets.contains(chosenTickets));
         //modify the player
         PlayerState newPlayer = playerState.get(currentPlayerId()).withAddedTickets(chosenTickets);
@@ -194,7 +195,8 @@ public final class GameState extends PublicGameState {
      * @return a new GameState
      * @throws IllegalArgumentException if we can't draw new cards form the deck
      */
-    public GameState withDrawnFaceUpCards(int slot){
+    public GameState withDrawnFaceUpCard(int slot){
+        //Check correctness of the argument
         Preconditions.checkArgument(canDrawCards());
         //modify the cards
         CardState newCards = cardState.withDrawnFaceUpCard(slot);
@@ -210,9 +212,9 @@ public final class GameState extends PublicGameState {
      * @return a new GameState
      * @throws IllegalArgumentException if we can't draw new cards
      */
-    public GameState withBlindlyDrawnCards(){
+    public GameState withBlindlyDrawnCard(){
         Preconditions.checkArgument(canDrawCards());
-        //modify the cards
+        //modify the cardsCardState newCards = cardState.withDrawnFaceUpCard(slot);
         CardState newCards = cardState.withoutTopDeckCard();
         //create new playerState
         PlayerState newPlayer = playerState.get(currentPlayerId()).withAddedCard(
@@ -278,7 +280,6 @@ public final class GameState extends PublicGameState {
         Map<PlayerId, PlayerState> newMap = new EnumMap<>(playerState);
         newMap.replace(currentPlayerId(), player);
         return newMap;
-
     }
 
 
