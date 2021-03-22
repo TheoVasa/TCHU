@@ -185,11 +185,8 @@ public final class GameState extends PublicGameState {
         PlayerState newPlayer = playerState.get(currentPlayerId()).withAddedTickets(chosenTickets);
         //create new Deck of tickets
         Deck<Ticket> newTicketDeck = ticketDeck.withoutTopCards(drawnTickets.size());
-        //recreate the new playerState map
-        Map<PlayerId, PlayerState> newMap = new EnumMap<PlayerId, PlayerState>(playerState);
-        newMap.replace(currentPlayerId(), newPlayer);
 
-        return new GameState(newTicketDeck, cardState, newMap, currentPlayerId(), lastPlayer());
+        return new GameState(newTicketDeck, cardState, generateNewPlayerMap(newPlayer), currentPlayerId(), lastPlayer());
     }
 
     /**
@@ -205,11 +202,8 @@ public final class GameState extends PublicGameState {
         //create new playerState
         PlayerState newPlayer = playerState.get(currentPlayerId()).withAddedCard(
                 cardState.faceUpCard(slot));
-        //recreate the new playerState map
-        Map<PlayerId, PlayerState> newMap = new EnumMap<PlayerId, PlayerState>(playerState);
-        newMap.replace(currentPlayerId(), newPlayer);
 
-        return new GameState(ticketDeck, newCards, newMap, currentPlayerId(), lastPlayer());
+        return new GameState(ticketDeck, newCards, generateNewPlayerMap(newPlayer), currentPlayerId(), lastPlayer());
     }
 
     /**
@@ -224,11 +218,8 @@ public final class GameState extends PublicGameState {
         //create new playerState
         PlayerState newPlayer = playerState.get(currentPlayerId()).withAddedCard(
                 cardState.topDeckCard());
-        //recreate the new playerState map
-        Map<PlayerId, PlayerState> newMap = new EnumMap<PlayerId, PlayerState>(playerState);
-        newMap.replace(currentPlayerId(), newPlayer);
 
-        return new GameState(ticketDeck, newCards, newMap, currentPlayerId(), lastPlayer());
+        return new GameState(ticketDeck, newCards, generateNewPlayerMap(newPlayer), currentPlayerId(), lastPlayer());
     }
 
     /**
@@ -240,11 +231,8 @@ public final class GameState extends PublicGameState {
     public GameState withClaimedRoute(Route route, SortedBag<Card> cards){
         //modify the player
         PlayerState newPlayer = playerState.get(currentPlayerId()).withClaimedRoute(route, cards);
-        //recreate the new playerState map
-        Map<PlayerId, PlayerState> newMap = new EnumMap<PlayerId, PlayerState>(playerState);
-        newMap.replace(currentPlayerId(), newPlayer);
 
-        return new GameState(ticketDeck, cardState, newMap, currentPlayerId(), lastPlayer());
+        return new GameState(ticketDeck, cardState, generateNewPlayerMap(newPlayer), currentPlayerId(), lastPlayer());
     }
 
     /**
@@ -280,6 +268,18 @@ public final class GameState extends PublicGameState {
             publicPlayerState.put(m.getKey(), new PublicPlayerState(player.ticketCount(), player.cardCount(), player.routes()));
         }
         return publicPlayerState;
+    }
+
+    /**
+     * modify the playerState of the current player by the given playerState
+     * @param player we want to replace in the map
+     * @return the new playerState map
+     */
+    private Map<PlayerId, PlayerState> generateNewPlayerMap(PlayerState player){
+        Map<PlayerId, PlayerState> newMap = new EnumMap<>(playerState);
+        newMap.replace(currentPlayerId(), player);
+        return newMap;
+
     }
 
 
