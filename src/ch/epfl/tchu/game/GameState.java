@@ -51,8 +51,7 @@ public final class GameState extends PublicGameState {
         Deck<Card> allCardsDeck = Deck.of(Constants.ALL_CARDS, rng);
         SortedBag<Card> cardsForPlayer1 = allCardsDeck.topCards(initialCardsCount);
         SortedBag<Card> cardsForPlayer2 = allCardsDeck.withoutTopCards(initialCardsCount).topCards(initialCardsCount);
-        Deck<Card> newCards = allCardsDeck.withoutTopCards(initialCardsCount*PlayerId.COUNT);
-        CardState cardState = CardState.of(newCards);
+        CardState cardState = CardState.of(allCardsDeck.withoutTopCards(initialCardsCount*PlayerId.COUNT));
 
         //initialise the playerStates and create the Map
         Map<PlayerId, PlayerState> playerStateMap = new EnumMap<>(PlayerId.class);
