@@ -51,7 +51,7 @@ public final class GameState extends PublicGameState {
         Deck<Card> allCardsDeck = Deck.of(Constants.ALL_CARDS, rng);
         SortedBag<Card> cardsForPlayer1 = allCardsDeck.topCards(initialCardsCount);
         SortedBag<Card> cardsForPlayer2 = allCardsDeck.withoutTopCards(initialCardsCount).topCards(initialCardsCount);
-        Deck<Card> newCards = allCardsDeck.withoutTopCards(initialCardsCount*2);
+        Deck<Card> newCards = allCardsDeck.withoutTopCards(initialCardsCount*PlayerId.COUNT);
         CardState cardState = CardState.of(newCards);
 
         //initialise the playerStates and create the Map
