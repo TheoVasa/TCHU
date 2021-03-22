@@ -6,7 +6,7 @@ import ch.epfl.tchu.SortedBag;
 import java.util.*;
 
 /**
- * Represent the state of a game of tCHu
+ * Represent the state of a game of tCHu, final, immutable
  *
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
@@ -56,8 +56,8 @@ public final class GameState extends PublicGameState {
 
         //initialise the playerStates and create the Map
         Map<PlayerId, PlayerState> playerStateMap = new EnumMap<>(PlayerId.class);
-        PlayerState playerState1 = new PlayerState(SortedBag.of(), cardsForPlayer1, List.of());
-        PlayerState playerState2 = new PlayerState(SortedBag.of(), cardsForPlayer2, List.of());
+        PlayerState playerState1 = PlayerState.initial(cardsForPlayer1);
+        PlayerState playerState2 = PlayerState.initial(cardsForPlayer2);
         playerStateMap.put(PlayerId.PLAYER_1, playerState1);
         playerStateMap.put(PlayerId.PLAYER_2, playerState2);
 

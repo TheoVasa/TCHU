@@ -5,7 +5,7 @@ import ch.epfl.tchu.Preconditions;
 import java.util.*;
 
 /**
- * Represent the public state of a game of tCHu
+ * Represent the public state of a game of tCHu, immutable
  *
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
