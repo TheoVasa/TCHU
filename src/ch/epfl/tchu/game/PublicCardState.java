@@ -41,7 +41,7 @@ public class PublicCardState {
 
 
     /**
-     * Gives the total amount of cards that aren't on any players hand
+     * Gives the total amount of cards that aren't on any players hand, meaning the size of the discards and the deck
      * @return the total of public cards
      */
     public int totalSize() {
