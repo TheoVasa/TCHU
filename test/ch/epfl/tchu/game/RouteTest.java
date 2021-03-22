@@ -320,7 +320,7 @@ class RouteTest {
         for (var l = 1; l <= 6; l++) {
             for (var color : COLORS) {
                 var matchingCard = CAR_CARDS.get(color.ordinal());
-                var nonMatchingCard = color == Color.BLACK
+                var nonMatchingCard = (color == Color.BLACK)
                         ? Card.WHITE
                         : Card.BLACK;
                 var claimCards = SortedBag.of(l, Card.LOCOMOTIVE);

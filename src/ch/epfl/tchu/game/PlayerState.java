@@ -186,7 +186,7 @@ public final class PlayerState extends PublicPlayerState {
                 .size()) ?
                 new ArrayList<>(playableCards.build()
                         .subsetsOfSize(additionalCardsCount)) :
-                new ArrayList<>(playableCards.build().subsetsOfSize(0));
+                new ArrayList<>();
 
         //Sort the List of possible additional cards depending on the amount of locomotives
         options.sort(Comparator.comparing(cs -> cs.countOf(Card.LOCOMOTIVE)));
