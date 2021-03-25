@@ -40,7 +40,6 @@ public final class Deck <C extends Comparable<C>>{
         //Shuffle the cards of the deck
         List<C> shuffleList = cards.toList();
         Collections.shuffle(shuffleList, rng);
-
         return new Deck<>(shuffleList);
     }
 

@@ -78,9 +78,6 @@ public class PublicGameState {
      * @return if we can draw new cards
      */
     public boolean canDrawCards(){
-        /*
-        return publicCardState.totalSize()>=5; ---> .totalSize() contient en plus les 5 cartes retournees
-        */
         return (publicCardState.deckSize()+ publicCardState.discardsSize()) >= 5;
     }
 
@@ -116,17 +113,9 @@ public class PublicGameState {
     public List<Route> claimedRoutes(){
         List<Route> claimedRoute = new ArrayList<>();
 
-        /*
-        for(Map.Entry<PlayerId, PublicPlayerState> m : playerState.entrySet())
-            claimedRoute.addAll(m.getValue().routes());
-
-        return claimedRoute;
-        */
-
         for(PublicPlayerState m : playerState.values())
             claimedRoute.addAll(m.routes());
         return claimedRoute;
-
     }
 
     /**
