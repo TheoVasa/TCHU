@@ -221,8 +221,8 @@ public final class PlayerState extends PublicPlayerState {
         //Get the biggest id
         int maxId = 0;
         for (Route r : routes()) {
-            maxId = Math.max(ChMap.stations().indexOf(r.station1()), maxId);
-            maxId = Math.max(ChMap.stations().indexOf(r.station2()), maxId);
+            maxId = Math.max(r.station1().id(), maxId);
+            maxId = Math.max(r.station2().id(), maxId);
         }
 
         //Create the partition of the connectivity
