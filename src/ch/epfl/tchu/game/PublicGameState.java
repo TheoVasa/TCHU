@@ -11,10 +11,10 @@ import java.util.*;
  * @author Theo Vasarino (313191)
  */
 public class PublicGameState {
+
     /**
      * attributs
      */
-
     private final int ticketsCount;
     private final PublicCardState publicCardState;
     private final PlayerId currentPlayerId;
@@ -33,20 +33,16 @@ public class PublicGameState {
      * @throws IllegalArgumentException if playerState dont contain exactly two pair of key/value
      */
     public PublicGameState(int ticketsCount, PublicCardState cardState, PlayerId currentPlayerId, Map<PlayerId, PublicPlayerState> playerState, PlayerId lastPlayer) {
-        /**
-         * Check the correctness of the arguments
-         */
+        //Check the correctness of the arguments
         Preconditions.checkArgument(ticketsCount>=0);
         Preconditions.checkArgument(playerState.size()==2);
 
-        /**
-         * init attributs and checking if they're null
-         */
-        this.ticketsCount = ticketsCount;
+        //init attributs and checking if they're null
         this.publicCardState = Objects.requireNonNull(cardState);
         this.currentPlayerId = Objects.requireNonNull(currentPlayerId);
         this.playerState = Collections.unmodifiableMap(Objects.requireNonNull(playerState));
         this.lastPlayer = lastPlayer;
+        this.ticketsCount = ticketsCount;
     }
 
     /**
@@ -112,7 +108,6 @@ public class PublicGameState {
      */
     public List<Route> claimedRoutes(){
         List<Route> claimedRoute = new ArrayList<>();
-
         for(PublicPlayerState m : playerState.values())
             claimedRoute.addAll(m.routes());
         return claimedRoute;

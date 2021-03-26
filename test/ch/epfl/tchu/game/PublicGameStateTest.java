@@ -287,4 +287,20 @@ public class PublicGameStateTest {
         assertEquals(PlayerId.PLAYER_1, publicGameState2.lastPlayer());
         assertNull(publicGameState3.lastPlayer());
     }
+
+    @Test
+    void lastPlayerOnCopy(){
+        //Required vars
+        var playerState = new EnumMap<PlayerId, PublicPlayerState>(PlayerId.class);
+        var cardState = CardState.of(Deck.of(SortedBag.of(10, Card.YELLOW), TestRandomizer.newRandom()));
+        playerState.put(PlayerId.PLAYER_1, PlayerState.initial(SortedBag.of(4, Card.LOCOMOTIVE)));
+        playerState.put(PlayerId.PLAYER_2, PlayerState.initial(SortedBag.of(4, Card.LOCOMOTIVE)));
+        var publicGameState1 = new PublicGameState(0, cardState, PlayerId.PLAYER_1, playerState, PlayerId.PLAYER_2);
+        var publicGameState2 = new PublicGameState(0, cardState, PlayerId.PLAYER_2, playerState, PlayerId.PLAYER_1);
+        var publicGameState3 = new PublicGameState(0, cardState, PlayerId.PLAYER_2, playerState, null);
+
+        publicGameState1.lastPlayer().next();
+
+        assertEquals(PlayerId.PLAYER_2, publicGameState1.lastPlayer());
+    }
 }
