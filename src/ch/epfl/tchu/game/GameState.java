@@ -18,7 +18,7 @@ public final class GameState extends PublicGameState {
      * attributs
      */
     private final Deck<Ticket> ticketDeck;
-    public final CardState cardState;
+    private final CardState cardState;
     private final Map<PlayerId, PlayerState> playerState;
 
     /**
