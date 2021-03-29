@@ -60,7 +60,7 @@ public final class Game {
         players.get(PlayerId.PLAYER_2).initPlayers(PlayerId.PLAYER_2, playerNames);
 
         //Inform who will play first
-        receiveInfo(receiveInfo(infos.get(gameState.currentPlayerId()).willPlayFirst());
+        receiveInfo(infos.get(gameState.currentPlayerId()).willPlayFirst());
 
         //Set initial
         players.get(PlayerId.PLAYER_1).setInitialTicketChoice(gameState.topTickets(Constants.INITIAL_TICKETS_COUNT));
@@ -136,7 +136,7 @@ public final class Game {
                     //Send message to inform which card has been drawn
                     receiveInfo(infos.get(id).drewAdditionalCards(drawnCards, additionalCardsCount));
 
-                    gameState.
+
 
                     //Update all the cards he used to claim route
                     SortedBag.Builder<Card> claimCardsBuilder = new SortedBag.Builder<>();
