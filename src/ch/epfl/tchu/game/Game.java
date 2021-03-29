@@ -6,6 +6,12 @@ import ch.epfl.tchu.gui.Info;
 
 import java.util.*;
 
+/**
+ * Represent the game of tChu, final, immutable
+ *
+ * @author Selien Wicki (314357)
+ * @author Theo Vasarino (313191)
+ */
 public final class Game {
 
     /**
