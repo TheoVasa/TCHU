@@ -109,7 +109,7 @@ public final class GameState extends PublicGameState {
      */
     public GameState withoutTopTickets(int count) {
         //check the correctness of the argument
-        Preconditions.checkArgument(count >= 0 && count < ticketsCount());
+        Preconditions.checkArgument(count >= 0 && count <= ticketsCount());
         return new GameState(ticketDeck.withoutTopCards(count), cardState, playerState, currentPlayerId(), lastPlayer());
     }
 
@@ -172,7 +172,7 @@ public final class GameState extends PublicGameState {
         Preconditions.checkArgument(playerState.get(playerId).ticketCount() == 0);
         //recreate the new playerState map
         PlayerState newPlayer = playerState.get(playerId).withAddedTickets(chosenTickets);
-        return new GameState(ticketDeck, cardState, generateNewPlayerMap(newPlayer), currentPlayerId(), lastPlayer());
+        return new GameState(ticketDeck, cardState, generateNewPlayerMap(newPlayer, playerId), currentPlayerId(), lastPlayer());
     }
 
     /**
@@ -191,7 +191,7 @@ public final class GameState extends PublicGameState {
         //create new Deck of tickets
         Deck<Ticket> newTicketDeck = ticketDeck.withoutTopCards(drawnTickets.size());
 
-        return new GameState(newTicketDeck, cardState, generateNewPlayerMap(newPlayer), currentPlayerId(), lastPlayer());
+        return new GameState(newTicketDeck, cardState, generateNewPlayerMap(newPlayer, currentPlayerId()), currentPlayerId(), lastPlayer());
     }
 
     /**
@@ -209,7 +209,7 @@ public final class GameState extends PublicGameState {
                 cardState.faceUpCard(slot));
         //modify the cards
         CardState newCardState = cardState.withDrawnFaceUpCard(slot);
-        return new GameState(ticketDeck, newCardState, generateNewPlayerMap(newPlayer), currentPlayerId(), lastPlayer());
+        return new GameState(ticketDeck, newCardState, generateNewPlayerMap(newPlayer, currentPlayerId()), currentPlayerId(), lastPlayer());
     }
 
     /**
@@ -226,7 +226,7 @@ public final class GameState extends PublicGameState {
                 cardState.topDeckCard());
         //modify the cardsCardState newCards = cardState.withDrawnFaceUpCard(slot);
         CardState newCards = cardState.withoutTopDeckCard();
-        return new GameState(ticketDeck, newCards, generateNewPlayerMap(newPlayer), currentPlayerId(), lastPlayer());
+        return new GameState(ticketDeck, newCards, generateNewPlayerMap(newPlayer, currentPlayerId()), currentPlayerId(), lastPlayer());
     }
 
     /**
@@ -239,7 +239,7 @@ public final class GameState extends PublicGameState {
     public GameState withClaimedRoute(Route route, SortedBag<Card> cards) {
         //modify the player state
         PlayerState newPlayer = playerState.get(currentPlayerId()).withClaimedRoute(route, cards);
-        return new GameState(ticketDeck, cardState, generateNewPlayerMap(newPlayer), currentPlayerId(), lastPlayer());
+        return new GameState(ticketDeck, cardState.withMoreDiscardedCards(cards), generateNewPlayerMap(newPlayer, currentPlayerId()), currentPlayerId(), lastPlayer());
     }
 
     /**
@@ -268,14 +268,14 @@ public final class GameState extends PublicGameState {
      */
 
     /**
-     * modify the playerState of the current player by the given playerState
+     * modify the playerState of the given id by the given playerState
      *
      * @param player we want to replace in the map
      * @return the new playerState map
      */
-    private Map<PlayerId, PlayerState> generateNewPlayerMap(PlayerState player) {
+    private Map<PlayerId, PlayerState> generateNewPlayerMap(PlayerState player, PlayerId id) {
         Map<PlayerId, PlayerState> newMap = new EnumMap<>(playerState);
-        newMap.replace(currentPlayerId(), player);
+        newMap.replace(id , player);
         return newMap;
     }
 }
