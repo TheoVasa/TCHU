@@ -129,7 +129,7 @@ public final class Game {
                     }
 
                     SortedBag drawnCards = drawnCardsBuilder.build();
-                    int additionalCardsCount = claimRoute.additionalClaimCardsCount();
+                    int additionalCardsCount = claimRoute.additionalClaimCardsCount(claimCards, drawnCards);
                     List possibleAddCards = gameState.currentPlayerState().possibleAdditionalCards(additionalCardsCount, claimCards, drawnCards);
                     SortedBag additionalCardsPlayed = players.get(id).chooseAdditionalCards(possibleAddCards);
 
