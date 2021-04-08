@@ -62,12 +62,15 @@ public final class Game {
      * Initialize the game on the beginning
      */
     private static void initGame(){
-        //Init players
-        players.get(PlayerId.PLAYER_1).initPlayers(PlayerId.PLAYER_1, playerNames);
-        players.get(PlayerId.PLAYER_2).initPlayers(PlayerId.PLAYER_2, playerNames);
+        //Update
+        //updateState();
 
         //Inform who will play first
         receiveInfo(infos.get(gameState.currentPlayerId()).willPlayFirst());
+
+        //Init players
+        players.get(PlayerId.PLAYER_1).initPlayers(PlayerId.PLAYER_1, playerNames);
+        players.get(PlayerId.PLAYER_2).initPlayers(PlayerId.PLAYER_2, playerNames);
 
         //Update
         updateState();
@@ -152,11 +155,10 @@ public final class Game {
 
                         //Take the three first cards of the deck
                         SortedBag.Builder<Card> drawnCardsBuilder = new SortedBag.Builder<>();
-                        for (int i = 0; i < Constants.ADDITIONAL_TUNNEL_CARDS && gameState.canDrawCards(); ++i) {
+                        for (int i = 0; i < Constants.ADDITIONAL_TUNNEL_CARDS && gameState.cardState().totalSize(); ++i) {
                             //Recreate deck from discard if needed
                             gameState = gameState.withCardsDeckRecreatedIfNeeded(rng);
                             //Take top cards and add it to the drawn cards
-                            gameState.topCard();
                             drawnCardsBuilder.add(gameState.topCard());
                             gameState = gameState.withoutTopCard();
                         }
@@ -169,7 +171,9 @@ public final class Game {
                         receiveInfo(infos.get(id).drewAdditionalCards(drawnCards, additionalCardsCount));
 
                         //Determine if the player can/want to play the additional cards
-                        List<SortedBag<Card>> possibleAddCards = gameState.currentPlayerState().possibleAdditionalCards(additionalCardsCount, claimCards, drawnCards);
+                        List<SortedBag<Card>> possibleAddCards = (additionalCardsCount>0)
+                                            ? gameState.currentPlayerState().possibleAdditionalCards(additionalCardsCount, claimCards, drawnCards)
+                                            : List.of();
                         SortedBag<Card> additionalCardsPlayed = players.get(id).chooseAdditionalCards(possibleAddCards);
 
                         if (additionalCardsPlayed.size() > 0) {
