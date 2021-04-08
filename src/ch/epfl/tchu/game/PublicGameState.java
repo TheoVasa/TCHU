@@ -40,7 +40,7 @@ public class PublicGameState {
         //init attributs and checking if they're null
         this.publicCardState = Objects.requireNonNull(cardState);
         this.currentPlayerId = Objects.requireNonNull(currentPlayerId);
-        this.playerState = Collections.unmodifiableMap(Objects.requireNonNull(playerState));
+        this.playerState = Map.copyOf(Objects.requireNonNull(playerState));
         this.lastPlayer = lastPlayer;
         this.ticketsCount = ticketsCount;
     }

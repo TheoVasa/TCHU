@@ -35,7 +35,7 @@ public final class GameState extends PublicGameState {
 
         this.ticketDeck = ticketDeck;
         this.cardState = cardState;
-        this.playerState = Collections.unmodifiableMap(playerState);
+        this.playerState = Map.copyOf(playerState);
     }
 
     /**

@@ -59,7 +59,7 @@ public interface Player {
 
     /**
      * Used to know where the player want to draw a new Card, meaning the face up cards or the top of the deck
-     * @return the slot of the draw
+     * @return the slot of the draw, meaning 0 to 4 in the case the player draw a face up cards, or Constants.DECK_SLOT if he wants to pick up the top deck card
      */
     public int drawSlot();
 

@@ -36,8 +36,8 @@ public final class Game {
         Preconditions.checkArgument(playerNames.size() == 2);
 
         //Init vars from parameters
-        Game.players = Collections.unmodifiableMap(players);
-        Game.playerNames = Collections.unmodifiableMap(playerNames);
+        Game.players = Map.copyOf(players);
+        Game.playerNames = Map.copyOf(playerNames);
         Game.gameState = GameState.initial(tickets, rng);
         Game.endGame = false;
 
