@@ -85,10 +85,25 @@ public class GameTest {
 
         @Override public void receiveInfo(String info) {
             ++receiveInfosCall;
+
+            if (receiveInfosCall < turnCounter)
+                throw new Error("Pas assez d'infos envoyees compare au nombre de tours");
+
+            int carsCountPl1 = 0;
+            int carsCountPl2 = 0;
+            if (isOnTurn) {
+                for (Route r : gameState.playerState(PlayerId.PLAYER_1).routes())
+                    carsCountPl1 += r.length();
+                for (Route r : gameState.playerState(PlayerId.PLAYER_2).routes())
+                    carsCountPl2 += r.length();
+            }
+
             System.out.println("Reçu par " + ownName + ": " + info);
             if (isOnTurn &&
                 !(info.equals(new Info(playerNames.get((PlayerId.PLAYER_1))).canPlay()) ||
                 info.equals(new Info(playerNames.get(PlayerId.PLAYER_2)).canPlay())) &&
+                (info.equals(new Info(playerNames.get(PlayerId.PLAYER_1)).lastTurnBegins(carsCountPl1)) ||
+                info.equals(new Info(playerNames.get(PlayerId.PLAYER_2)).lastTurnBegins(carsCountPl2))) &&
                 currentClaimRouteIsOverground &&
                 ownId == gameState.currentPlayerId())
 
@@ -137,14 +152,14 @@ public class GameTest {
             if (claimableRoutes.isEmpty()) {
                 currentTurn = TurnKind.DRAW_CARDS;
                 System.out.println();
-                if (gameState.lastPlayer() == ownId)
+                if (gameState.lastPlayer() != null)
                     isOnTurn = false;
                 return TurnKind.DRAW_CARDS;
 
             } else if (claimableRoutes.size() > rng.nextInt(allRoutes.size())) {
                 currentTurn = TurnKind.DRAW_TICKETS;
                 System.out.println();
-                if (gameState.lastPlayer() == ownId)
+                if (gameState.lastPlayer() != null)
                     isOnTurn = false;
                 return TurnKind.DRAW_TICKETS;
 
@@ -158,7 +173,7 @@ public class GameTest {
                 initialClaimCards = cards.get(0);
                 currentTurn = TurnKind.CLAIM_ROUTE;
                 System.out.println();
-                if (gameState.lastPlayer() == ownId)
+                if (gameState.lastPlayer() != null)
                     isOnTurn = false;
                 return TurnKind.CLAIM_ROUTE;
             }

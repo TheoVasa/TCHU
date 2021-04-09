@@ -155,7 +155,7 @@ public final class Game {
 
                         //Take the three first cards of the deck
                         SortedBag.Builder<Card> drawnCardsBuilder = new SortedBag.Builder<>();
-                        for (int i = 0; i < Constants.ADDITIONAL_TUNNEL_CARDS && gameState.cardState().totalSize(); ++i) {
+                        for (int i = 0; i < Constants.ADDITIONAL_TUNNEL_CARDS && gameState.canDrawCards(); ++i) {
                             //Recreate deck from discard if needed
                             gameState = gameState.withCardsDeckRecreatedIfNeeded(rng);
                             //Take top cards and add it to the drawn cards
@@ -165,7 +165,10 @@ public final class Game {
 
                         //Handle the additional cards to play
                         SortedBag<Card> drawnCards = drawnCardsBuilder.build();
-                        int additionalCardsCount = claimRoute.additionalClaimCardsCount(claimCards, drawnCards);
+                        int additionalCardsCount = (drawnCards.size() > 0)
+                                                    ? claimRoute.additionalClaimCardsCount(claimCards, drawnCards)
+                                                    : 0;
+
 
                         //Send message to inform which card has been drawn
                         receiveInfo(infos.get(id).drewAdditionalCards(drawnCards, additionalCardsCount));
@@ -176,7 +179,7 @@ public final class Game {
                                             : List.of();
                         SortedBag<Card> additionalCardsPlayed = players.get(id).chooseAdditionalCards(possibleAddCards);
 
-                        if (additionalCardsPlayed.size() > 0) {
+                        if (additionalCardsPlayed.size() > 0 || additionalCardsCount == 0) {
                             //Update all the cards he used to claim route
                             SortedBag.Builder<Card> claimCardsBuilder = new SortedBag.Builder<>();
                             claimCardsBuilder.add(claimCards);
@@ -193,7 +196,7 @@ public final class Game {
                         }
 
                         //Put the drawn cards in the discard
-                        gameState.withMoreDiscardedCards(drawnCards);
+                        gameState = gameState.withMoreDiscardedCards(drawnCards);
                     }
                 }
                 break;
@@ -216,27 +219,32 @@ public final class Game {
         //Update
         updateState();
 
+        //Get the final points of the players
+        int finalPointsCountPlayer1 = gameState.playerState(PlayerId.PLAYER_1).finalPoints();
+        int finalPointsCountPlayer2 = gameState.playerState(PlayerId.PLAYER_2).finalPoints();
+
         //Generate bonus for longest trail
         Trail longestTrailPlayer1 = Trail.longest(gameState.playerState(PlayerId.PLAYER_1).routes());
         Trail longestTrailPlayer2 = Trail.longest(gameState.playerState(PlayerId.PLAYER_2).routes());
 
-        if (longestTrailPlayer1.length() > longestTrailPlayer2.length())
+        if (longestTrailPlayer1.length() > longestTrailPlayer2.length()) {
             receiveInfo(infos.get(PlayerId.PLAYER_1).getsLongestTrailBonus(longestTrailPlayer1));
-        else if (longestTrailPlayer2.length() > longestTrailPlayer1.length())
+            finalPointsCountPlayer1 += Constants.LONGEST_TRAIL_BONUS_POINTS;
+        }
+        else if (longestTrailPlayer2.length() > longestTrailPlayer1.length()) {
             receiveInfo(infos.get(PlayerId.PLAYER_2).getsLongestTrailBonus(longestTrailPlayer2));
+            finalPointsCountPlayer2 += Constants.LONGEST_TRAIL_BONUS_POINTS;
+        }
         //Else no bonus if trail length are the same
 
-        //Identify the winner
-        int finalPointsCountPlayer1 = gameState.playerState(PlayerId.PLAYER_1).finalPoints();
-        int finalPointsCountPlayer2 = gameState.playerState(PlayerId.PLAYER_2).finalPoints();
 
         if (finalPointsCountPlayer1 > finalPointsCountPlayer2)
-            infos.get(PlayerId.PLAYER_1).won(finalPointsCountPlayer1, finalPointsCountPlayer2);
+            receiveInfo(infos.get(PlayerId.PLAYER_1).won(finalPointsCountPlayer1, finalPointsCountPlayer2));
         else if (finalPointsCountPlayer2 > finalPointsCountPlayer1)
-            infos.get(PlayerId.PLAYER_1).won(finalPointsCountPlayer1, finalPointsCountPlayer2);
+            receiveInfo(infos.get(PlayerId.PLAYER_2).won(finalPointsCountPlayer2, finalPointsCountPlayer1));
         else {
             List<String> names = List.of(playerNames.get(PlayerId.PLAYER_1), playerNames.get(PlayerId.PLAYER_2));
-            Info.draw(names, finalPointsCountPlayer1);
+            receiveInfo(Info.draw(names, finalPointsCountPlayer1));
         }
     }
 
