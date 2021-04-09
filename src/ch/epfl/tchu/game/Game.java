@@ -62,9 +62,6 @@ public final class Game {
      * Initialize the game on the beginning
      */
     private static void initGame(){
-        //Update
-        //updateState();
-
         //Inform who will play first
         receiveInfo(infos.get(gameState.currentPlayerId()).willPlayFirst());
 
@@ -113,6 +110,7 @@ public final class Game {
                 SortedBag<Ticket> drawnTickets  = gameState.topTickets(Constants.IN_GAME_TICKETS_COUNT);
                 SortedBag<Ticket> keptTickets = players.get(id).chooseTickets(drawnTickets);
                 gameState = gameState.withoutTopTickets(Constants.IN_GAME_TICKETS_COUNT);
+                gameState = gameState.withChosenAdditionalTickets(drawnTickets, keptTickets);
 
                 //Send info that the player kept some tickets
                 receiveInfo(infos.get(id).keptTickets(keptTickets.size()));
