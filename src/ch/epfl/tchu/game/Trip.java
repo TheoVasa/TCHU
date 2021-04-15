@@ -15,7 +15,7 @@ import java.util.Objects;
 public final class Trip {
 
     /**
-     * Arguments of the Trip
+     * Attributes
      */
     final private Station from;
     final private Station to;
@@ -26,6 +26,8 @@ public final class Trip {
      * @param from the starting station of the trip
      * @param to the final station of the trip
      * @param points the amount of points the trip provides
+     * @throws IllegalArgumentException if points isn't strictly positive
+     * @throws NullPointerException if one Station is null
      */
     public Trip(Station from, Station to, int points) {
         //Check the correctness of the arguments
@@ -42,7 +44,8 @@ public final class Trip {
      * @param from the list of the starting station of the trips
      * @param to the list of the final station of the trips
      * @param points the list of the amount of points each trip provides
-     * @return the list of each possible trip
+     * @return the list of each possible trip (ArrayList<Trip>())
+     * @throws IllegalArgumentException if one of the list is empty or if the points aren't strictly positive
      */
     public static List<Trip> all(List<Station> from, List<Station> to, int points) {
         //Check the correctness of the arguments
@@ -55,13 +58,12 @@ public final class Trip {
                 allTrips.add(new Trip(a, b, points));
             }
         }
-
         return allTrips;
     }
 
     /**
      * Getter for the starting Station of the trip
-     * @return the starting position of the trip
+     * @return the starting position of the trip (Station)
      */
     public Station from() {
         return from;
@@ -69,7 +71,7 @@ public final class Trip {
 
     /**
      * Getter for the final station of the trip
-     * @return the final station of the trip
+     * @return the final station of the trip (Station)
      */
     public Station to() {
         return to;
@@ -77,16 +79,17 @@ public final class Trip {
 
     /**
      * Getter for the amount of points the trips provides
-     * @return the amount of points the trip provides
+     * @return the amount of points the trip provides (int)
      */
     public int points() {
         return points;
     }
 
     /**
-     * Gives the amounts of points according of the given connectivity
+     * Gives the amounts of points according of the given connectivity,
+     * indeed the points if the starting station and the final station are connected, minus the points if not
      * @param connectivity the connection between two station
-     * @return the amount of points for the given connection
+     * @return the amount of points for the given connection (int)
      */
     public int points(StationConnectivity connectivity){
         if (connectivity.connected(from, to)) {

@@ -2,12 +2,10 @@ package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.Preconditions;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
- * Ticket of a trip
+ * Ticket of a trip, final, public, immutable
  *
  * @author Selien Wicki (314357)
  */
@@ -20,36 +18,37 @@ public final class Ticket implements Comparable<Ticket> {
     private final String text;
 
     /**
-     * Constructor (principale)
+     * Constructor (principal)
      * @param trips list of all the trips that requires a ticket
+     * @throws IllegalArgumentException if all the starting stations doesn't have the same name, or if the list is empty
      */
     public Ticket(List<Trip> trips){
         //Check the correctness of the arguments
-        Preconditions.checkArgument(trips.size() > 0);
+        Preconditions.checkArgument(!trips.isEmpty());
         for (int i = 1; i < trips.size(); ++i){
             Preconditions.checkArgument(trips.get(i).from().toString().equals(trips.get(i-1).from().toString()));
         }
 
         //Init the attributes
         text = computeText(trips);
-        this.trips = trips;
+        this.trips = new ArrayList<>(trips);
     }
 
     /**
-     * Constructor (secondaire)
+     * Constructor (secondary)
      * @param from the starting station of the trip
      * @param to the final station of the trip
      * @param points the amount of points the trip provides
      */
     public Ticket(Station from, Station to, int points){
-        this(Arrays.asList(new Trip(from, to, points)));
+        this(Collections.singletonList(new Trip(from, to, points)));
     }
 
 
 
     /**
      * Built the text of the ticket
-     * @return the text of the ticket
+     * @return the text of the ticket (String)
      */
     private static String computeText(List<Trip> trips){
         TreeSet<String> destinations = new TreeSet<>();
@@ -72,7 +71,7 @@ public final class Ticket implements Comparable<Ticket> {
 
     /**
      * Getter for the trip name of the ticket
-     * @return the trip information
+     * @return the trip information (String)
      */
     public String text(){
         return text;
@@ -81,7 +80,7 @@ public final class Ticket implements Comparable<Ticket> {
     /**
      * Gives the amount of point that the player achieved with this ticket
      * @param connectivity the connectivity of the trip
-     * @return the amount of point of the trip of the ticket that the player managed to connect
+     * @return the amount of point of the trip of the ticket that the player managed to connect (int)
      */
     public int points(StationConnectivity connectivity){
         //We take the highest score if the ticket is of type town-country or country-country

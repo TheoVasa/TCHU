@@ -3,14 +3,14 @@ package ch.epfl.tchu.game;
 import ch.epfl.tchu.Preconditions;
 
 /**
- * The station of the game
+ * The station of the game, public, final, immutable
  *
  * @author Theo Vasarino (313191)
  */
 public final class Station {
 
     /**
-     * Attributs
+     * Attributes
      */
     private final String name;
     private final int id;
@@ -31,7 +31,7 @@ public final class Station {
 
     /**
      * Getter for the name of the station
-     * @return
+     * @return the name of the station (String)
      */
     public String name() {
         return name;
@@ -39,7 +39,7 @@ public final class Station {
 
     /**
      * Getter for the id of the station
-     * @return
+     * @return the id of the station (int)
      */
     public int id() {
         return id;

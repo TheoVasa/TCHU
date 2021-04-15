@@ -10,6 +10,10 @@ import java.util.List;
  */
 public enum Card {
 
+    /**
+     * the cards type, associate with their respecting color, ordered
+     */
+
     BLACK(Color.BLACK),
     VIOLET(Color.VIOLET),
     BLUE(Color.BLUE),
@@ -24,10 +28,8 @@ public enum Card {
      * Attributes
      */
     private final Color colorType;
-    private static final Card tabOfEnum[]       = Card.values();
-    private static final int locoPositionInEnum = Card.LOCOMOTIVE.ordinal();
-    public static final List<Card> ALL          = List.of(tabOfEnum);
-    public static final List<Card> CARS        = ALL.subList(0, locoPositionInEnum);
+    public static final List<Card> ALL          = List.of(Card.values());
+    public static final List<Card> CARS        = ALL.subList(0, Card.LOCOMOTIVE.ordinal());
     public static final int COUNT               = ALL.size();
 
     /**
@@ -40,20 +42,20 @@ public enum Card {
 
     /**
      * Getter of the color of the card
-     * @return the color of the card
+     * @return the color of the card (Color)
      */
     public Color color() {
         return colorType;
     }
 
     /**
-     * Get the card type according by a given color
+     * Get the card type according by the given color
      * @param color color
      */
     public static Card of(Color color) {
         for (int i = 0; i < COUNT; ++i) {
-            if (tabOfEnum[i].color() == color)
-                return tabOfEnum[i];
+            if (ALL.get(i).color() == color)
+                return ALL.get(i);
         }
         return null;
     }
