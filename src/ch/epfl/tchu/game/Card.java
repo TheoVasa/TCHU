@@ -3,17 +3,14 @@ package ch.epfl.tchu.game;
 import java.util.List;
 
 /**
- * Enumeration of the different cards of the game
+ * This class represent the enumeration of the different cards of the game.
  *
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
  */
 public enum Card {
 
-    /**
-     * the cards type, associate with their respecting color, ordered
-     */
-
+    //The elements of the enumeration (order important).
     BLACK(Color.BLACK),
     VIOLET(Color.VIOLET),
     BLUE(Color.BLUE),
@@ -24,39 +21,54 @@ public enum Card {
     WHITE(Color.WHITE),
     LOCOMOTIVE(null);
 
-    /**
-     * Attributes
-     */
-    private final Color colorType;
-    public static final List<Card> ALL          = List.of(Card.values());
-    public static final List<Card> CARS        = ALL.subList(0, Card.LOCOMOTIVE.ordinal());
-    public static final int COUNT               = ALL.size();
+    //The color of the card (can be null for locomotives).
+    private final Color color;
 
     /**
-     * Constructor
+     * The list of all the cards (in the correct order) of <code>this</code> enumeration.
+     */
+    public static final List<Card> ALL = List.of(Card.values());
+
+    /**
+     * The list of all the cards without the locomotive (only cars).
+     */
+    public static final List<Card> CARS = ALL.subList(0, Card.LOCOMOTIVE.ordinal());
+
+    /**
+     * The amount of cards.
+     */
+    public static final int COUNT = ALL.size();
+
+    /**
+     * Create a card associated to the given color.
+     *
      * @param color the color of the card
      */
     Card(Color color) {
-        colorType = color;
+        this.color = color;
     }
 
     /**
-     * Getter of the color of the card
-     * @return the color of the card (Color)
+     * Getter of the color of the card.
+     *
+     * @return the color of the card
      */
     public Color color() {
-        return colorType;
+        return color;
     }
 
     /**
-     * Get the card type according by the given color
-     * @param color color
+     * Get the card type corresponding to the given color.
+     *
+     * @param color the given color
+     * @return the card corresponding to <code>color</code> (Card)
      */
     public static Card of(Color color) {
-        for (int i = 0; i < COUNT; ++i) {
-            if (ALL.get(i).color() == color)
-                return ALL.get(i);
+        Card correspondingCard = null;
+        for (Card crd : ALL) {
+            if (crd.color() == color)
+                correspondingCard = crd;
         }
-        return null;
+        return correspondingCard;
     }
 }

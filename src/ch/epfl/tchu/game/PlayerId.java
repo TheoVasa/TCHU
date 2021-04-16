@@ -9,18 +9,23 @@ import java.util.List;
  * @author Theo Vasarino (313191)
  */
 public enum PlayerId {
-    PLAYER_1, PLAYER_2;
+    //The values of the enumeration
+    PLAYER_1,
+    PLAYER_2;
 
     /**
-     * Attributes
+     * All the values of the enumeration (ordered)
      */
-    //the two players
     public final static List<PlayerId> ALL = List.of(PlayerId.values());
-    //number of players
+
+    /**
+     * The amount of elements in the enumeration
+     */
     public final static int COUNT = ALL.size();
 
     /**
-     * Gives the PlayerId of the next Player
+     * Gives the PlayerId of the next player.
+     *
      * @return the PlayerId of the next player in the enum. (PlayerId)
      */
     public PlayerId next() {

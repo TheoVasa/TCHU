@@ -3,26 +3,34 @@ package ch.epfl.tchu.game;
 import ch.epfl.tchu.Preconditions;
 
 /**
- * The station of the game, public, final, immutable
+ * This class represents the station of the game.
+ * It is final and immutable.
  *
  * @author Theo Vasarino (313191)
+ * @author Selien Wicki (314357)
  */
 public final class Station {
 
     /**
-     * Attributes
+     * The name of the station
      */
     private final String name;
+
+    /**
+     * The id of the station
+     */
     private final int id;
 
     /**
-     * Constructor
+     * Create a new station with the given id and name
+     *
      * @param name the name of the station
-     * @param id the id of the station
+     * @param id   the id of the station
+     * @throws IllegalArgumentException if the <code>id</code> is strictly negative
      */
     public Station(int id, String name) {
         //Check the correctness of the arguments
-        Preconditions.checkArgument( id >= 0);
+        Preconditions.checkArgument(id >= 0);
 
         //Init the attributes
         this.name = name;
@@ -30,7 +38,8 @@ public final class Station {
     }
 
     /**
-     * Getter for the name of the station
+     * Getter for the name of the station.
+     *
      * @return the name of the station (String)
      */
     public String name() {
@@ -38,7 +47,8 @@ public final class Station {
     }
 
     /**
-     * Getter for the id of the station
+     * Getter for the id of the station.
+     *
      * @return the id of the station (int)
      */
     public int id() {
@@ -46,7 +56,7 @@ public final class Station {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return name;
     }
 }

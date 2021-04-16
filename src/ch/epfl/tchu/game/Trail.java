@@ -1,41 +1,46 @@
 package ch.epfl.tchu.game;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
- * Represent a trail in the network of the player during the game, public, final, immutable
+ * This class represents a Trail (a succession of routes that are connected).
+ * Only useful to find the longest trail of a player.
+ * It is public, final and immutable.
  *
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
  */
 public final class Trail {
-
-    /**
-     * Attributes
-     */
+    //The routes of the trail
     private final List<Route> routes;
+    //All the stations of the trail in the correct order (useful for the text)
     private final List<Station> stations;
-    private final Station station1;
-    private final Station station2;
+    //The first station of the trail
+    private final Station firstStation;
+    //The last station of the trail
+    private final Station lastStation;
+    //The length of the trail given by the sum of the length of all the routes
+    private final int length;
+    //The text of the trail
+    private final String text;
 
-    /**
-     * Private Constructor
-     */
+
+    //Create a Trail with all the station it goes trough.
     private Trail(List<Route> routes, List<Station> stations) {
-        this.routes = new ArrayList<>(routes);
-        this.stations = new ArrayList<>(stations);
-        this.station1 = (stations.size() > 0) ? stations.get(0) : null;
-        this.station2 = (stations.size() > 0) ? stations.get(stations.size() - 1) : null;
+        //Init vars
+        this.routes = List.copyOf(routes); //Shouldn't be modifiable outside this class, but safer to take a copy !
+        this.stations = List.copyOf(stations);
+        firstStation = (stations.size() != 0) ? stations.get(0) : null;
+        lastStation = (stations.size() != 0) ? stations.get(stations.size() - 1) : null;
+        this.length = generateLength();
+        this.text = generateName();
     }
 
     /**
-     * Gives the longest possible trail given a list of roads
+     * Gives the longest possible trail.
      *
-     * @param routes the list of all possible roads
-     * @return the longest trail of multiple roads (Trail)
+     * @param routes the list of all possible routes
+     * @return the longest trail of multiple routes (Trail)
      */
     public static Trail longest(List<Route> routes) {
         //longestTrail, will be set and returned at the end
@@ -56,18 +61,18 @@ public final class Trail {
 
             for (Trail trail : trails) {
                 //Set longest trail
-                if (longestTrail.generateLength() < trail.generateLength())
+                if (longestTrail.length < trail.length)
                     longestTrail = new Trail(trail.routes, trail.stations);
 
                 //Find trail extensions
                 for (Route route : routes) {
-                    if ((route.station2().equals(trail.station2) || route.station1().equals(trail.station2)) && !trail.contains(route)) {
+                    if ((route.station2().equals(trail.lastStation) || route.station1().equals(trail.lastStation)) && !trail.contains(route)) {
                         //Set the new extended roads of the trail
-                        List<Route> extendedTrailRoads = new ArrayList<>(trail.routes);
+                        List<Route> extendedTrailRoute = new ArrayList<>(trail.routes);
                         List<Station> extendedStations = new ArrayList<>(trail.stations);
-                        extendedTrailRoads.add(route);
-                        extendedStations.add((route.station2().equals(trail.station2)) ? route.station1() : route.station2());
-                        extendedTrails.add(new Trail(extendedTrailRoads, extendedStations));
+                        extendedTrailRoute.add(route);
+                        extendedStations.add((route.station2().equals(trail.lastStation)) ? route.station1() : route.station2());
+                        extendedTrails.add(new Trail(extendedTrailRoute, extendedStations));
                     }
                 }
             }
@@ -79,47 +84,46 @@ public final class Trail {
     }
 
     /**
-     * Getter for the length of the trail
+     * Getter for the length of the trail.
+     * The length of the trail is just the sum of the length of its routes.
      *
      * @return the length of the trail (int)
      */
     public int length() {
-        return this.generateLength();
+        return length;
     }
 
     /**
-     * Getter for the first station of the trail
+     * Getter for the last station of the trail.
      *
-     * @return the first station (Station)
+     * @return the first station of the trail (Station)
      */
     public Station station1() {
-        return station1;
+        return firstStation;
     }
 
     /**
-     * Getter for the second station of the trail
+     * Getter for the last station of the trail.
      *
-     * @return the second station (Station)
+     * @return the second station of the trail (Station)
      */
     public Station station2() {
-        return station2;
+        return lastStation;
     }
 
-    /**
-     * Check if a road is contained in the trail (Useful for double road type to avoid duplications exp. : Lausanne - Fribourg)
-     *
-     * @param road the road we want to check the appearance
-     * @return true if the road is contained in the trail (boolean)
-     */
-    private boolean contains(Route road) {
-        return routes.contains(road);
+    //Check if a road is contained in the trail
+    //Needed for double route type to avoid duplications, exp. : Lausanne - Fribourg.
+    //If we used the methode contains(Obj) of the class Collection, then the trail could
+    //take twice the same route.
+    private boolean contains(Route route) {
+        for (Route r : routes) {
+            if (r.stations().contains(route.station1()) && r.stations().contains(route.station2()))
+                return true;
+        }
+        return false;
     }
 
-    /**
-     * Calculate the length of the trail
-     *
-     * @return the length of the trail (int)
-     */
+    //Calculate the length of the trail.
     private int generateLength() {
         int finalLength = 0;
         if (routes.size() > 0) {
@@ -129,23 +133,28 @@ public final class Trail {
         return finalLength;
     }
 
-    /**
-     * Generate the name of the trail (a name with all the roads that the trail contains)
-     *
-     * @return trail name (String)
-     */
+    //Generate the name of the trail (a name with all the route that the trail contains).
     private String generateName() {
         //Name list of all the station of the trail
         List<String> stationNames = new ArrayList<>();
         for (Station s : stations)
             stationNames.add(s.name());
 
-        //Set trail name
-        return (stationNames.isEmpty()) ? "Empty Trail" : String.join(" - ", stationNames) + " (" + this.generateLength() + ")";
+        //Generate the name
+        String name = new StringBuilder()
+                .append(String.join(" - ", stationNames))
+                .append(" (")
+                .append(length)
+                .append(")")
+                .toString();
+
+        return (stationNames.isEmpty())
+                ? "Empty Trail"
+                : name;
     }
 
     @Override
     public String toString() {
-        return this.generateName();
+        return text;
     }
 }

@@ -6,18 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class represent the public states of a player, public, immutable.
+ * This class represent the public states of a player.
+ * It is public and immutable.
  *
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
  **/
 
 public class PublicPlayerState {
-
-    /**
-     * Attributes
-     */
-
     //the route the player claimed
     private final List<Route> routes;
     //his number of tickets
@@ -31,13 +27,14 @@ public class PublicPlayerState {
 
     /**
      * Construct a new PublicPlayerState from a given number of tickets, a given number of card and a list of claimed Routes.
+     *
      * @param ticketCount the number of tickets of the player.
      * @param cardCount   the number of cards of the player.
      * @param routes      the  list of all the routes of the player.
-     * @throws IllegalArgumentException if ticketCount and cardCount are strictly negative.
+     * @throws IllegalArgumentException if <code>ticketCount</code> and <code>cardCount</codes> are strictly negative.
      */
     public PublicPlayerState(int ticketCount, int cardCount,
-            List<Route> routes) {
+                             List<Route> routes) {
         //Check correctness of arguments
         Preconditions.checkArgument(ticketCount >= 0 && cardCount >= 0);
 
@@ -53,6 +50,7 @@ public class PublicPlayerState {
 
     /**
      * The amount of tickets of the player.
+     *
      * @return the number of tickets. (int)
      */
     public int ticketCount() {
@@ -61,6 +59,7 @@ public class PublicPlayerState {
 
     /**
      * The amount of cards of a player.
+     *
      * @return the number of cards. (int)
      */
     public int cardCount() {
@@ -69,6 +68,7 @@ public class PublicPlayerState {
 
     /**
      * The routes of the player.
+     *
      * @return the routes of the player. (List)
      */
     public List<Route> routes() {
@@ -77,6 +77,7 @@ public class PublicPlayerState {
 
     /**
      * The amount of cars of the player.
+     *
      * @return the number of cars. (int)
      */
     public int carCount() {
@@ -85,11 +86,13 @@ public class PublicPlayerState {
 
     /**
      * The amount of the claim point of a player.
+     *
      * @return the amount of claim points. (int)
      */
     public int claimPoints() {
         return claimPoints;
     }
+
 
     //initialize the cars count
     private int initCarsCount() {

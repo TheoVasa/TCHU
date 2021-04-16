@@ -3,24 +3,19 @@ package ch.epfl.tchu.game;
 import ch.epfl.tchu.Preconditions;
 
 /**
- * This class represent the connectivity network of the player, in the form of a partition of stations, indeed she implements the interface StationConnectivity, this class is final, public and immutable.
+ * This class represent the connectivity network of the player,
+ * in the form of a partition of stations,
+ * It is public, final, immutable and implements StationConnectivity.
  *
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
  */
 public final class StationPartition implements StationConnectivity {
 
-    /**
-     * Attributes
-     */
     //the partition of the network.
     private final int[] partition;
 
-    /**
-     * private constructor
-     *
-     * @param partition, tab of int representing the partition
-     */
+    //Creates a station partition
     private StationPartition(int[] partition) {
         //copy of the tab by values
         this.partition = partition.clone();
@@ -38,24 +33,22 @@ public final class StationPartition implements StationConnectivity {
     }
 
     /**
-     * Builder of a StationPartition, final, static and nested in the class StationPartition
+     * Builder of a StationPartition.
+     * It is final and static.
      *
      * @author Selien Wicki (314357)
      * @author Theo Vasarino (313191)
      */
     public static final class Builder {
 
-        /**
-         * Attributes
-         */
-
         //the first version of the partition
         private final int[] builderPartition;
 
         /**
          * Construct a Builder with a certain number of Stations.
+         *
          * @param stationCount the number of station we want to put in the partition.
-         * @throws IllegalArgumentException if the count is strictly negative.
+         * @throws IllegalArgumentException if the <code>stationCount</code> is strictly negative.
          */
         public Builder(int stationCount) {
             //Check the correctness of the argument.
@@ -70,9 +63,12 @@ public final class StationPartition implements StationConnectivity {
 
         /**
          * Use to connect two stations in the partition.
+         *
          * @param s1 the first station we want to connect.
          * @param s2 the second station we want to connect.
-         * @return the current instance of the builder, with the two station connected (indeed the representative of one is setup like the representative of the other). (Builder)
+         * @return the current instance of the builder,
+         * with the two station connected
+         * (indeed the representative of one is setup like the representative of the other). (Builder)
          */
         public Builder connect(Station s1, Station s2) {
             int s1RepresentativeIndex = representative(s1.id());
@@ -83,7 +79,8 @@ public final class StationPartition implements StationConnectivity {
         }
 
         /**
-         * Build a StationPartition with a "flat" version of the partition, indeed each station is directly connected to his representative.
+         * Build a StationPartition with a "flat" version of the partition,
+         * each station is directly connected to his representative.
          *
          * @return the new StationPartition. (StationPartition)
          */

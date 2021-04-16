@@ -3,16 +3,14 @@ package ch.epfl.tchu.game;
 import java.util.List;
 
 /**
- * Enumeration for the different color of the cards of the game
+ * Enumeration for the different color of the cards of the game.
  *
  * @author Theo Vasarino (313191)
+ * @author Selien Wicki (314357)
  */
 public enum Color {
 
-    /**
-     * Color used in the game, with a given order
-     */
-
+    //The elements of the enumeration (order important).
     BLACK,
     VIOLET,
     BLUE,
@@ -23,8 +21,12 @@ public enum Color {
     WHITE;
 
     /**
-     * Attributes
+     * The list of all the colors (in the correct order) of <code>this</code> enumeration.
      */
     public static final List<Color> ALL = List.of(Color.values());
+
+    /**
+     * The amount of colors of <code>this</code> enumeration.
+     */
     public static final int COUNT = ALL.size();
 }

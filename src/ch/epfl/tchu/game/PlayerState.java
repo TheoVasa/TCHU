@@ -2,22 +2,19 @@ package ch.epfl.tchu.game;
 
 import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 /**
- * This class represent the whole state of a player, public, final and immutable, extends PublicPlayerState.
+ * This class represent the whole state of a player.
+ * It is public, final, immutable and extends PublicPlayerState.
  *
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
  */
 public final class PlayerState extends PublicPlayerState {
-
-    /**
-     * Attributes
-     */
-
     //the tickets of the player
     private final SortedBag<Ticket> tickets;
     //the cards of the player
@@ -25,6 +22,7 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * Construct a new PlayerState, with tickets, given cards and given routes.
+     *
      * @param tickets the tickets of the player.
      * @param cards   the remaining cards of the player (that he can play).
      * @param routes  the routes of the player (that he already claimed).
@@ -37,6 +35,7 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * Initialize the initial state of the player, indeed the given initial cards has been distributed to the player, who's hasn't any route or tickets.
+     *
      * @param initialCards the initial cards of the player.
      * @return the new PlayerState with the initial cards. (PlayerState)
      * @throws IllegalArgumentException if initial cards isn't equal to Constants.INITIAL_CARDS_COUNT.
@@ -49,6 +48,7 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * The tickets of the player,
+     *
      * @return the tickets of the player. (SortedBag)
      */
     public SortedBag<Ticket> tickets() {
@@ -57,6 +57,7 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * Generate a new playerState with the new given tickets.
+     *
      * @param newTickets the ticket to add to the player state.
      * @return a new player state with the added ticket. (PlayerState)
      */
@@ -70,6 +71,7 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * The cards of the player.
+     *
      * @return the cards of the player. (SortedBag)
      */
     public SortedBag<Card> cards() {
@@ -78,6 +80,7 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * Generate a new PlayerState with the new given cards.
+     *
      * @param card the new card we want to add to the player state.
      * @return a PlayerState with the added card. (PlayerState)
      */
@@ -87,6 +90,7 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * Gives a new player state with given added cards.
+     *
      * @param additionalCards the SortedBag of cards we want to add.
      * @return a new player state with the added cards. (PlayerState)
      */
@@ -100,6 +104,7 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * Determine if the player can claim a route depending on his state.
+     *
      * @param route the route to check if it's claimable.
      * @return true if the route is claimable. (boolean)
      */
@@ -117,8 +122,9 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * Gives a multiset of all possible combinations of cards in order to claim the route.
+     *
      * @param route the route to claim.
-     * @return all the possible list of cards to claim the route. (List)
+     * @return all the possible list of cards to claim the route. (List< SortedBag< Cards >>)
      * @throws IllegalArgumentException if the player don't have sufficient cars.
      */
     public List<SortedBag<Card>> possibleClaimCards(Route route) {
@@ -135,6 +141,7 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * Gives all the possible combinations of additional cards a player can play to claim a underground route.
+     *
      * @param additionalCardsCount number of additional cards to play.
      * @param initialCards         cards the player has played to claim the route.
      * @param drawnCards           the 3 cards that are drawn from the deck.
@@ -184,6 +191,7 @@ public final class PlayerState extends PublicPlayerState {
 
     /**
      * Gives a new PlayerState with the new claimed route.
+     *
      * @param route      the newly claimed route.
      * @param claimCards the cards used to claim the route.
      * @return A new PlayerState with the new list of routes. (PlayerState)

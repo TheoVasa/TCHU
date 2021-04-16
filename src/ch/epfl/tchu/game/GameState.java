@@ -6,30 +6,22 @@ import ch.epfl.tchu.SortedBag;
 import java.util.*;
 
 /**
- * Represent the state of a game of tCHu, final, immutable
+ * Represent the private state of a game of tCHu.
+ * It is public, final, immutable and extends PublicGameState.
  *
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
  */
 
 public final class GameState extends PublicGameState {
-
-    /**
-     * attributs
-     */
+    //The deck of th tickets of the game
     private final Deck<Ticket> ticketDeck;
+    //The state of the cards of the game
     private final CardState cardState;
+    //The state of the two player of the game
     private final Map<PlayerId, PlayerState> playerState;
 
-    /**
-     * private constructor of a gameState
-     *
-     * @param ticketDeck      the tickets of the game
-     * @param cardState       the cards of the game
-     * @param playerState     the state of the different player in the game
-     * @param currentPlayerId the ID of the current player
-     * @param lastPlayer      the last player that played
-     */
+    //Create a GameState
     private GameState(Deck<Ticket> ticketDeck, CardState cardState, Map<PlayerId, PlayerState> playerState, PlayerId currentPlayerId, PlayerId lastPlayer) {
         super(ticketDeck.size(), cardState, currentPlayerId, Map.copyOf(playerState), lastPlayer);
 
@@ -39,11 +31,12 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * construction method of a gameState
+     * Initialize the state of the game.
+     * Useful for the beginning of the game.
      *
-     * @param tickets we want to put in the intial state
-     * @param rng     number for the shuffle
-     * @return a new initial gameState
+     * @param tickets the tickets we want to put in the initial state of the game
+     * @param rng     a random number for the shuffle
+     * @return a new initial gameState (GameState)
      */
     public static GameState initial(SortedBag<Ticket> tickets, Random rng) {
         //initialise the tickets
@@ -69,10 +62,6 @@ public final class GameState extends PublicGameState {
         return new GameState(ticketDeck, cardState, playerStateMap, currentPlayer, null);
     }
 
-    /**
-     * Override methods
-     */
-
     @Override
     public PlayerState playerState(PlayerId playerId) {
         return playerState.get(playerId);
@@ -84,15 +73,11 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * public methods
-     */
-
-    /**
-     * return a given number of tickets from the top of the deck
+     * Gives the given amount of tickets from the top of the ticket deck.
      *
-     * @param count we want to extract from the deck
-     * @return a SortedBag of tickets
-     * @throws IllegalArgumentException if count is nit included between 0 and the size of the tickets deck (included)
+     * @param count the amount of thickets we want from the top of the ticket deck
+     * @return the top tickets of the ticket deck (SortedBag)
+     * @throws IllegalArgumentException if <code>count</code> is not between 0 and the size of the tickets deck (included)
      */
     public SortedBag<Ticket> topTickets(int count) {
         //check the correctness of the argument
@@ -101,11 +86,11 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * generate a new gameState without a given number of tickets
+     * Generate a new gameState without a certain number of tickets on the top of tickets deck.
      *
-     * @param count we want to put off the deck
-     * @return a new GameState
-     * @throws IllegalArgumentException if count is nit included between 0 and the size of the tickets deck (included)
+     * @param count the amount of tickets we want to remove from the top of the deck of tickets
+     * @return a game state without the top tickets (GameState)
+     * @throws IllegalArgumentException if <code>count</code> is not between 0 and the size of the tickets deck (included)
      */
     public GameState withoutTopTickets(int count) {
         //check the correctness of the argument
@@ -114,10 +99,10 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * return the top deck card
+     * Gives the top deck card.
      *
-     * @return the cards
-     * @throws IllegalArgumentException if the deck is empty
+     * @return the top card of the deck of cards (Card)
+     * @throws IllegalArgumentException if the card deck is empty
      */
     public Card topCard() {
         //check the correctness of the argument
@@ -126,10 +111,10 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * generate a new GameState without the topDeck card
+     * Generate a new GameState without the top card of the deck of cards.
      *
-     * @return the new gameState
-     * @throws IllegalArgumentException if the deck is empty
+     * @return the new gameState without the top card of the deck of cards (GameState)
+     * @throws IllegalArgumentException if the card deck is empty
      */
     public GameState withoutTopCard() {
         //check the correctness of the argument
@@ -138,20 +123,20 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * generate a new GameState with more discarded cards
+     * Generate a new GameState with more discarded cards.
      *
-     * @param discardedCards we want to put in
-     * @return the new game state
+     * @param discardedCards the cards we want to put in the discard
+     * @return the new game state (GameState)
      */
     public GameState withMoreDiscardedCards(SortedBag<Card> discardedCards) {
         return new GameState(ticketDeck, cardState.withMoreDiscardedCards(discardedCards), playerState, currentPlayerId(), lastPlayer());
     }
 
     /**
-     * generate a new gameState with a new deck recreated from the discard if needed (the deck is empty)
+     * Generate a new gameState with a new deck recreated from the discard if needed (the deck is empty).
      *
-     * @param rng for shuffling the new deck
-     * @return this if the deck is empty, else return the new GameState with the new deck
+     * @param rng a random number for shuffling the new deck
+     * @return <code>this</code> if the deck is empty, else return the new GameState with the new deck (GameState)
      */
     public GameState withCardsDeckRecreatedIfNeeded(Random rng) {
         return (cardState.isDeckEmpty())
@@ -160,12 +145,13 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * generate a new GameState with the given ticket added tho the playerState of the given playerId
+     * Generate a new GameState with the given ticket added tho the playerState of the given playerId.
+     * Useful at the beginning of the game
      *
-     * @param playerId      we want to modify the state
-     * @param chosenTickets we want to add to the given playerState
-     * @return a new GameState
-     * @throws IllegalArgumentException if the player already have at least one ticket
+     * @param playerId      the id of the player we want to add the tickets
+     * @param chosenTickets the tickets that the player chose at the begining of the game
+     * @return A game state with tickets added to the given player (GameState)
+     * @throws IllegalArgumentException if the player already has at least one ticket
      **/
     public GameState withInitiallyChosenTickets(PlayerId playerId, SortedBag<Ticket> chosenTickets) {
         //Check the correctness of the argument
@@ -176,12 +162,12 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * generate a new GameState where the player draw drawnTicket and choose the chosenTickets
+     * Generate a new GameState where the player draw some tickets and choose some of them.
      *
-     * @param drawnTickets  the player draw
-     * @param chosenTickets the player choose
-     * @return a new GameState
-     * @throws IllegalArgumentException if the chosenTicket are not included in the drawnTickets
+     * @param drawnTickets  the drawn tickets
+     * @param chosenTickets the tickets the player has chosen
+     * @return a game state with the chosen tickets added to the given player (GameState)
+     * @throws IllegalArgumentException if the <code>chosenTicket</code> are not included in the <code>drawnTickets</code>
      */
     public GameState withChosenAdditionalTickets(SortedBag<Ticket> drawnTickets, SortedBag<Ticket> chosenTickets) {
         //Check the correctness of the argument
@@ -195,11 +181,12 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * generate a new GameState where the player took a given card among the faceUpCards
+     * Generate a new GameState where the player draw a given card among the faced up cards
      *
-     * @param slot of the faceUpCards
-     * @return a new GameState
-     * @throws IllegalArgumentException if we can't draw new cards form the deck
+     * @param slot the position of the faced up card that is drawn
+     * @return a game state where the drawn faced up card is given to the player,
+     * the empty slot is replaced by the top card of the deck of cards (GameState)
+     * @throws IllegalArgumentException if we can not draw new cards form the deck
      */
     public GameState withDrawnFaceUpCard(int slot) {
         //Check correctness of the argument
@@ -213,10 +200,10 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * generate a new GameState where the top card of the deck is given to the current player
+     * Generate a new GameState where the top card of the deck is given to the current player.
      *
-     * @return a new GameState
-     * @throws IllegalArgumentException if we can't draw new cards
+     * @return a game state with the top card of the deck of cards given to the current player (GameState)
+     * @throws IllegalArgumentException if we can not draw a new card from the deck of cards
      */
     public GameState withBlindlyDrawnCard() {
         //Check correctness of the argument
@@ -230,11 +217,11 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * generate a new GameState where the player claimed the given route with the given cards
+     * Generate a new GameState where the player claimed the given route with the given cards.
      *
-     * @param route claimed by the player
-     * @param cards used by the player to claim the route
-     * @return a new GameState
+     * @param route the route the player wants to claim
+     * @param cards the cards used by the player to claim the route
+     * @return a game state where the player has claimed <code>route</code>
      */
     public GameState withClaimedRoute(Route route, SortedBag<Card> cards) {
         //modify the player state
@@ -243,18 +230,22 @@ public final class GameState extends PublicGameState {
     }
 
     /**
-     * method to know if the last turn begins, meaning the current player has 2 cards or less and the lastPlayer is unknown
+     * Method to know if the last turn begins,
+     * meaning the current player has 2 cards or less and the lastPlayer is unknown
      *
-     * @return true if the last turn begins
+     * @return true if the current player has 2 cards or less and the lastPlayer is unknown
      */
     public boolean lastTurnBegins() {
         return lastPlayer() == null && playerState.get(currentPlayerId()).carCount() <= 2;
     }
 
     /**
-     * End the turn of the player, indeed this method change the current player and if the last turn begins, set the last player as the current player
+     * End the turn of the player,
+     * indeed this method changes the current player,
+     * if the last turn begins then set the last player as the current player
      *
-     * @return the new GameState
+     * @return the game state with a new new current player. additionally,
+     * if the last turn begins then the current player is set to be the last player
      */
     public GameState forNextTurn() {
         PlayerId newCurrentPlayer = currentPlayerId().next();
@@ -263,19 +254,12 @@ public final class GameState extends PublicGameState {
                 : new GameState(ticketDeck, cardState, playerState, newCurrentPlayer, lastPlayer());
     }
 
-    /**
-     * private method
-     */
 
-    /**
-     * modify the playerState of the given id by the given playerState
-     *
-     * @param player we want to replace in the map
-     * @return the new playerState map
-     */
+    //Modify the map of the player
+    //Only the given player will be modified
     private Map<PlayerId, PlayerState> generateNewPlayerMap(PlayerState player, PlayerId id) {
         Map<PlayerId, PlayerState> newMap = new EnumMap<>(playerState);
-        newMap.replace(id , player);
+        newMap.replace(id, player);
         return newMap;
     }
 }

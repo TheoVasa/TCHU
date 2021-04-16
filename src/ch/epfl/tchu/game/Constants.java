@@ -4,7 +4,7 @@ import ch.epfl.tchu.SortedBag;
 
 import java.util.List;
 
-public final class  Constants {
+public final class Constants {
     private Constants() {}
 
     /**

@@ -1,16 +1,17 @@
 package ch.epfl.tchu.game;
 
 /**
- * Represent the "connectivity network" of the player
+ * Station that the player manage to connect.
  *
  * @author Theo Vasarino (313191)
  */
 public interface StationConnectivity {
     /**
-     * Determine if two given stations are connected
+     * Determine if two given station are connected by a players trail.
+     *
      * @param s1 first station
      * @param s2 second station
-     * @return true if the station are connected (boolean)
+     * @return true iff the station are connected (boolean)
      */
-    public boolean connected(Station s1, Station s2);
+    boolean connected(Station s1, Station s2);
 }

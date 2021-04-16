@@ -13,24 +13,26 @@ import java.util.*;
  * @author Theo Vasarino (313191)
  */
 public final class Game {
-
-    /**
-     * Attributes
-     */
+    //The two players of the game
     private static Map<PlayerId, Player> players;
+    //The name of the players
     private static Map<PlayerId, String> playerNames;
+    //The state of the game
     private static GameState gameState;
+    //The information that will be sent to the players during the game
     private static Map<PlayerId, Info> infos;
-    private static boolean endGame;
 
     /**
-     * Loop of the game that will make the game run
-     * @param players the two players of the game
+     * Loop of the game that will make the game run.
+     *
+     * @param players     the two players of the game
      * @param playerNames the names of the two players
-     * @param tickets the tickets of the games
-     * @param rng the random number to generate a shuffles deck
+     * @param tickets     the initial tickets in the games
+     * @param rng         the random number to generate a shuffles deck
+     * @throws IllegalArgumentException if the <code>players</code> and <code>playerNames</code>
+     *                                  does not contain exactly 2 players
      */
-    public static void play(Map<PlayerId, Player> players, Map<PlayerId, String> playerNames, SortedBag<Ticket> tickets, Random rng){
+    public static void play(Map<PlayerId, Player> players, Map<PlayerId, String> playerNames, SortedBag<Ticket> tickets, Random rng) {
         //Check correctness of the arguments
         Preconditions.checkArgument(players.size() == 2);
         Preconditions.checkArgument(playerNames.size() == 2);
@@ -39,7 +41,6 @@ public final class Game {
         Game.players = Map.copyOf(players);
         Game.playerNames = Map.copyOf(playerNames);
         Game.gameState = GameState.initial(tickets, rng);
-        Game.endGame = false;
 
         infos = new EnumMap<>(PlayerId.class);
         infos.put(PlayerId.PLAYER_1, new Info(playerNames.get(PlayerId.PLAYER_1)));
@@ -49,7 +50,8 @@ public final class Game {
         initGame();
 
         //Play the game
-        while (!endGame){
+        boolean endGame = false;
+        while (!endGame) {
             if (gameState.lastPlayer() == gameState.currentPlayerId())
                 endGame = true;
             playTurn(rng);
@@ -58,10 +60,8 @@ public final class Game {
         endGame();
     }
 
-    /**
-     * Initialize the game on the beginning
-     */
-    private static void initGame(){
+    //Initialize the game
+    private static void initGame() {
         //Inform who will play first
         receiveInfo(infos.get(gameState.currentPlayerId()).willPlayFirst());
 
@@ -72,27 +72,25 @@ public final class Game {
         //Update
         updateState();
 
-        //Set initial
+        //Chose tickets player 1
         players.get(PlayerId.PLAYER_1).setInitialTicketChoice(gameState.topTickets(Constants.INITIAL_TICKETS_COUNT));
-        gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
-        players.get(PlayerId.PLAYER_1).setInitialTicketChoice(gameState.topTickets(Constants.INITIAL_TICKETS_COUNT));
-        gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
         SortedBag<Ticket> chosenTicketsPlayer1 = players.get(PlayerId.PLAYER_1).chooseInitialTickets();
-        SortedBag<Ticket> chosenTicketsPlayer2 = players.get(PlayerId.PLAYER_1).chooseInitialTickets();
         gameState = gameState.withInitiallyChosenTickets(PlayerId.PLAYER_1, chosenTicketsPlayer1);
+        gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
+        //Chose tickets player 2
+        players.get(PlayerId.PLAYER_2).setInitialTicketChoice(gameState.topTickets(Constants.INITIAL_TICKETS_COUNT));
+        SortedBag<Ticket> chosenTicketsPlayer2 = players.get(PlayerId.PLAYER_2).chooseInitialTickets();
         gameState = gameState.withInitiallyChosenTickets(PlayerId.PLAYER_2, chosenTicketsPlayer2);
+        gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
+
 
         //Give info about chosen tickets (first the info about the current player)
         receiveInfo(infos.get(PlayerId.PLAYER_1).keptTickets(chosenTicketsPlayer1.size()));
         receiveInfo(infos.get(PlayerId.PLAYER_2).keptTickets(chosenTicketsPlayer2.size()));
     }
 
-    /**
-     * Player plays the current turn of the game
-     *
-     * @param rng The random number used to mix the deck
-     */
-    private static void playTurn(Random rng){
+    //Make the current player play a turn
+    private static void playTurn(Random rng) {
         PlayerId id = gameState.currentPlayerId();
 
         //Send info that the player can play --> turn begins
@@ -102,14 +100,14 @@ public final class Game {
         updateState();
 
         //Next turn
-        switch (players.get(id).nextTurn()){
+        switch (players.get(id).nextTurn()) {
             case DRAW_TICKETS:
                 //Send info that the player drew tickets
                 receiveInfo(infos.get(id).drewTickets(Constants.IN_GAME_TICKETS_COUNT));
 
-                SortedBag<Ticket> drawnTickets  = gameState.topTickets(Constants.IN_GAME_TICKETS_COUNT);
+                //chose tickets
+                SortedBag<Ticket> drawnTickets = gameState.topTickets(Constants.IN_GAME_TICKETS_COUNT);
                 SortedBag<Ticket> keptTickets = players.get(id).chooseTickets(drawnTickets);
-                gameState = gameState.withoutTopTickets(Constants.IN_GAME_TICKETS_COUNT);
                 gameState = gameState.withChosenAdditionalTickets(drawnTickets, keptTickets);
 
                 //Send info that the player kept some tickets
@@ -117,7 +115,7 @@ public final class Game {
                 break;
             case DRAW_CARDS:
                 //Ask twice which card the current player wants
-                for (int i = 0; i < 2 && gameState.canDrawCards(); ++i){
+                for (int i = 0; i < 2 && gameState.canDrawCards(); ++i) {
                     //Update
                     if (i == 1)
                         updateState();
@@ -127,7 +125,7 @@ public final class Game {
 
                     //Player draw from faced up cards or deck
                     int cardSlot = players.get(id).drawSlot();
-                    if (cardSlot == Constants.DECK_SLOT){
+                    if (cardSlot == Constants.DECK_SLOT) {
                         //Send info that the player drew from deck
                         receiveInfo(infos.get(id).drewBlindCard());
                         gameState = gameState.withBlindlyDrawnCard();
@@ -164,19 +162,23 @@ public final class Game {
                         //Handle the additional cards to play
                         SortedBag<Card> drawnCards = drawnCardsBuilder.build();
                         int additionalCardsCount = (drawnCards.size() > 0)
-                                                    ? claimRoute.additionalClaimCardsCount(claimCards, drawnCards)
-                                                    : 0;
-
+                                ? claimRoute.additionalClaimCardsCount(claimCards, drawnCards)
+                                : 0;
 
                         //Send message to inform which card has been drawn
                         receiveInfo(infos.get(id).drewAdditionalCards(drawnCards, additionalCardsCount));
 
-                        //Determine if the player can/want to play the additional cards
-                        List<SortedBag<Card>> possibleAddCards = (additionalCardsCount>0)
-                                            ? gameState.currentPlayerState().possibleAdditionalCards(additionalCardsCount, claimCards, drawnCards)
-                                            : List.of();
-                        SortedBag<Card> additionalCardsPlayed = players.get(id).chooseAdditionalCards(possibleAddCards);
+                        //Determine all possibilities to play additional cards (if needed)
+                        List<SortedBag<Card>> possibleAddCards = (additionalCardsCount > 0)
+                                ? gameState.currentPlayerState().possibleAdditionalCards(additionalCardsCount, claimCards, drawnCards)
+                                : List.of();
 
+                        //Chose cards to play if he can
+                        SortedBag<Card> additionalCardsPlayed = (possibleAddCards.size() > 0)
+                                ? players.get(id).chooseAdditionalCards(possibleAddCards)
+                                : SortedBag.of();
+
+                        //If player decides to play, else send a message that he does not want to play
                         if (additionalCardsPlayed.size() > 0 || additionalCardsCount == 0) {
                             //Update all the cards he used to claim route
                             SortedBag.Builder<Card> claimCardsBuilder = new SortedBag.Builder<>();
@@ -192,6 +194,7 @@ public final class Game {
                             //Send info that the player did not take a route
                             receiveInfo(infos.get(id).didNotClaimRoute(claimRoute));
                         }
+
 
                         //Put the drawn cards in the discard
                         gameState = gameState.withMoreDiscardedCards(drawnCards);
@@ -210,10 +213,8 @@ public final class Game {
         gameState = gameState.forNextTurn();
     }
 
-    /**
-     * End the game (send infos, count points...)
-     */
-    private static void endGame(){
+    //End the game (send infos, count points...)
+    private static void endGame() {
         //Update
         updateState();
 
@@ -225,40 +226,37 @@ public final class Game {
         Trail longestTrailPlayer1 = Trail.longest(gameState.playerState(PlayerId.PLAYER_1).routes());
         Trail longestTrailPlayer2 = Trail.longest(gameState.playerState(PlayerId.PLAYER_2).routes());
 
-        if (longestTrailPlayer1.length() > longestTrailPlayer2.length()) {
+        //Send info for the bonus of the longest trail
+        if (longestTrailPlayer1.length() > longestTrailPlayer2.length() ||
+                longestTrailPlayer1.length() == longestTrailPlayer2.length()) {
+
             receiveInfo(infos.get(PlayerId.PLAYER_1).getsLongestTrailBonus(longestTrailPlayer1));
             finalPointsCountPlayer1 += Constants.LONGEST_TRAIL_BONUS_POINTS;
         }
-        else if (longestTrailPlayer2.length() > longestTrailPlayer1.length()) {
+        if (longestTrailPlayer2.length() > longestTrailPlayer1.length() ||
+                longestTrailPlayer1.length() == longestTrailPlayer2.length()) {
+
             receiveInfo(infos.get(PlayerId.PLAYER_2).getsLongestTrailBonus(longestTrailPlayer2));
             finalPointsCountPlayer2 += Constants.LONGEST_TRAIL_BONUS_POINTS;
         }
-        //Else no bonus if trail length are the same
 
-
+        //Send info for the winner
         if (finalPointsCountPlayer1 > finalPointsCountPlayer2)
             receiveInfo(infos.get(PlayerId.PLAYER_1).won(finalPointsCountPlayer1, finalPointsCountPlayer2));
         else if (finalPointsCountPlayer2 > finalPointsCountPlayer1)
             receiveInfo(infos.get(PlayerId.PLAYER_2).won(finalPointsCountPlayer2, finalPointsCountPlayer1));
-        else {
-            List<String> names = List.of(playerNames.get(PlayerId.PLAYER_1), playerNames.get(PlayerId.PLAYER_2));
-            receiveInfo(Info.draw(names, finalPointsCountPlayer1));
-        }
+        else receiveInfo(Info.draw(new ArrayList<>(playerNames.values()), finalPointsCountPlayer1));
+
     }
 
-    /**
-     *
-     * @param info the information that must be given to the players
-     */
-    private static void receiveInfo(String info){
+    //make the two player of the game receive an info
+    private static void receiveInfo(String info) {
         players.get(PlayerId.PLAYER_1).receiveInfo(info);
         players.get(PlayerId.PLAYER_2).receiveInfo(info);
     }
 
-    /**
-     * Update the state of the player
-     */
-    private static  void updateState(){
+    //Update the state of the game
+    private static void updateState() {
         players.get(PlayerId.PLAYER_1).updateState(gameState, gameState.playerState(PlayerId.PLAYER_1));
         players.get(PlayerId.PLAYER_2).updateState(gameState, gameState.playerState(PlayerId.PLAYER_2));
     }

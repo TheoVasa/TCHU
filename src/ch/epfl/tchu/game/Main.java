@@ -9,7 +9,7 @@ import java.util.List;
 public class Main {
 
     public static void main (String[] args){
-
+/*
         Card card = Card.BLACK;
 
 
@@ -44,9 +44,9 @@ public class Main {
 
         System.out.println(ChMap.routes().get(0).additionalClaimCardsCount(claim, draw));
         List<Route> routes = new ArrayList<>();
-        /*for (int i = 0; i < 80; ++i){
+        for (int i = 0; i < 80; ++i){
             routes.add(ChMap.routes().get(i));
-        }*/
+        }
         routes.add(ChMap.routes().get(66));
         routes.add(ChMap.routes().get(65));
         routes.add(ChMap.routes().get(19));
@@ -74,7 +74,6 @@ public class Main {
         System.out.println(infplayer.claimedRoute(ChMap.routes().get(10), listOfcard));
 
         System.out.println(ChMap.stations().indexOf(ChMap.stations().get(10)));
-
-
+*/
     }
 }
