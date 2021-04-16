@@ -9,6 +9,10 @@ import java.util.List;
  */
 public enum Color {
 
+    /**
+     * Color used in the game, with a given order
+     */
+
     BLACK,
     VIOLET,
     BLUE,
@@ -21,8 +25,6 @@ public enum Color {
     /**
      * Attributes
      */
-    private static final Color tabOfEnum[] = Color.values();
-    public static final List<Color> ALL = List.of(tabOfEnum);
+    public static final List<Color> ALL = List.of(Color.values());
     public static final int COUNT = ALL.size();
-
 }

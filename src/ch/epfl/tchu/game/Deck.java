@@ -9,16 +9,15 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * generic class representing a deck of cards, immutable
+ * This class is a generic class representing a deck containing of comparable objects, is public, final and immutable.
+ *
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
  */
 
 public final class Deck <C extends Comparable<C>>{
 
-    /**
-     * the cards in the deck
-     */
+   //the cards in the deck in the sense of what the deck is containing and not necessary Cards from the tCHu game
     private final List<C> cards;
 
     /**
@@ -26,15 +25,16 @@ public final class Deck <C extends Comparable<C>>{
      * @param cards in the deck
      */
     private Deck(List<C> cards) {
-        this.cards = cards;
+        this.cards = new ArrayList<>(cards);
     }
 
     /**
-     * generate a new shuffle deck from a set of cards
+     * generate a new shuffle deck from a set of a comparable objects
+     *
      * @param cards we want in the future deck
-     * @param rng for the shuffle
+     * @param rng randomizer for the shuffle
      * @param <C> type
-     * @return a new deck, with the cards we want, shuffle
+     * @return a new deck, with the given objects, shuffle with the given rng seed (Deck)
      */
     public static <C extends Comparable<C>> Deck<C> of(SortedBag<C> cards, Random rng) {
         //Shuffle the cards of the deck
@@ -44,8 +44,8 @@ public final class Deck <C extends Comparable<C>>{
     }
 
     /**
-     * Give the empty state of the cards in the deck
-     * @return true if the deck is empty
+     * Used to know if the deck is empty or not
+     * @return true if the deck is empty (boolean)
      */
     public boolean isEmpty(){
         return cards.isEmpty();
@@ -53,7 +53,8 @@ public final class Deck <C extends Comparable<C>>{
 
     /**
      * Getter for the first card of the deck
-     * @return the top card of the deck
+     * @return the top card of the deck (C)
+     * @throws IllegalArgumentException if the deck is empty
      */
     public C topCard(){
         //Check correctness of the argument
@@ -62,9 +63,10 @@ public final class Deck <C extends Comparable<C>>{
     }
 
     /**
-     * Getter for the first n cards of the top of the deck
+     * Getter for a given number of cards from the top of the deck
      * @param count the number of cards we want to get on the top
-     * @return a collection of top cards from the deck
+     * @return a collection of top cards from the deck (SortedBag)
+     * @throws IllegalArgumentException if the count isn't positive or bigger than the size of the deck
      */
     public SortedBag<C> topCards(int count){
         //Check correctness of the argument
@@ -79,9 +81,10 @@ public final class Deck <C extends Comparable<C>>{
     }
 
     /**
-     * Gives a new deck without the first cards of the deck
+     * Gives a new deck without a given number of firsts cards in the deck
      * @param count the number of cards we want to extract from the deck
-     * @return a new deck without the top cards
+     * @return a new deck without the top cards (Deck)
+     * @throws IllegalArgumentException if the count isn't positive or bigger than the size of the deck
      */
     public Deck<C> withoutTopCards(int count){
         //Check correctness of the argument
@@ -97,7 +100,7 @@ public final class Deck <C extends Comparable<C>>{
 
     /**
      * Gives a new deck without the first card of the deck
-     * @return a new deck without the top card
+     * @return a new deck without the top card (Deck)
      */
 
     public Deck<C> withoutTopCard(){
@@ -106,17 +109,13 @@ public final class Deck <C extends Comparable<C>>{
 
     /**
      * Getter for the size of the deck
-     * @return the size of the deck
+     * @return the size of the deck (int)
      */
     public int size() {
         return cards.size();
     }
 
-    /**
-     * Check that the count(index) is in the range
-     * @param count the count(index) we want to check
-     * @return true if the count is within the range
-     */
+    //Use to check if the count(index) is in the range
     private boolean countIsGood(int count){
         return count>=0 && count<= cards.size();
     }
