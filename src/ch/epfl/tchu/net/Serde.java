@@ -1,6 +1,5 @@
 package ch.epfl.tchu.net;
 
-import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 
 import java.util.ArrayList;
@@ -50,10 +49,11 @@ public interface Serde<E> {
     }
 
     /**
+     * Create a new Serde from a given enumeration of objects (Enum types, all tickets in the game, all the routes, etc..).
      *
-     * @param enumList
-     * @param <T>
-     * @return
+     * @param enumList the list of all objects.
+     * @param <T> the type of the object.
+     * @return the new Serde for the given enum (Serde).
      */
     //ici j'ai refait la methode à ma manière, jai enlevé le throw parce que je comprenais pas exactement ce quil faisait, donc a toi de le rajouter dans la lambda si il est important!
     static <T> Serde<T> oneOf(List<T> enumList) {
@@ -95,17 +95,22 @@ public interface Serde<E> {
  */
 
     /**
+     * Create a new Serde who's able to (de)serialize with the given separator a list of objects (de)serialized with the given serde.
      *
-     * @param serde
-     * @param separator
-     * @param <T>
-     * @return
+     * @param serde used to (de)serialize the objects in the future List.
+     * @param separator used to separate all the different objects in the list in the serialization and deserialization.
+     * @param <T> type of the objects.
+     * @return the new Serde (Serde).
      */
     static <T> Serde<List<T>> listOf(Serde<T> serde, String separator){
         return Serde.of(
                 //serialization function
                 //peut etre amelioré ici (jai pensé a transformer tout les elements de la liste en String avec lambda forEach et apres return le join de tout ca)
                 (List<T> l) -> {
+                    /*
+                    l.forEach(serde::serialize);
+                    return String.join(separator, (CharSequence) l);
+                    */
                     String data = "";
                     for(T t : l)
                         data = String.join(separator, serde.serialize(t));
@@ -114,21 +119,22 @@ public interface Serde<E> {
                 //deserialization function
                 //peu etre ameliore aussi (surtout noms de variables etc..)
                 (String data) -> {
-                    List<T> listOfObj = new ArrayList<>();
-                    String[] allString = data.split(Pattern.quote(separator), -1);
-                    for(String str : allString)
-                        listOfObj.add(serde.deserialize(str));
-                    return listOfObj;
+                    List<T> deserList = new ArrayList<>();
+                    String[] splitData = data.split(Pattern.quote(separator), -1);
+                    for(String str : splitData)
+                        deserList.add(serde.deserialize(str));
+                    return deserList;
                 }
         );
     }
 
     /**
+     * Create a new Serde who's able to (de)serialize with the given separator a bag of objects (de)serialized with the given serde.
      *
-     * @param serde
-     * @param separator
-     * @param <T>
-     * @return
+     * @param serde used to (de)serialize the objects in the future bag.
+     * @param separator used to separate all the different objects in the bag in the serialization and deserialization.
+     * @param <T> type of the objects.
+     * @return the new Serde (Serde).
      */
     //peut etre opti avec une methode privée qui transform un serde de list en serde de SortedBag, mais bon.. a faire
     static <T extends Comparable<T>> Serde<SortedBag<T>> bagOf(Serde<T> serde, String separator){
