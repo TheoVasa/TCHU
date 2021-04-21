@@ -91,6 +91,7 @@ public class Serdes {
      * Serde use to (de)serialize some PublicCardState.
      */
     public static final Serde<PublicCardState> PUBLIC_CARD_STATE_SERDE = Serde.of(
+            //serialize
             (PublicCardState cardState)->{
                 String faceUpCards = LIST_CARD_SERDE.serialize(cardState.faceUpCards());
                 String deckSize = INTEGER_SERDE.serialize(cardState.deckSize());
@@ -99,6 +100,7 @@ public class Serdes {
 
                 return String.join(";", listOfData);
             },
+            //deserialize
             (String data)->{
                 String[] tabOfData = data.split((Pattern.quote(";")), -1);
                 List<Card> faceUpCards = LIST_CARD_SERDE.deserialize(tabOfData[0]);
@@ -161,6 +163,7 @@ public class Serdes {
      * Serde use to (de)serialize some PublicGameState.
      */
     public static final Serde<PublicGameState> PUBLIC_GAME_STATE_SERDE = Serde.of(
+            //serialize
             (PublicGameState game)->{
                 String ticketsCount = INTEGER_SERDE.serialize(game.ticketsCount());
                 String cardState = PUBLIC_CARD_STATE_SERDE.serialize(game.cardState());
@@ -172,6 +175,7 @@ public class Serdes {
 
                 return String.join(";", listOfData);
             },
+            //deserialize
             (String data)->{
                 String[] tabOfData = data.split((Pattern.quote(";")), -1);
                 int ticketsCount = INTEGER_SERDE.deserialize(tabOfData[0]);
