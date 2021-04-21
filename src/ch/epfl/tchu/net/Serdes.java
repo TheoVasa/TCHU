@@ -133,7 +133,7 @@ public class Serdes {
 
                 return new PublicPlayerState(ticketCount, cardCount, routes);
             }
-    );;
+    );
 
     /**
      * Serde use to (de)serialize some PlayerState.
