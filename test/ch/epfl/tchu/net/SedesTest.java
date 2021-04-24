@@ -5,7 +5,6 @@ import ch.epfl.tchu.game.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.concurrent.CancellationException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -258,7 +257,7 @@ public class SedesTest {
         for (Ticket c: expectedList)
             indexList.add(String.valueOf(ChMap.tickets().indexOf(c)));
         String data = String.join(",",indexList);
-        SortedBag expected = SortedBag.of(expectedList);
+        SortedBag<Ticket> expected = SortedBag.of(expectedList);
         assertEquals(expected, Serdes.SORTED_BAG_TICKETS_SERDE.deserialize(data));
 
     }
