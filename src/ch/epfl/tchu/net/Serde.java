@@ -33,7 +33,6 @@ public interface Serde<E> {
      * @param <T> the parameters associate to the future serde
      * @return a new Serde with the given serialization and deserialization functions (Serde)
      */
-    // ! Pour l'instant j'ai mis  E mais je suis pas sur d'avoir bien compris la donnee.. !
     static <T> Serde<T> of(Function<T, String> serialization, Function<String, T> deserialization){
         return new Serde<T>() {
             @Override
@@ -54,45 +53,20 @@ public interface Serde<E> {
      * @param enumList the list of all objects.
      * @param <T> the type of the object.
      * @return the new Serde for the given enum (Serde).
+     * //TODO --> throw illegal si la liste est vie
      */
-    //ici j'ai refait la methode à ma manière, jai enlevé le throw parce que je comprenais pas exactement ce quil faisait, donc a toi de le rajouter dans la lambda si il est important!
     static <T> Serde<T> oneOf(List<T> enumList) {
         return Serde.of(
                 //serialization function
-                (T t) -> (enumList.contains(t))
+                (T t) -> (t != null && enumList.contains(t))
                         ? String.valueOf(enumList.indexOf(t))
                         : "",
                 //deserialization function
-                (String data) -> enumList.get(Integer.parseInt(data))
+                (String data) ->  (!data.isEmpty())
+                                    ? enumList.get(Integer.parseInt(data))
+                                    : null
         );
     }
-/*
-        );{
-            @Override
-            public String serialize(T t) {
-                String data = (enumList.contains(t))
-                        ? new StringBuilder()
-                            .append(enumList.indexOf(t))
-                            .toString()
-                        : "";
-                return data;
-            }
-
-            @Override
-            public T deserialize(String data) {
-                //Take the index of the single data
-                int index = 0;
-                try {
-                    index = Integer.parseInt(data);
-                } catch (NumberFormatException e) {
-                    Preconditions.checkArgument(false);
-                } //DO NOTHING
-
-                T element = enumList.get(index);
-                return element;
-            }
-        };
- */
 
     /**
      * Create a new Serde who's able to (de)serialize with the given separator a list of objects (de)serialized with the given serde.
@@ -105,25 +79,23 @@ public interface Serde<E> {
     static <T> Serde<List<T>> listOf(Serde<T> serde, String separator){
         return Serde.of(
                 //serialization function
-                //peut etre amelioré ici (jai pensé a transformer tout les elements de la liste en String avec lambda forEach et apres return le join de tout ca)
                 (List<T> l) -> {
-                    /*
-                    l.forEach(serde::serialize);
-                    return String.join(separator, (CharSequence) l);
-                    */
-                    String data = "";
+                    List<String> dataList = new ArrayList<>();
                     for(T t : l)
-                        data = String.join(separator, serde.serialize(t));
-                    return data;
+                        dataList.add(serde.serialize(t));
+                    return String.join(separator, dataList);
                 },
                 //deserialization function
-                //peu etre ameliore aussi (surtout noms de variables etc..)
                 (String data) -> {
-                    List<T> deserList = new ArrayList<>();
+                    //If data is empty then return an empty list
+                    if (data.isEmpty())
+                        return new ArrayList<T>();
+                    //If data is not empty then deserialize element by element
+                    List<T> deserializedList = new ArrayList<>();
                     String[] splitData = data.split(Pattern.quote(separator), -1);
                     for(String str : splitData)
-                        deserList.add(serde.deserialize(str));
-                    return deserList;
+                        deserializedList.add(serde.deserialize(str));
+                    return deserializedList;
                 }
         );
     }
@@ -141,22 +113,13 @@ public interface Serde<E> {
         return Serde.of(
                 //serialization function
                 (SortedBag<T> bag)-> {
-                    List<T> listFromBag = bag.toList();
-                    String data = "";
-                    for(T t : listFromBag)
-                        data = String.join(separator, serde.serialize(t));
-                    return data;
+                    return Serde.listOf(serde, separator).serialize(bag.toList());
                 },
                 //deserialization function
                 (String data) -> {
-                    List<T> listOfObj = new ArrayList<>();
-                    String[] allString = data.split(Pattern.quote(separator), -1);
-                    for(String str : allString)
-                        listOfObj.add(serde.deserialize(str));
+                    List<T> listOfObj = Serde.listOf(serde, separator).deserialize(data);
                     return SortedBag.of(listOfObj);
                 }
         );
     }
-
-
 }

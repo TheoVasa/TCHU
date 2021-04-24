@@ -14,7 +14,4 @@ public enum MessageId {
     ROUTE,
     CARDS,
     CHOOSE_ADDITIONAL_CARDS
-
-
-
 }

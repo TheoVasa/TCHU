@@ -26,9 +26,13 @@ public class Serdes {
     //pas sur de celui la.. a revoir
     public static final Serde<String> STRING_SERDE = Serde.of(
             //serialize
-            (String str)-> Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8)),
+            (String str)-> (!str.isEmpty())
+                            ? Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8))
+                            : "",
             //deserialize
-            (String data)-> new String (Base64.getDecoder().decode(data.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8)
+            (String data)-> (!data.isEmpty())
+                            ? new String (Base64.getDecoder().decode(data.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8)
+                            : ""
     );
 
     /**
@@ -126,10 +130,10 @@ public class Serdes {
             },
             //deserialize
             (String data)->{
-                List<String> listOfData = Serde.listOf(STRING_SERDE, ";").deserialize(data);
-                int ticketCount = INTEGER_SERDE.deserialize(listOfData.get(0));
-                int cardCount = INTEGER_SERDE.deserialize(listOfData.get(1));
-                List<Route> routes = LIST_ROUTE_SERDE.deserialize(listOfData.get(2));
+                String[] listOfData = data.split(";", -1);//Serde.listOf(STRING_SERDE, ";").deserialize(data);
+                int ticketCount = INTEGER_SERDE.deserialize(listOfData[0]);
+                int cardCount = INTEGER_SERDE.deserialize(listOfData[1]);
+                List<Route> routes = LIST_ROUTE_SERDE.deserialize(listOfData[2]);
 
                 return new PublicPlayerState(ticketCount, cardCount, routes);
             }
@@ -173,11 +177,11 @@ public class Serdes {
                 String lastPlayer = PLAYER_ID_SERDE.serialize(game.lastPlayer());
                 List<String> listOfData = List.of(ticketsCount, cardState, currentPlayerId, playerState1, playerState2, lastPlayer);
 
-                return String.join(";", listOfData);
+                return String.join(":", listOfData);
             },
             //deserialize
             (String data)->{
-                String[] tabOfData = data.split((Pattern.quote(";")), -1);
+                String[] tabOfData = data.split((Pattern.quote(":")), -1);
                 int ticketsCount = INTEGER_SERDE.deserialize(tabOfData[0]);
                 PublicCardState cardState = PUBLIC_CARD_STATE_SERDE.deserialize(tabOfData[1]);
                 PlayerId currentPlayerId = PLAYER_ID_SERDE.deserialize(tabOfData[2]);
