@@ -11,9 +11,10 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * This class is used to contain all different Serde used, not instantiable.
+ * This class is used to contain all different Serde used.
+ * It is public, final and not instantiable.
  */
-public class Serdes {
+public final class Serdes {
 
     /**
      * Serde use to (de)serialize some Integer.
@@ -23,7 +24,6 @@ public class Serdes {
     /**
      * Serde use to (de)serialize some String.
      */
-    //pas sur de celui la.. a revoir
     public static final Serde<String> STRING_SERDE = Serde.of(
             //serialize
             (String str)-> (!str.isEmpty())
