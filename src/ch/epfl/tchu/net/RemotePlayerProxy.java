@@ -103,8 +103,7 @@ public class RemotePlayerProxy implements Player {
     @Override
     public SortedBag<Ticket> chooseInitialTickets() {
         //Send message
-        String sendMessage = String.join(" ", List.of(MessageId.CHOOSE_INITIAL_TICKETS.name(), "\n"))
-                ;
+        String sendMessage = String.join(" ", List.of(MessageId.CHOOSE_INITIAL_TICKETS.name(), "\n"));
         sendMessage(sendMessage);
 
         //Receive message
@@ -170,11 +169,14 @@ public class RemotePlayerProxy implements Player {
 
     @Override
     public SortedBag<Card> initialClaimCards() {
-        //TODO
         //Send message
-        //String sendMessage = String.join(" ", MessageId..name(), "\n");
-        //sendMessage(sendMessage);
-        return null;
+        String sendMessage = String.join(" ", MessageId.CARDS.name(), "\n");
+        sendMessage(sendMessage);
+
+        //Receive message
+        String receivedMessage = receiveMessage();
+        SortedBag<Card> cards = Serdes.SORTED_BAG_CARD_SERDE.deserialize(receivedMessage);
+        return cards;
     }
 
     @Override
