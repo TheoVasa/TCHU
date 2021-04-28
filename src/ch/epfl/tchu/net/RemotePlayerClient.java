@@ -12,14 +12,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class RemotePlayerClient {
+/**
+ * This class represent the connection of the player to the server.
+ * It get the message from the server and handle them by calling the right method of player.
+ * This class will be used on the machine where the server is not launching.
+ * It is public and final.
+ */
+public final class RemotePlayerClient {
 
     //The player that is not on the same machine than the server
-    private Player player;
+    private final Player player;
     //The name of the server
-    private String name;
+    private final String name;
     //The port to connect via tcpip
-    private int port;
+    private final int port;
     //The socket to handle the connection of the game
     private Socket socket;
 
@@ -52,10 +58,13 @@ public class RemotePlayerClient {
                     new InputStreamReader(socket.getInputStream(),
                             StandardCharsets.US_ASCII));
             return receiver.readLine();
-        }catch (IOException e){} // Do nothiing
-        return "";
+        }catch (IOException e){
+            throw new UncheckedIOException(e);
+        }
     }
 
+    //Send a message to the server.
+    //param msg : the message (already serialized) that we want to send to the server
     private  void sendMessage(String msg){
         try {
             BufferedWriter sender = new BufferedWriter(
@@ -63,19 +72,29 @@ public class RemotePlayerClient {
                             StandardCharsets.US_ASCII));
             sender.write(msg);
             sender.flush();
-        }catch (IOException e){} // Do nothiing
+        }catch (IOException e){
+            throw new UncheckedIOException(e);
+        }
     }
 
 
+    /**
+     * Listen permanently to the connection with the server and handle the messages received
+     */
     public void run(){
         while (socket.isConnected()){
             String receivedMessage = receiveMessage();
             if (!receivedMessage.isEmpty())
-                deserializeAndCallPlayerMethod(receivedMessage);
+                handleRecivedMessage(receivedMessage);
         }
     }
 
-    private void deserializeAndCallPlayerMethod(String msg){
+    //Handle the message received from the server
+    //by calling the right method of player
+    //param msg: the message received (needs to be deserialized and
+    // eventually send to the server the return of the method of player)
+    private void handleRecivedMessage(String msg){
+        //Get the different data from the message in a list
         Iterator<String> listOfData = Arrays.stream(msg.split(Pattern.quote(" "), -1)).iterator();
         switch (MessageId.valueOf(listOfData.next())){
             case INIT_PLAYERS :
