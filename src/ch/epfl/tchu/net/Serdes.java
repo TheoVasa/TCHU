@@ -13,7 +13,11 @@ import java.util.regex.Pattern;
 /**
  * This class is used to contain all different Serde used.
  * It is public, final and not instantiable.
+ *
+ * @author Selien Wicki (314357)
+ * @author Theo Vasarino (313191)
  */
+
 public final class Serdes {
 
     /**
@@ -31,7 +35,7 @@ public final class Serdes {
                             : "",
             //deserialize
             (String data)-> (!data.isEmpty())
-                            ? new String (Base64.getDecoder().decode(data.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8)
+                            ? new String (Base64.getDecoder().decode(data), StandardCharsets.UTF_8)
                             : ""
     );
 
@@ -39,7 +43,6 @@ public final class Serdes {
      * Serde use to (de)serialize some PlayerID.
      */
     public static final Serde<PlayerId> PLAYER_ID_SERDE = Serde.oneOf(PlayerId.ALL);
-
 
     /**
      * Serde use to (de)serialize some TurnKind.

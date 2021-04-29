@@ -12,22 +12,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+/**
+ * class represent the distant player's client, in fact this class is used to dialog with the server proxy and do the right actions with the player.
+ *
+ * @author Selien Wicki (314357)
+ * @author Theo Vasarino (313191)
+ */
 public class RemotePlayerClient {
 
     //The player that is not on the same machine than the server
-    private Player player;
+    private final Player player;
     //The name of the server
-    private String name;
+    private final String name;
     //The port to connect via tcpip
-    private int port;
+    private final int port;
     //The socket to handle the connection of the game
     private Socket socket;
 
     /**
+     * Construct a RemotePlayerClient.
      *
-     * @param player
-     * @param name
-     * @param port
+     * @param player represented by the client
+     * @param name of the server
+     * @param port to connect to properly communicate with the proxy
      */
     public RemotePlayerClient(Player player, String name, int port){
         this.player = player;
@@ -38,35 +45,12 @@ public class RemotePlayerClient {
         connect();
     }
 
-    private String connect(){
-        try{
-            socket = new Socket(name, port);
-        }catch (IOException e){} // Do nothiing
-
-        return "";
-    }
-
-    private String receiveMessage(){
-        try {
-            BufferedReader receiver = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream(),
-                            StandardCharsets.US_ASCII));
-            return receiver.readLine();
-        }catch (IOException e){} // Do nothiing
-        return "";
-    }
-
-    private  void sendMessage(String msg){
-        try {
-            BufferedWriter sender = new BufferedWriter(
-                    new OutputStreamWriter(socket.getOutputStream(),
-                            StandardCharsets.US_ASCII));
-            sender.write(msg);
-            sender.flush();
-        }catch (IOException e){} // Do nothiing
-    }
-
-
+    /**
+     * Used to communicate with the server.
+     * Indeed this method : - Wait a message from the proxy
+     *                      - In function of the type of the message, do the proper actions with the player.
+     *
+     */
     public void run(){
         while (socket.isConnected()){
             String receivedMessage = receiveMessage();
@@ -75,6 +59,7 @@ public class RemotePlayerClient {
         }
     }
 
+    //In function of the type of message, deserialize and do the proper actions with the player.
     private void deserializeAndCallPlayerMethod(String msg){
         Iterator<String> listOfData = Arrays.stream(msg.split(Pattern.quote(" "), -1)).iterator();
         switch (MessageId.valueOf(listOfData.next())){
@@ -136,6 +121,42 @@ public class RemotePlayerClient {
                 String serializedChoseOption = Serdes.SORTED_BAG_CARD_SERDE.serialize(chosenOption);
                 sendMessage(serializedChoseOption);
                 break;
+            default:
+                //do nothing
+                break;
         }
     }
+
+    //connect the client to the server.
+    private void connect(){
+        try{
+            socket = new Socket(name, port);
+        }catch (IOException e){
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    //receive a message from the server.
+    private String receiveMessage(){
+        try {
+            BufferedReader receiver = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
+            return receiver.readLine();
+        }catch (IOException e){
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    //send a message to the server.
+    private  void sendMessage(String msg){
+        try {
+            BufferedWriter sender = new BufferedWriter(
+                    new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.US_ASCII));
+            sender.write(msg);
+            sender.flush();
+        }catch (IOException e){
+            throw new UncheckedIOException(e);
+        }
+    }
+
 }
