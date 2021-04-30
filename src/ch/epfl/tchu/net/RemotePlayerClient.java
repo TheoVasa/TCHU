@@ -13,12 +13,12 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * This class represent the connection of the player to the server.
- * It get the message from the server and handle them by calling the right method of player.
- * This class will be used on the machine where the server is not launching.
- * It is public and final.
+ * class represent the distant player's client, in fact this class is used to dialog with the server proxy and do the right actions with the player.
+ *
+ * @author Selien Wicki (314357)
+ * @author Theo Vasarino (313191)
  */
-public final class RemotePlayerClient {
+public class RemotePlayerClient {
 
     //The player that is not on the same machine than the server
     private final Player player;
@@ -30,10 +30,11 @@ public final class RemotePlayerClient {
     private Socket socket;
 
     /**
+     * Construct a RemotePlayerClient.
      *
-     * @param player
-     * @param name
-     * @param port
+     * @param player represented by the client
+     * @param name of the server
+     * @param port to connect to properly communicate with the proxy
      */
     public RemotePlayerClient(Player player, String name, int port){
         this.player = player;
@@ -44,57 +45,22 @@ public final class RemotePlayerClient {
         connect();
     }
 
-    private String connect(){
-        try{
-            socket = new Socket(name, port);
-        }catch (IOException e){} // Do nothiing
-
-        return "";
-    }
-
-    private String receiveMessage(){
-        try {
-            BufferedReader receiver = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream(),
-                            StandardCharsets.US_ASCII));
-            return receiver.readLine();
-        }catch (IOException e){
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    //Send a message to the server.
-    //param msg : the message (already serialized) that we want to send to the server
-    private  void sendMessage(String msg){
-        try {
-            BufferedWriter sender = new BufferedWriter(
-                    new OutputStreamWriter(socket.getOutputStream(),
-                            StandardCharsets.US_ASCII));
-            sender.write(msg);
-            sender.flush();
-        }catch (IOException e){
-            throw new UncheckedIOException(e);
-        }
-    }
-
-
     /**
-     * Listen permanently to the connection with the server and handle the messages received
+     * Used to communicate with the server.
+     * Indeed this method : - Wait a message from the proxy
+     *                      - In function of the type of the message, do the proper actions with the player.
+     *
      */
     public void run(){
         while (socket.isConnected()){
             String receivedMessage = receiveMessage();
             if (!receivedMessage.isEmpty())
-                handleRecivedMessage(receivedMessage);
+                deserializeAndCallPlayerMethod(receivedMessage);
         }
     }
 
-    //Handle the message received from the server
-    //by calling the right method of player
-    //param msg: the message received (needs to be deserialized and
-    // eventually send to the server the return of the method of player)
-    private void handleRecivedMessage(String msg){
-        //Get the different data from the message in a list
+    //In function of the type of message, deserialize and do the proper actions with the player.
+    private void deserializeAndCallPlayerMethod(String msg){
         Iterator<String> listOfData = Arrays.stream(msg.split(Pattern.quote(" "), -1)).iterator();
         switch (MessageId.valueOf(listOfData.next())){
             case INIT_PLAYERS :
@@ -155,6 +121,43 @@ public final class RemotePlayerClient {
                 String serializedChoseOption = Serdes.SORTED_BAG_CARD_SERDE.serialize(chosenOption);
                 sendMessage(serializedChoseOption);
                 break;
+            default:
+                //do nothing
+                break;
         }
     }
+
+    //connect the client to the server.
+    private void connect(){
+        try{
+            socket = new Socket(name, port);
+        }catch (IOException e){
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    //receive a message from the server.
+    private String receiveMessage(){
+        try {
+            BufferedReader receiver = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
+            String message = receiver.readLine();
+            return (message==null) ? "" : message;
+        }catch (IOException e){
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    //send a message to the server.
+    private  void sendMessage(String msg){
+        try {
+            BufferedWriter sender = new BufferedWriter(
+                    new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.US_ASCII));
+            sender.write(msg);
+            sender.flush();
+        }catch (IOException e){
+            throw new UncheckedIOException(e);
+        }
+    }
+
 }

@@ -7,6 +7,12 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+/**
+ * This interface represent a serde, used to serialize and deserialize some information.
+ *
+ * @author Selien Wicki (314357)
+ * @author Theo Vasarino (313191)
+ */
 public interface Serde<E> {
 
     /**
@@ -112,14 +118,9 @@ public interface Serde<E> {
     static <T extends Comparable<T>> Serde<SortedBag<T>> bagOf(Serde<T> serde, String separator){
         return Serde.of(
                 //serialization function
-                (SortedBag<T> bag)-> {
-                    return Serde.listOf(serde, separator).serialize(bag.toList());
-                },
+                (SortedBag<T> bag)-> Serde.listOf(serde, separator).serialize(bag.toList()),
                 //deserialization function
-                (String data) -> {
-                    List<T> listOfObj = Serde.listOf(serde, separator).deserialize(data);
-                    return SortedBag.of(listOfObj);
-                }
+                (String data) -> SortedBag.of(Serde.listOf(serde, separator).deserialize(data))
         );
     }
 }

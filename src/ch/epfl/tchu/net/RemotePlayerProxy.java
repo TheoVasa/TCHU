@@ -9,35 +9,34 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
-/**
- * This class represent the the proxy of th player that is not on the same machine than the server.
- * It is public, final and immutable.
- */
-public final class RemotePlayerProxy implements Player {
+public class RemotePlayerProxy implements Player {
 
-    //The Socket of the Player
-    private final Socket socket;
+    /**
+     * The Socket of the Player
+     */
+    private Socket socket;
 
     /**
      * Create a Player that plays on an other machine than the server
      * @param socket the socket to handle the connection on internet
      */
-    public RemotePlayerProxy(Socket socket){
+    RemotePlayerProxy(Socket socket){
         this.socket = socket;
     }
 
     //Send a message to the player that isn't on the same machine as the server
     //parameter is the serialized message (instruction) to send
-    private void sendMessage(String msg){
+    private boolean sendMessage(String msg){
         try{
             BufferedWriter sender = new BufferedWriter(new OutputStreamWriter(
                                         this.socket.getOutputStream(),
                                         StandardCharsets.US_ASCII));
             sender.write(msg);
             sender.flush();
-        }catch (IOException e){
-            throw new UncheckedIOException(e);
-        }
+            return true;
+        }catch (UncheckedIOException | IOException e){} // Do nothing
+
+        return false;
     }
 
     //Receive a message from the player
@@ -48,9 +47,9 @@ public final class RemotePlayerProxy implements Player {
                     this.socket.getInputStream(),
                     StandardCharsets.US_ASCII));
             return receiver.readLine();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        } catch (UncheckedIOException | IOException e) {} // Do nothing
+
+        return "";
     }
 
 
@@ -109,7 +108,9 @@ public final class RemotePlayerProxy implements Player {
 
         //Receive message
         String receivedMessage = receiveMessage();
-        return Serdes.SORTED_BAG_TICKETS_SERDE.deserialize(receivedMessage);
+        SortedBag<Ticket> deserializedBag = Serdes.SORTED_BAG_TICKETS_SERDE.deserialize(receivedMessage);
+
+        return deserializedBag;
     }
 
     @Override
@@ -120,7 +121,9 @@ public final class RemotePlayerProxy implements Player {
 
         //Receive message
         String receiveMessage = receiveMessage();
-        return Serdes.TURN_KIND_SERDE.deserialize(receiveMessage);
+        TurnKind deserializedTurnKind = Serdes.TURN_KIND_SERDE.deserialize(receiveMessage);
+
+        return deserializedTurnKind;
     }
 
     @Override
@@ -133,7 +136,9 @@ public final class RemotePlayerProxy implements Player {
 
         //Recceive message
         String receivedMessage = receiveMessage();
-        return Serdes.SORTED_BAG_TICKETS_SERDE.deserialize(receivedMessage);
+        SortedBag<Ticket> deserializedBag = Serdes.SORTED_BAG_TICKETS_SERDE.deserialize(receivedMessage);
+
+        return deserializedBag;
     }
 
     @Override
@@ -144,7 +149,9 @@ public final class RemotePlayerProxy implements Player {
 
         //Receive message
         String receivedMessage = receiveMessage();
-        return Serdes.INTEGER_SERDE.deserialize(receivedMessage);
+        int deserializedInt = Serdes.INTEGER_SERDE.deserialize(receivedMessage);
+
+        return deserializedInt;
     }
 
     @Override
@@ -155,7 +162,9 @@ public final class RemotePlayerProxy implements Player {
 
         //Receive message
         String receivedMessage = receiveMessage();
-        return Serdes.ROUTE_SERDE.deserialize(receivedMessage);
+        Route deserializedRoute = Serdes.ROUTE_SERDE.deserialize(receivedMessage);
+
+        return deserializedRoute;
     }
 
     @Override
@@ -166,7 +175,8 @@ public final class RemotePlayerProxy implements Player {
 
         //Receive message
         String receivedMessage = receiveMessage();
-        return Serdes.SORTED_BAG_CARD_SERDE.deserialize(receivedMessage);
+        SortedBag<Card> cards = Serdes.SORTED_BAG_CARD_SERDE.deserialize(receivedMessage);
+        return cards;
     }
 
     @Override
@@ -178,6 +188,8 @@ public final class RemotePlayerProxy implements Player {
 
         //Receive message
         String receiveMessage = receiveMessage();
-        return Serdes.SORTED_BAG_CARD_SERDE.deserialize(receiveMessage);
+        SortedBag<Card> deserializedBag = Serdes.SORTED_BAG_CARD_SERDE.deserialize(receiveMessage);
+
+        return deserializedBag;
     }
 }
