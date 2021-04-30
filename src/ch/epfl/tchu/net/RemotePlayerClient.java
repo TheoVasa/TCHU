@@ -141,7 +141,8 @@ public class RemotePlayerClient {
         try {
             BufferedReader receiver = new BufferedReader(
                     new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
-            return receiver.readLine();
+            String message = receiver.readLine();
+            return (message==null) ? "" : message;
         }catch (IOException e){
             throw new UncheckedIOException(e);
         }
