@@ -2,9 +2,14 @@ package ch.epfl.tchu.net;
 
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
+import ch.epfl.test.TestRandomizer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+
+import static ch.epfl.tchu.game.Player.TurnKind.CLAIM_ROUTE;
 
 public class TestClient {
     public static void main(String[] args) {
@@ -19,10 +24,13 @@ public class TestClient {
 
     private final static class TestPlayer implements Player {
         private final List<Ticket> alltickets = ChMap.tickets();
+        private final List<Route> allRoutes = ChMap.routes();
+        private final List<Card> allCards = Card.ALL;
+        private final Random rng = TestRandomizer.newRandom();
 
         @Override
-        public void initPlayers(PlayerId ownId,
-                Map<PlayerId, String> names) {
+        public void initPlayers(PlayerId ownId, Map<PlayerId, String> names) {
+            System.out.println("Message received!");
             System.out.printf("ownId: %s\n", ownId);
             System.out.printf("playerNames: %s\n", names);
         }
@@ -33,6 +41,7 @@ public class TestClient {
          * @param info the information we want to communicate
          */
         @Override public void receiveInfo(String info) {
+            System.out.println("Message received!");
             System.out.printf("Received info : %s\n", info);
 
         }
@@ -44,9 +53,9 @@ public class TestClient {
          * @param ownState the state of the player
          */
         @Override public void updateState(PublicGameState newState, PlayerState ownState) {
-
-            System.out.printf("new game state : %s\n", newState);
-            System.out.printf("player state : %s\n", ownState);
+            System.out.println("Message received!");
+            System.out.printf("new game state : %s\n", Serdes.PUBLIC_GAME_STATE_SERDE.serialize(newState));
+            System.out.printf("player state : %s\n", Serdes.PLAYER_STATE_SERDE.serialize(ownState));
 
         }
 
@@ -57,6 +66,7 @@ public class TestClient {
          */
         @Override public void setInitialTicketChoice(
                 SortedBag<Ticket> tickets) {
+            System.out.println("Message received!");
             System.out.printf("initial ticket : %s\n", tickets);
 
         }
@@ -67,6 +77,7 @@ public class TestClient {
          * @return a SortedBag of tickets (SortedBag< Tickets >>)
          */
         @Override public SortedBag<Ticket> chooseInitialTickets() {
+            System.out.println("Message received!");
             SortedBag<Ticket> chosenTickets = SortedBag.of(alltickets.subList(3, 6));
             System.out.printf("Chosen tickets : %s\n", chosenTickets);
 
@@ -79,7 +90,9 @@ public class TestClient {
          * @return a type of action the player wants to do for the turn (TurnKind)
          */
         @Override public TurnKind nextTurn() {
-            return null;
+            System.out.println("Message received!");
+            System.out.println("player want to claim a route");
+            return CLAIM_ROUTE;
         }
 
         /**
@@ -89,9 +102,13 @@ public class TestClient {
          * @param options the additional tickets he can choose
          * @return the tickets the player chose (SortedBag< Tickets >>)
          */
-        @Override public SortedBag<Ticket> chooseTickets(
-                SortedBag<Ticket> options) {
-            return null;
+        @Override public SortedBag<Ticket> chooseTickets(SortedBag<Ticket> options) {
+            System.out.println("Message received!");
+            System.out.printf("Options tickets : %s\n", options);
+            List<Ticket> chosenTickets = options.toList();
+            chosenTickets.remove(0);
+            System.out.printf("Chosen Tickets : %s\n", chosenTickets);
+            return SortedBag.of(chosenTickets);
         }
 
         /**
@@ -101,7 +118,10 @@ public class TestClient {
          * or Constants.DECK_SLOT if he wants to pick up the top deck card
          */
         @Override public int drawSlot() {
-            return 0;
+            var slot = Constants.DECK_SLOT;
+            System.out.println("Message received!");
+            System.out.printf("Chosen slot %s\n", slot);
+            return slot;
         }
 
         /**
@@ -110,7 +130,10 @@ public class TestClient {
          * @return the route the player tries to claim (Route)
          */
         @Override public Route claimedRoute() {
-            return null;
+            Route claimedRoute = allRoutes.get(rng.nextInt(allRoutes.size()));
+            System.out.println("Message received!");
+            System.out.printf("claimed route : %s\n", claimedRoute.id());
+            return claimedRoute;
         }
 
         /**
@@ -119,7 +142,10 @@ public class TestClient {
          * @return the initial cards he used to try to claim an route (SortedBag< Card >>)
          */
         @Override public SortedBag<Card> initialClaimCards() {
-            return null;
+            SortedBag<Card> claimCards = SortedBag.of(4, allCards.get(rng.nextInt(allCards.size())));
+            System.out.println("Message received!");
+            System.out.printf("Claim cards : %s\n", claimCards);
+            return claimCards;
         }
 
         /**
@@ -130,11 +156,12 @@ public class TestClient {
          * @return the cards the player want play additional,
          * return a void SortedBag if he decide to not claim the route (SortedBag< Tickets >>)
          */
-        @Override public SortedBag<Card> chooseAdditionalCards(
-                List<SortedBag<Card>> options) {
-            return null;
+        @Override public SortedBag<Card> chooseAdditionalCards(List<SortedBag<Card>> options) {
+            SortedBag<Card> addCards = SortedBag.of(4, allCards.get(rng.nextInt(allCards.size())));
+            System.out.println("Message received!");
+            System.out.printf("Additional cards : %s\n", addCards);
+            return addCards;
         }
 
-        // … autres méthodes de Player
     }
 }
