@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Consumer;
 
 import static ch.epfl.tchu.game.PlayerId.PLAYER_1;
 import static ch.epfl.tchu.game.PlayerId.PLAYER_2;
@@ -24,7 +25,7 @@ public class TestServer {
 
     public static void main(String[] args) throws IOException {
         System.out.println("Starting server!");
-        try (ServerSocket serverSocket = new ServerSocket(5108);
+        try (ServerSocket serverSocket = new ServerSocket(5107);
                 Socket socket = serverSocket.accept()) {
             Player playerProxy = new RemotePlayerProxy(socket);
             var playerNames = Map.of(PLAYER_1, "Ada", PLAYER_2, "Charles");
@@ -65,13 +66,15 @@ public class TestServer {
             playerProxy.setInitialTicketChoice(tickets);
 
             generateSendingMessage("choose initial Tickets");
-            playerProxy.chooseInitialTickets();
+            SortedBag<Ticket> chosenTickets = playerProxy.chooseInitialTickets();
+            chosenTickets.toList().forEach( t -> System.out.println(t.text()));
 
             generateSendingMessage("choose next turn");
             playerProxy.nextTurn();
 
             generateSendingMessage("choose tickets");
-            playerProxy.chooseTickets(tickets);
+
+
 
             generateSendingMessage("draw slot");
             playerProxy.drawSlot();

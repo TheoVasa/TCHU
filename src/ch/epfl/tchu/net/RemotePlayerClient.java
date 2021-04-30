@@ -28,9 +28,13 @@ public class RemotePlayerClient {
     private final int port;
     //The socket to handle the connection of the game
     private Socket socket;
+    //BufferReader
+    private BufferedReader receiver;
+    //BufferWriter
+    private BufferedWriter sender;
 
     /**
-     * Construct a RemotePlayerClient.
+     * Construct a RemotePlayerClient and connect him to the server
      *
      * @param player represented by the client
      * @param name of the server
@@ -47,20 +51,19 @@ public class RemotePlayerClient {
 
     /**
      * Used to communicate with the server.
-     * Indeed this method : - Wait a message from the proxy
-     *                      - In function of the type of the message, do the proper actions with the player.
-     *
+     * This method : - Wait a message from the proxy
+     *               - In function of the type of the message, do the proper actions with the player.
      */
     public void run(){
         while (socket.isConnected()){
             String receivedMessage = receiveMessage();
             if (!receivedMessage.isEmpty())
-                deserializeAndCallPlayerMethod(receivedMessage);
+                handleReceivedMessage(receivedMessage);
         }
     }
 
     //In function of the type of message, deserialize and do the proper actions with the player.
-    private void deserializeAndCallPlayerMethod(String msg){
+    private void handleReceivedMessage(String msg){
         Iterator<String> listOfData = Arrays.stream(msg.split(Pattern.quote(" "), -1)).iterator();
         switch (MessageId.valueOf(listOfData.next())){
             case INIT_PLAYERS :
@@ -87,39 +90,46 @@ public class RemotePlayerClient {
             case CHOOSE_INITIAL_TICKETS:
                 SortedBag<Ticket> chosenTickets = player.chooseInitialTickets();
                 String serializedChosenTickets = Serdes.SORTED_BAG_TICKETS_SERDE.serialize(chosenTickets);
-                sendMessage(serializedChosenTickets);
+                String msgToSend = new StringBuilder(serializedChosenTickets).append("\n").toString();
+                sendMessage(msgToSend);
                 break;
             case NEXT_TURN:
                 Player.TurnKind turnKind = player.nextTurn();
                 String serializedTurnKind = Serdes.TURN_KIND_SERDE.serialize(turnKind);
-                sendMessage(serializedTurnKind);
+                msgToSend = new StringBuilder(serializedTurnKind).append("\n").toString();
+                sendMessage(msgToSend);
                 break;
             case CHOOSE_TICKETS:
                 SortedBag<Ticket> options = Serdes.SORTED_BAG_TICKETS_SERDE.deserialize(listOfData.next());
                 SortedBag<Ticket> chosenOptions = player.chooseTickets(options);
                 String serializedChosenOptions = Serdes.SORTED_BAG_TICKETS_SERDE.serialize(chosenOptions);
-                sendMessage(serializedChosenOptions);
+                msgToSend = new StringBuilder(serializedChosenOptions).append("\n").toString();
+                sendMessage(msgToSend);
                 break;
             case DRAW_SLOT:
                 int drawSlot = player.drawSlot();
                 String serializedDrawSlot = Serdes.INTEGER_SERDE.serialize(drawSlot);
-                sendMessage(serializedDrawSlot);
+                msgToSend = new StringBuilder(serializedDrawSlot).append("\n").toString();
+                sendMessage(msgToSend);
                 break;
             case ROUTE:
                 Route route = player.claimedRoute();
                 String serializedRoute = Serdes.ROUTE_SERDE.serialize(route);
-                sendMessage(serializedRoute);
+                msgToSend = new StringBuilder(serializedRoute).append("\n").toString();
+                sendMessage(msgToSend);
                 break;
             case CARDS:
                 SortedBag<Card> cards = player.initialClaimCards();
                 String serializedCards = Serdes.SORTED_BAG_CARD_SERDE.serialize(cards);
-                sendMessage(serializedCards);
+                msgToSend = new StringBuilder(serializedCards).append("\n").toString();
+                sendMessage(msgToSend);
                 break;
             case CHOOSE_ADDITIONAL_CARDS:
                 List<SortedBag<Card>> option = Serdes.LIST_SORTED_BAG_CARD_SERDE.deserialize(listOfData.next());
                 SortedBag<Card> chosenOption = player.chooseAdditionalCards(option);
                 String serializedChoseOption = Serdes.SORTED_BAG_CARD_SERDE.serialize(chosenOption);
-                sendMessage(serializedChoseOption);
+                msgToSend = new StringBuilder(serializedChoseOption).append("\n").toString();
+                sendMessage(msgToSend);
                 break;
             default:
                 //do nothing
@@ -131,6 +141,10 @@ public class RemotePlayerClient {
     private void connect(){
         try{
             socket = new Socket(name, port);
+            receiver = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
+            sender = new BufferedWriter(
+                    new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.US_ASCII));
         }catch (IOException e){
             throw new UncheckedIOException(e);
         }
@@ -139,10 +153,8 @@ public class RemotePlayerClient {
     //receive a message from the server.
     private String receiveMessage(){
         try {
-            BufferedReader receiver = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
             String message = receiver.readLine();
-            return (message==null) ? "" : message;
+            return (message == null) ? "" : message;
         }catch (IOException e){
             throw new UncheckedIOException(e);
         }
@@ -151,13 +163,11 @@ public class RemotePlayerClient {
     //send a message to the server.
     private  void sendMessage(String msg){
         try {
-            BufferedWriter sender = new BufferedWriter(
-                    new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.US_ASCII));
             sender.write(msg);
+            System.out.println(msg);
             sender.flush();
         }catch (IOException e){
             throw new UncheckedIOException(e);
         }
     }
-
 }

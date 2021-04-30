@@ -17,7 +17,7 @@ public class TestClient {
         RemotePlayerClient playerClient =
                 new RemotePlayerClient(new TestPlayer(),
                         "localhost",
-                        5108);
+                        5107);
         playerClient.run();
         System.out.println("Client done!");
     }
