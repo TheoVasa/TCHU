@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * class represent the distant player's client, in fact this class is used to dialog with the server proxy and do the right actions with the player.
+ * Class representing a distant player's client, in fact this class is used to dialog with the server proxy and do the right actions with the player.
  *
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
@@ -60,6 +60,7 @@ public class RemotePlayerClient {
             if (!receivedMessage.isEmpty())
                 handleReceivedMessage(receivedMessage);
         }
+
     }
 
     //In function of the type of message, deserialize and do the proper actions with the player.
@@ -89,47 +90,33 @@ public class RemotePlayerClient {
                 break;
             case CHOOSE_INITIAL_TICKETS:
                 SortedBag<Ticket> chosenTickets = player.chooseInitialTickets();
-                String serializedChosenTickets = Serdes.SORTED_BAG_TICKETS_SERDE.serialize(chosenTickets);
-                String msgToSend = new StringBuilder(serializedChosenTickets).append("\n").toString();
-                sendMessage(msgToSend);
+                sendMessage(Serdes.SORTED_BAG_TICKETS_SERDE.serialize(chosenTickets));
                 break;
             case NEXT_TURN:
                 Player.TurnKind turnKind = player.nextTurn();
-                String serializedTurnKind = Serdes.TURN_KIND_SERDE.serialize(turnKind);
-                msgToSend = new StringBuilder(serializedTurnKind).append("\n").toString();
-                sendMessage(msgToSend);
+                sendMessage(Serdes.TURN_KIND_SERDE.serialize(turnKind));
                 break;
             case CHOOSE_TICKETS:
                 SortedBag<Ticket> options = Serdes.SORTED_BAG_TICKETS_SERDE.deserialize(listOfData.next());
                 SortedBag<Ticket> chosenOptions = player.chooseTickets(options);
-                String serializedChosenOptions = Serdes.SORTED_BAG_TICKETS_SERDE.serialize(chosenOptions);
-                msgToSend = new StringBuilder(serializedChosenOptions).append("\n").toString();
-                sendMessage(msgToSend);
+                sendMessage(Serdes.SORTED_BAG_TICKETS_SERDE.serialize(chosenOptions));
                 break;
             case DRAW_SLOT:
                 int drawSlot = player.drawSlot();
-                String serializedDrawSlot = Serdes.INTEGER_SERDE.serialize(drawSlot);
-                msgToSend = new StringBuilder(serializedDrawSlot).append("\n").toString();
-                sendMessage(msgToSend);
+                sendMessage(Serdes.INTEGER_SERDE.serialize(drawSlot));
                 break;
             case ROUTE:
                 Route route = player.claimedRoute();
-                String serializedRoute = Serdes.ROUTE_SERDE.serialize(route);
-                msgToSend = new StringBuilder(serializedRoute).append("\n").toString();
-                sendMessage(msgToSend);
+                sendMessage(Serdes.ROUTE_SERDE.serialize(route));
                 break;
             case CARDS:
                 SortedBag<Card> cards = player.initialClaimCards();
-                String serializedCards = Serdes.SORTED_BAG_CARD_SERDE.serialize(cards);
-                msgToSend = new StringBuilder(serializedCards).append("\n").toString();
-                sendMessage(msgToSend);
+                sendMessage(Serdes.SORTED_BAG_CARD_SERDE.serialize(cards));
                 break;
             case CHOOSE_ADDITIONAL_CARDS:
                 List<SortedBag<Card>> option = Serdes.LIST_SORTED_BAG_CARD_SERDE.deserialize(listOfData.next());
                 SortedBag<Card> chosenOption = player.chooseAdditionalCards(option);
-                String serializedChoseOption = Serdes.SORTED_BAG_CARD_SERDE.serialize(chosenOption);
-                msgToSend = new StringBuilder(serializedChoseOption).append("\n").toString();
-                sendMessage(msgToSend);
+                sendMessage(Serdes.SORTED_BAG_CARD_SERDE.serialize(chosenOption));
                 break;
             default:
                 //do nothing
@@ -142,9 +129,9 @@ public class RemotePlayerClient {
         try{
             socket = new Socket(name, port);
             receiver = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
+                            new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
             sender = new BufferedWriter(
-                    new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.US_ASCII));
+                            new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.US_ASCII));
         }catch (IOException e){
             throw new UncheckedIOException(e);
         }
@@ -163,8 +150,8 @@ public class RemotePlayerClient {
     //send a message to the server.
     private  void sendMessage(String msg){
         try {
+            msg = msg + "\n";
             sender.write(msg);
-            System.out.println(msg);
             sender.flush();
         }catch (IOException e){
             throw new UncheckedIOException(e);

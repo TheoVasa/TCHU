@@ -33,9 +33,6 @@ public class TestServer {
             generateSendingMessage("initPlayer");
             playerProxy.initPlayers(PLAYER_1, playerNames);
 
-            generateSendingMessage("receive info");
-            playerProxy.receiveInfo("Hey mate! That's an info!");
-
             generateSendingMessage("update state");
                 //init gameState and playerState
                 int ticketsCount = 40;
@@ -61,20 +58,19 @@ public class TestServer {
                 PublicGameState gameState = new PublicGameState(ticketsCount, cardState, PlayerId.PLAYER_2, ps, null);
             playerProxy.updateState(gameState, playerState );
 
+            generateSendingMessage("receive info");
+            playerProxy.receiveInfo("Hey mate! That's an info!");
 
             generateSendingMessage("set initialTicketChoice");
             playerProxy.setInitialTicketChoice(tickets);
 
             generateSendingMessage("choose initial Tickets");
             SortedBag<Ticket> chosenTickets = playerProxy.chooseInitialTickets();
-            chosenTickets.toList().forEach( t -> System.out.println(t.text()));
 
             generateSendingMessage("choose next turn");
             playerProxy.nextTurn();
 
             generateSendingMessage("choose tickets");
-
-
 
             generateSendingMessage("draw slot");
             playerProxy.drawSlot();
@@ -87,8 +83,6 @@ public class TestServer {
 
             generateSendingMessage("choose additional Cards");
             playerProxy.chooseAdditionalCards(List.of(cards));
-
-
 
         }
         System.out.println("Server done!");

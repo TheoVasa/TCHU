@@ -9,22 +9,25 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+/**
+ *This class represent the player in the eye of the server, is used to communicate with the distant player.
+ *
+ * @author Selien Wicki (314357)
+ * @author Theo Vasarino (313191)
+ */
+
 public class RemotePlayerProxy implements Player {
 
-    //The Socket of the Player
-    private Socket socket;
-    //BufferReader
-    private BufferedReader receiver;
-    //BufferWriter
-    private BufferedWriter sender;
+    //the socket of the proxy
+    private final Socket socket;
 
     /**
-     * Create a Player that plays on an other machine than the server
-     * @param socket the socket to handle the connection on internet
+     * Create a RemotePlayerProxy with connected to a given Socket.
+     *
+     * @param socket the socket to handle the connection on internet.
      */
     RemotePlayerProxy(Socket socket){
         this.socket = socket;
-        connect();
     }
 
     @Override
@@ -82,12 +85,8 @@ public class RemotePlayerProxy implements Player {
 
         //Receive message
         String receivedMessage = receiveMessage();
-        while(receivedMessage.isEmpty()) {
-            receivedMessage = receiveMessage();
-        }
-        SortedBag<Ticket> deserializedBag = Serdes.SORTED_BAG_TICKETS_SERDE.deserialize(receivedMessage);
 
-        return deserializedBag;
+        return Serdes.SORTED_BAG_TICKETS_SERDE.deserialize(receivedMessage);
     }
 
     @Override
@@ -98,9 +97,8 @@ public class RemotePlayerProxy implements Player {
 
         //Receive message
         String receiveMessage = receiveMessage();
-        TurnKind deserializedTurnKind = Serdes.TURN_KIND_SERDE.deserialize(receiveMessage);
 
-        return deserializedTurnKind;
+        return Serdes.TURN_KIND_SERDE.deserialize(receiveMessage);
     }
 
     @Override
@@ -111,11 +109,10 @@ public class RemotePlayerProxy implements Player {
         String sendMessage = String.join(" ", List.of(msgIdString, optionsSerialized, "\n"));
         sendMessage(sendMessage);
 
-        //Recceive message
+        //Receive message
         String receivedMessage = receiveMessage();
-        SortedBag<Ticket> deserializedBag = Serdes.SORTED_BAG_TICKETS_SERDE.deserialize(receivedMessage);
 
-        return deserializedBag;
+        return Serdes.SORTED_BAG_TICKETS_SERDE.deserialize(receivedMessage);
     }
 
     @Override
@@ -126,9 +123,8 @@ public class RemotePlayerProxy implements Player {
 
         //Receive message
         String receivedMessage = receiveMessage();
-        int deserializedInt = Serdes.INTEGER_SERDE.deserialize(receivedMessage);
 
-        return deserializedInt;
+        return Serdes.INTEGER_SERDE.deserialize(receivedMessage);
     }
 
     @Override
@@ -139,9 +135,8 @@ public class RemotePlayerProxy implements Player {
 
         //Receive message
         String receivedMessage = receiveMessage();
-        Route deserializedRoute = Serdes.ROUTE_SERDE.deserialize(receivedMessage);
 
-        return deserializedRoute;
+        return Serdes.ROUTE_SERDE.deserialize(receivedMessage);
     }
 
     @Override
@@ -152,8 +147,7 @@ public class RemotePlayerProxy implements Player {
 
         //Receive message
         String receivedMessage = receiveMessage();
-        SortedBag<Card> cards = Serdes.SORTED_BAG_CARD_SERDE.deserialize(receivedMessage);
-        return cards;
+        return Serdes.SORTED_BAG_CARD_SERDE.deserialize(receivedMessage);
     }
 
     @Override
@@ -165,30 +159,18 @@ public class RemotePlayerProxy implements Player {
 
         //Receive message
         String receiveMessage = receiveMessage();
-        SortedBag<Card> deserializedBag = Serdes.SORTED_BAG_CARD_SERDE.deserialize(receiveMessage);
 
-        return deserializedBag;
+        return Serdes.SORTED_BAG_CARD_SERDE.deserialize(receiveMessage);
     }
-
-    //connect the bufferReader and BufferWriter
-    private void connect(){
-        try {
-            receiver = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
-            sender = new BufferedWriter(
-                    new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.US_ASCII));
-        }catch(IOException e){
-            throw new UncheckedIOException(e);
-        }
-    }
-
     //Send a message to the player that isn't on the same machine as the server
     //parameter is the serialized message (instruction) to send
     private void sendMessage(String msg){
         try{
+            BufferedWriter sender = new BufferedWriter(
+                    new OutputStreamWriter(this.socket.getOutputStream(), StandardCharsets.US_ASCII));
             sender.write(msg);
             sender.flush();
-        }catch(IOException e) {
+        } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
@@ -197,10 +179,14 @@ public class RemotePlayerProxy implements Player {
     //returns the serialization of the message (instruction) received
     private String receiveMessage() {
         try {
-            String message = receiver.readLine();
-            return (message == null) ? "" : message;
+            BufferedReader receiver = new BufferedReader(
+                    new InputStreamReader(this.socket.getInputStream(), StandardCharsets.US_ASCII));
+            return receiver.readLine();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+
+
     }
+
 }
