@@ -67,7 +67,7 @@ public final class ObservableGameState {
      * @param gameState, the new PublicGameState
      * @param playerState, the new PlayerState
      */
-    public void setState(GameState gameState, PlayerState playerState){
+    public void setState(PublicGameState gameState, PlayerState playerState){
 
         List<PlayerId> allPlayers = List.of(player, otherPlayer);
         SortedBag<Card> playerCards = playerState.cards();
@@ -90,7 +90,7 @@ public final class ObservableGameState {
 
     //set states for all players
         allPlayers.forEach((PlayerId plr)->{
-            numberTicketsForEachPlayer.get(plr).set(gameState.playerState(plr).tickets().size());
+            numberTicketsForEachPlayer.get(plr).set(gameState.playerState(plr).ticketCount());
             numberCardsForEachPlayer.get(plr).set(gameState.playerState(plr).cardCount());
             numberCarsForEachPlayer.get(plr).set(gameState.playerState(plr).carCount());
             numberConstructsPointsForEachPlayer.get(plr).set(gameState.playerState(plr).claimPoints());
