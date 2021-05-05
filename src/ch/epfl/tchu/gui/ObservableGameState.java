@@ -9,7 +9,10 @@ import javafx.collections.ObservableList;
 
 import java.util.*;
 
-public class ObservableGameState {
+/**
+ * This class contains all the observable property in a game of tchu, those property "observe" what's passing during the game and must be set each time the state of the game change.
+ */
+public final class ObservableGameState {
 
     //the player attached to the observable game state.
     private final PlayerId player;
@@ -79,7 +82,7 @@ public class ObservableGameState {
         });
 
         ticketsOfPlayer.setAll(playerTickets.toList());
-        for(Card c : Card.ALL)numberOfCardsForEachType.put(c, new SimpleIntegerProperty(playerCards.countOf(c)));
+        for(Card c : Card.ALL) numberOfCardsForEachType.get(c).set(playerCards.countOf(c));
 
     //set the percents of the cards and tickets
         restingTicketsPercents.set(generatePercents(gameState.ticketsCount(), ChMap.tickets().size()));
@@ -358,29 +361,37 @@ public class ObservableGameState {
         return playerHasGivenRoute.get(route).get();
     }
 
+    //initialize the face uo cards with a "null" card for each slot.
     private static List<SimpleObjectProperty<Card>> createFaceUpCards(){
         List<SimpleObjectProperty<Card>> listOfProper = new ArrayList<>();
         for(int i=0; i<Constants.FACE_UP_CARDS_COUNT; ++i) listOfProper.add(new SimpleObjectProperty<Card>(null));
 
-        return listOfProper;
+        return Collections.unmodifiableList(listOfProper);
     }
 
+    //create all route owner trough the chmap routes and set a null owner for all of them.
     private static Map<Route, SimpleObjectProperty<PlayerId>> createAllRoutesOwners(){
         Map<Route, SimpleObjectProperty<PlayerId>> map = new HashMap<>();
         for(Route r : ChMap.routes()) map.put(r, new SimpleObjectProperty<PlayerId>(null));
 
-        return map;
+        return Collections.unmodifiableMap(map);
     }
 
+    //create a map from elements of an enum with for all elements, an integer property to 0.
     private static <E extends Enum<E>> Map<E, SimpleIntegerProperty> createEnumMapWithNullIntegerProperty(E[] tabOfEnum){
         Map<E, SimpleIntegerProperty> map = new HashMap<>();
         for(E element : tabOfEnum)map.put(element, new SimpleIntegerProperty(0));
 
-        return map;
+        return Collections.unmodifiableMap(map);
     }
 
+    //generate percents given two numbers, in int (always between 0 and 100).
     private int generatePercents(int number, int total){
-        return (int) Math.ceil(((double) number / (double) total)*100);
+        int percent = (int) Math.ceil(((double) number / (double) total)*100);
+        if(percent >100)percent = 100;
+        else if(percent<0)percent = 0;
+
+        return percent;
     }
 
 }
