@@ -30,6 +30,7 @@ public final class ObservableGameState {
     private final SimpleIntegerProperty restingCardsPercents;
     private final List<SimpleObjectProperty<Card>> faceUpCards;
     private final Map<Route, SimpleObjectProperty<PlayerId>> ownersOfEachRoutes;
+    private final Map<Route, SimpleBooleanProperty> claimableRoutes;
 
     //public state of all players
     private final Map<PlayerId, SimpleIntegerProperty> numberTicketsForEachPlayer;
@@ -55,6 +56,9 @@ public final class ObservableGameState {
         restingTicketsPercents = new SimpleIntegerProperty(0);
         faceUpCards = createFaceUpCards();
         ownersOfEachRoutes= createAllRoutesOwners();
+        //set that all routes aren't claimable
+        claimableRoutes = new HashMap<>();
+        ChMap.routes().forEach((route)->claimableRoutes.put(route, new SimpleBooleanProperty(false)));
 
         numberTicketsForEachPlayer = createEnumMapWithNullIntegerProperty(PlayerId.values());
         numberCardsForEachPlayer = createEnumMapWithNullIntegerProperty(PlayerId.values());
@@ -64,7 +68,7 @@ public final class ObservableGameState {
         ticketsOfPlayer = FXCollections.observableArrayList();
         numberOfCardsForEachType = createEnumMapWithNullIntegerProperty(Card.values());
         playerHasGivenRoute = new HashMap<>();
-        for(Route r : ChMap.routes()) playerHasGivenRoute.put(r, new SimpleBooleanProperty(false));
+        ChMap.routes().forEach((route)->playerHasGivenRoute.put(route, new SimpleBooleanProperty(false)));
     }
 
     /**
@@ -74,8 +78,6 @@ public final class ObservableGameState {
      * @param playerState, the new PlayerState
      */
     public void setState(PublicGameState gameState, PlayerState playerState){
-        System.out.println("setState");
-
         this.gameState = gameState;
         this.playerState = playerState;
         List<PlayerId> allPlayers = List.of(player, otherPlayer);
@@ -108,6 +110,11 @@ public final class ObservableGameState {
     //set the owner of each route
         playerRoutes.forEach((Route r)->ownersOfEachRoutes.get(r).set(player));
         otherPlayerRoutes.forEach((Route r)->ownersOfEachRoutes.get(r).set(otherPlayer));
+    //set which routes are now claimable
+        claimableRoutes.forEach((route, bool)->{
+            if(playerState.canClaimRoute(route) && ownersOfEachRoutes.get(route).get()==null)
+                claimableRoutes.get(route).set(true);
+        });
 
     //set the faceUpCards
         for (int slot : Constants.FACE_UP_CARD_SLOTS) {
@@ -270,14 +277,13 @@ public final class ObservableGameState {
     }
 
     /**
-     * test
-     * @param
-     * @return skjhfkj
+     * This method is used to know if a route if claimable by the player attached to the current ObservableGameState.
+     *
+     * @param route we want to know if claimable.
+     * @return a property containing if the route is claimable. (ReadOnlyBooleanProperty)
      */
-    public ReadOnlyBooleanProperty claimable (Route r){
-        boolean isClaimable = playerState!=null && playerState.canClaimRoute(r) && ownersOfEachRoutes.get(r).get()==null;
-        System.out.println(this.playerState==null);
-        return new SimpleBooleanProperty(isClaimable);
+    public ReadOnlyBooleanProperty claimable (Route route){
+        return claimableRoutes.get(route);
     }
 
     //initialize the face uo cards with a "null" card for each slot.

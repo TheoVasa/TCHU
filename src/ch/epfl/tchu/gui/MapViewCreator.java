@@ -50,6 +50,7 @@ public class MapViewCreator {
         Group route = new Group();
         route.setId(r.id());
         //route color
+        System.out.println("test2");
         String routeColor = (r.color()==null) ? "NEUTRAL" : r.color().toString();
         route.getStyleClass().addAll("route",r.level().toString(), routeColor);
         //manage route player

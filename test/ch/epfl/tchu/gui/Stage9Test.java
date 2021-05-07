@@ -25,7 +25,6 @@ public class Stage9Test extends Application {
     public void start(Stage primaryStage) {
 
         ObservableGameState gameState = new ObservableGameState(PLAYER_1);
-        setState(gameState);
 
 
         ObjectProperty<ActionHandler.ClaimRouteHandler> claimRoute =
