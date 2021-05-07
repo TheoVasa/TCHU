@@ -16,7 +16,7 @@ import java.util.Map;
  * @author Theo Vasarino (313191)
  */
 
-public class RemotePlayerProxy implements Player {
+public final class RemotePlayerProxy implements Player {
 
     //the socket of the proxy
     private final Socket socket;
@@ -185,8 +185,5 @@ public class RemotePlayerProxy implements Player {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-
-
     }
-
 }

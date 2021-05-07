@@ -8,7 +8,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -21,6 +20,7 @@ import static ch.epfl.tchu.game.PlayerId.PLAYER_1;
 
 public class Stage9Test extends Application {
     public static void main(String[] args) { launch(args); }
+
     @Override
     public void start(Stage primaryStage) {
 
@@ -34,10 +34,13 @@ public class Stage9Test extends Application {
         ObjectProperty<ActionHandler.DrawCardHandler> drawCard =
                 new SimpleObjectProperty<>(Stage9Test::drawCard);
 
-        Node mapView = MapViewCreator.createMapView(gameState, claimRoute, Stage9Test::chooseCards);
+        Node mapView = MapViewCreator
+                .createMapView(gameState, claimRoute, Stage9Test::chooseCards);
+        Node cardsView = DecksViewCreator.createCardsView(gameState);
+        Node handView = DecksViewCreator.createHandView(gameState);
 
-
-        BorderPane mainPane = new BorderPane(mapView);
+        BorderPane mainPane =
+                new BorderPane(mapView, null, cardsView, handView, null);
         primaryStage.setScene(new Scene(mainPane));
         primaryStage.show();
 

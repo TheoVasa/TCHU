@@ -13,12 +13,14 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * Class representing a distant player's client, in fact this class is used to dialog with the server proxy and do the right actions with the player.
+ * Class representing a distant player's client,
+ * in fact this class is used to dialog with the server proxy and do the right actions with the player.
+ * It is final and
  *
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
  */
-public class RemotePlayerClient {
+public final class RemotePlayerClient {
 
     //The player that is not on the same machine than the server
     private final Player player;
@@ -150,7 +152,7 @@ public class RemotePlayerClient {
     //send a message to the server.
     private  void sendMessage(String msg){
         try {
-            msg = msg + "\n";
+            msg = new StringBuilder(msg).append("\n").toString();
             sender.write(msg);
             sender.flush();
         }catch (IOException e){

@@ -222,7 +222,7 @@ public final class ObservableGameState {
      *
      * @return the observable list of the ticket (ObservableList).
      */
-    public ObservableList<Ticket> TicketsOfPlayerProperty() {
+    public ObservableList<Ticket> ticketsOfPlayerProperty() {
         return ticketsOfPlayer;
     }
 
