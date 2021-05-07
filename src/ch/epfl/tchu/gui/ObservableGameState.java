@@ -3,6 +3,7 @@ package ch.epfl.tchu.gui;
 import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -17,6 +18,11 @@ public final class ObservableGameState {
     //the player attached to the observable game state.
     private final PlayerId player;
     private final PlayerId otherPlayer;
+
+    //states of the game, changing with each setState().
+    private PublicGameState gameState;
+    private PlayerState playerState;
+
 
     //all properties:
     //public state of the game
@@ -55,7 +61,7 @@ public final class ObservableGameState {
         numberCarsForEachPlayer = createEnumMapWithNullIntegerProperty(PlayerId.values());
         numberConstructsPointsForEachPlayer = createEnumMapWithNullIntegerProperty(PlayerId.values());
 
-        ticketsOfPlayer = FXCollections.unmodifiableObservableList(FXCollections.observableArrayList());
+        ticketsOfPlayer = FXCollections.observableArrayList();
         numberOfCardsForEachType = createEnumMapWithNullIntegerProperty(Card.values());
         playerHasGivenRoute = new HashMap<>();
         for(Route r : ChMap.routes()) playerHasGivenRoute.put(r, new SimpleBooleanProperty(false));
@@ -68,7 +74,10 @@ public final class ObservableGameState {
      * @param playerState, the new PlayerState
      */
     public void setState(PublicGameState gameState, PlayerState playerState){
+        System.out.println("setState");
 
+        this.gameState = gameState;
+        this.playerState = playerState;
         List<PlayerId> allPlayers = List.of(player, otherPlayer);
         SortedBag<Card> playerCards = playerState.cards();
         SortedBag<Ticket> playerTickets = playerState.tickets();
@@ -108,30 +117,12 @@ public final class ObservableGameState {
     }
 
     /**
-     * Used to get the resting tickets in the game in percents.
-     *
-     * @return the resting tickets in the game in percents (int).
-     */
-    public int getRestingTicketsPercents() {
-        return restingTicketsPercents.get();
-    }
-
-    /**
      * Used to know the property attached to the resting tickets in the game.
      *
      * @return the property attached of the resting tickets in the game (ReadOnlyIntegerProperty).
      */
     public ReadOnlyIntegerProperty restingTicketsPercentsProperty() {
         return restingTicketsPercents;
-    }
-
-    /**
-     * Used to get the resting cards in the game in percents.
-     *
-     * @return the resting cards in the game in percents (int).
-     */
-    public int getRestingCardsPercents() {
-        return restingCardsPercents.get();
     }
 
     /**
@@ -156,18 +147,6 @@ public final class ObservableGameState {
     }
 
     /**
-     * Used to get the face up card attached of a given property.
-     *
-     * @param slot of the face up card attached to the property.
-     * @return the card in the property (Card).
-     * @throws IllegalArgumentException if the slot isn't in face up cards
-     */
-    public Card getFaceUpCard (int slot){
-        Preconditions.checkArgument(slot< faceUpCards.size());
-        return faceUpCards.get(slot).get();
-    }
-
-    /**
      * Used to get the property attached of an owner of a given route.
      *
      * @param route we want to know the property of his owner.
@@ -177,17 +156,6 @@ public final class ObservableGameState {
     public ReadOnlyObjectProperty<PlayerId> RouteProperty (Route route){
         Preconditions.checkArgument(ownersOfEachRoutes.containsKey(route));
         return ownersOfEachRoutes.get(route);
-    }
-
-    /**
-     * Used to get the current owner of a given route attached of a given property.
-     *
-     * @param route we want to know the owner.
-     * @return the owner of the route (PlayerId) or null if the route hasn't owner.
-     */
-    public PlayerId getFaceUpCards (Route route){
-        Preconditions.checkArgument(ownersOfEachRoutes.containsKey(route));
-        return ownersOfEachRoutes.get(route).get();
     }
 
     /**
@@ -204,18 +172,6 @@ public final class ObservableGameState {
     }
 
     /**
-     * Used to get the number of tickets of a given player.
-     *
-     * @param plr player we want to know his number of tickets.
-     * @return the number of tickets of the given player (int).
-     * @throws IllegalArgumentException if the given player isn't one of the player in the game.
-     */
-    public int getNumberOfTicketsForGivenPlayer(PlayerId plr){
-        Preconditions.checkArgument(numberTicketsForEachPlayer.containsKey(plr));
-        return numberTicketsForEachPlayer.get(plr).get();
-    }
-
-    /**
      * Used to get the property attached to the number of cards of a given player.
      *
      * @param plr player we want to know his number of cards.
@@ -226,18 +182,6 @@ public final class ObservableGameState {
         Preconditions.checkArgument(numberCardsForEachPlayer.containsKey(plr));
         return numberCardsForEachPlayer.get(plr);
 
-    }
-
-    /**
-     * Used to get the number of cards of a given player.
-     *
-     * @param plr player we want to know his number of cards.
-     * @return the number of cards of the given player (int).
-     * @throws IllegalArgumentException if the given player isn't one of the player in the game.
-     */
-    public int getNumberOfCardsForGivenPlayer(PlayerId plr){
-        Preconditions.checkArgument(numberCardsForEachPlayer.containsKey(plr));
-        return numberCardsForEachPlayer.get(plr).get();
     }
 
     /**
@@ -254,18 +198,6 @@ public final class ObservableGameState {
     }
 
     /**
-     * Used to get the number of cars of a given player.
-     *
-     * @param plr player we want to know his number of cars.
-     * @return the number of cars of the given player (int).
-     * @throws IllegalArgumentException if the given player isn't one of the player in the game.
-     */
-    public int getNumberOfCarsForGivenPlayer(PlayerId plr){
-        Preconditions.checkArgument(numberCarsForEachPlayer.containsKey(plr));
-        return numberCarsForEachPlayer.get(plr).get();
-    }
-
-    /**
      * Used to get the property attached to the number of construct points of a given player.
      *
      * @param plr player we want to know his number of construct points.
@@ -279,37 +211,12 @@ public final class ObservableGameState {
     }
 
     /**
-     * Used to get the number of construct points of a given player.
-     *
-     * @param plr player we want to know his number of construct points.
-     * @return the number of construct points of the given player (int).
-     * @throws IllegalArgumentException if the given player isn't one of the player in the game.
-     */
-    public int getNumberOfConstructPointsForGivenPlayer(PlayerId plr){
-        Preconditions.checkArgument(numberConstructsPointsForEachPlayer.containsKey(plr));
-        return numberConstructsPointsForEachPlayer.get(plr).get();
-    }
-
-    /**
      * Used to get the observable list of the tickets of the player.
      *
      * @return the observable list of the ticket (ObservableList).
      */
     public ObservableList<Ticket> TicketsOfPlayerProperty() {
         return ticketsOfPlayer;
-    }
-
-    /**
-     * Used to get the given ticket from the tickets of the player
-     *
-     * @param slot of the ticket.
-     * @return the ticket (Ticket).
-     * @throws IllegalArgumentException if the slot is bigger than the size of the list.
-     */
-    public Ticket getTicketOfPlayer(int slot){
-        Preconditions.checkArgument(ticketsOfPlayer.size()>slot);
-        return ticketsOfPlayer.get(slot);
-
     }
 
     /**
@@ -326,18 +233,6 @@ public final class ObservableGameState {
     }
 
     /**
-     * Used to get the number of cards possessed by the player for a given type.
-     *
-     * @param type type of cards we want to know.
-     * @return the number of cards possessed by the player for the given type (int).
-     * @throws IllegalArgumentException if the type isn't one of the Card in the game.
-     */
-    public int getNumberOfPlayerCardsForGivenType(Card type){
-        Preconditions.checkArgument(numberOfCardsForEachType.containsKey(type));
-        return numberOfCardsForEachType.get(type).get();
-    }
-
-    /**
      * Used to get the boolean property attached to the given route.
      *
      * @param route we want to know the property attached to it.
@@ -350,15 +245,39 @@ public final class ObservableGameState {
     }
 
     /**
-     * Used to get if the player has the given route.
      *
-     * @param route we want to know if the player has it.
-     * @return true if the player has the route (boolean).
-     * @throws IllegalArgumentException if the route isn't in the map.
+     * @return canDrawTickets from the current gameState(boolean).
      */
-    public boolean getPlayerHasGivenRoute(Route route){
-        Preconditions.checkArgument(playerHasGivenRoute.containsKey(route));
-        return playerHasGivenRoute.get(route).get();
+    public boolean canDrawTickets(){
+        return gameState.canDrawTickets();
+    }
+
+    /**
+     *
+     * @return canDrawCards from the current gameState (boolean).
+     */
+    public boolean canDrawCards(){
+        return gameState.canDrawCards();
+    }
+
+    /**
+     *
+     * @param route the player want to claim.
+     * @return possible ClaimCards of the current PlayerState (List).
+     */
+    public List<SortedBag<Card>> possibleClaimCards(Route route){
+        return playerState.possibleClaimCards(route);
+    }
+
+    /**
+     * test
+     * @param
+     * @return skjhfkj
+     */
+    public ReadOnlyBooleanProperty claimable (Route r){
+        boolean isClaimable = playerState!=null && playerState.canClaimRoute(r) && ownersOfEachRoutes.get(r).get()==null;
+        System.out.println(this.playerState==null);
+        return new SimpleBooleanProperty(isClaimable);
     }
 
     //initialize the face uo cards with a "null" card for each slot.
@@ -366,7 +285,7 @@ public final class ObservableGameState {
         List<SimpleObjectProperty<Card>> listOfProper = new ArrayList<>();
         for(int i=0; i<Constants.FACE_UP_CARDS_COUNT; ++i) listOfProper.add(new SimpleObjectProperty<Card>(null));
 
-        return Collections.unmodifiableList(listOfProper);
+        return listOfProper;
     }
 
     //create all route owner trough the chmap routes and set a null owner for all of them.
@@ -374,7 +293,7 @@ public final class ObservableGameState {
         Map<Route, SimpleObjectProperty<PlayerId>> map = new HashMap<>();
         for(Route r : ChMap.routes()) map.put(r, new SimpleObjectProperty<PlayerId>(null));
 
-        return Collections.unmodifiableMap(map);
+        return map;
     }
 
     //create a map from elements of an enum with for all elements, an integer property to 0.
@@ -382,7 +301,7 @@ public final class ObservableGameState {
         Map<E, SimpleIntegerProperty> map = new HashMap<>();
         for(E element : tabOfEnum)map.put(element, new SimpleIntegerProperty(0));
 
-        return Collections.unmodifiableMap(map);
+        return map;
     }
 
     //generate percents given two numbers, in int (always between 0 and 100).

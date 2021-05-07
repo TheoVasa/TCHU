@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.util.List;
@@ -20,11 +21,12 @@ import static ch.epfl.tchu.game.PlayerId.PLAYER_1;
 
 public class Stage9Test extends Application {
     public static void main(String[] args) { launch(args); }
-
     @Override
     public void start(Stage primaryStage) {
 
         ObservableGameState gameState = new ObservableGameState(PLAYER_1);
+        setState(gameState);
+
 
         ObjectProperty<ActionHandler.ClaimRouteHandler> claimRoute =
                 new SimpleObjectProperty<>(Stage9Test::claimRoute);
@@ -33,19 +35,14 @@ public class Stage9Test extends Application {
         ObjectProperty<ActionHandler.DrawCardHandler> drawCard =
                 new SimpleObjectProperty<>(Stage9Test::drawCard);
 
+        Node mapView = MapViewCreator.createMapView(gameState, claimRoute, Stage9Test::chooseCards);
 
-        Node mapView = MapViewCreator
-                .createMapView(gameState, claimRoute, Stage9Test::chooseCards);
-        Node cardsView = null;
-        Node handView = null;
 
-        BorderPane mainPane =
-                new BorderPane(mapView, null, cardsView, handView, null);
+        BorderPane mainPane = new BorderPane(mapView);
         primaryStage.setScene(new Scene(mainPane));
         primaryStage.show();
 
         setState(gameState);
-
     }
 
     private void setState(ObservableGameState gameState) {
