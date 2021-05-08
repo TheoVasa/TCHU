@@ -16,27 +16,28 @@ public final class ObservableGameState {
 
     //the player attached to the observable game state.
     private final PlayerId player;
+    //the other one
     private final PlayerId otherPlayer;
-
-    //states of the game, changing with each setState().
+    //gameState attached to the observable
     private PublicGameState gameState;
+    //playerState attached to the observable
     private PlayerState playerState;
 
     //all properties:
-    //public state of the game
+    //public states of the game
     private final SimpleIntegerProperty restingTicketsPercents;
     private final SimpleIntegerProperty restingCardsPercents;
     private final List<SimpleObjectProperty<Card>> faceUpCards;
     private final Map<Route, SimpleObjectProperty<PlayerId>> ownersOfEachRoutes;
     private final Map<Route, SimpleBooleanProperty> claimableRoutes;
 
-    //public state of all players
+    //public states of all players
     private final Map<PlayerId, SimpleIntegerProperty> numberTicketsForEachPlayer;
     private final Map<PlayerId, SimpleIntegerProperty> numberCardsForEachPlayer;
     private final Map<PlayerId, SimpleIntegerProperty> numberCarsForEachPlayer;
     private final Map<PlayerId, SimpleIntegerProperty> numberConstructsPointsForEachPlayer;
 
-    //private state of the player
+    //private states of the player
     private final ObservableList<Ticket> ticketsOfPlayer;
     private final Map<Card, SimpleIntegerProperty> numberOfCardsForEachType;
     private final Map<Route, SimpleBooleanProperty> playerHasGivenRoute;
@@ -311,7 +312,7 @@ public final class ObservableGameState {
     //generate percents given two numbers, in int (always between 0 and 100).
     private int generatePercents(int number, int total){
         int percent = (int) Math.ceil(((double) number / (double) total)*100);
-        if(percent >100)percent = 100;
+        if(percent>100)percent = 100;
         else if(percent<0)percent = 0;
 
         return percent;

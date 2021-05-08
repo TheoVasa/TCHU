@@ -11,6 +11,14 @@ import javafx.scene.shape.Rectangle;
 import java.util.List;
 
 public class MapViewCreator {
+    private final static int RECTANGLES_WIGHT = 36;
+    private final static int RECTANGLES_HEIGHT = 12;
+    private final static int CIRCLES_RADIUS = 3;
+    private final static int CIRCLE1_XPOS = 12;
+    private final static int CIRCLE1_YPOS = 6;
+    private final static int CIRCLE2_XPOS = 24;
+    private final static int CIRCLE2_YPOS = 6;
+
     public static Pane createMapView(ObservableGameState gameState, ObjectProperty<ActionHandler.ClaimRouteHandler> claimRouteHandler, CardChooser cardChooser){
         //the map
         Pane map = new Pane();
@@ -35,14 +43,12 @@ public class MapViewCreator {
                 }
             });
             map.getChildren().add(route);
-            System.out.println("Test");
+            //able or not the route interactions with the user, in function of if the route is claimable or not.
             route.disableProperty().bind(claimRouteHandler.isNull().or(gameState.claimable(r).not()));
-
-            //boolean property in function of if the player can claim route.
         }
         return map;
     }
-
+    //generate a route node
     private static Group  generateRoute(Route r, ObservableGameState obsGameState) {
         Group route = new Group();
         route.setId(r.id());
@@ -59,27 +65,27 @@ public class MapViewCreator {
             route.getChildren().add(generateCaseRoute(r.id() + "_" + i));
        return route;
     }
-
+    //generate the case of a route node
     private static Group generateCaseRoute(String id){
         Group caseOfRoute = new Group();
         caseOfRoute.setId(id);
-        Rectangle rect = new Rectangle(36, 12);
+        Rectangle rect = new Rectangle(RECTANGLES_WIGHT, RECTANGLES_HEIGHT);
         rect.getStyleClass().addAll("track", "filled");
         caseOfRoute.getChildren().add(rect);
         caseOfRoute.getChildren().add(generateCarGroup());
 
         return caseOfRoute;
     }
-
+    //generate the car on the case of a route node
     private static Group generateCarGroup(){
         Group car = new Group();
         car.getStyleClass().add("car");
 
-        Rectangle rect = new Rectangle(36, 12);
+        Rectangle rect = new Rectangle(RECTANGLES_WIGHT, RECTANGLES_HEIGHT);
         rect.getStyleClass().add("filled");
 
-        Circle circ1 = new Circle(12, 6,3);
-        Circle circ2 = new Circle(24, 6, 3);
+        Circle circ1 = new Circle(CIRCLE1_XPOS, CIRCLE1_YPOS,CIRCLES_RADIUS);
+        Circle circ2 = new Circle(CIRCLE2_XPOS, CIRCLE2_YPOS, CIRCLES_RADIUS);
 
         //draw the rectangle
         car.getChildren().add(rect);
@@ -88,7 +94,6 @@ public class MapViewCreator {
 
         return car;
     }
-
 
     @FunctionalInterface
     interface CardChooser {
