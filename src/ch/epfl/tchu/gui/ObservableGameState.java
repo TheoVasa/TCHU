@@ -3,7 +3,6 @@ package ch.epfl.tchu.gui;
 import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,7 +21,6 @@ public final class ObservableGameState {
     //states of the game, changing with each setState().
     private PublicGameState gameState;
     private PlayerState playerState;
-
 
     //all properties:
     //public state of the game
@@ -160,7 +158,7 @@ public final class ObservableGameState {
      * @return the property attached to the owner (ReadOnlyObjectProperty)
      * @throws IllegalArgumentException if the route
      */
-    public ReadOnlyObjectProperty<PlayerId> RouteProperty (Route route){
+    public ReadOnlyObjectProperty<PlayerId> routeProperty (Route route){
         Preconditions.checkArgument(ownersOfEachRoutes.containsKey(route));
         return ownersOfEachRoutes.get(route);
     }

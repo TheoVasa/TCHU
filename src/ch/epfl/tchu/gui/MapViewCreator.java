@@ -46,15 +46,14 @@ public class MapViewCreator {
         return map;
     }
 
-    private static Group generateRoute(Route r, ObservableGameState observableGameState) {
+    private static Group  generateRoute(Route r, ObservableGameState obsGameState) {
         Group route = new Group();
         route.setId(r.id());
         //route color
-        System.out.println("test2");
         String routeColor = (r.color()==null) ? "NEUTRAL" : r.color().toString();
         route.getStyleClass().addAll("route",r.level().toString(), routeColor);
         //manage route player
-        observableGameState.RouteProperty(r).addListener((o, oV, nV)->{
+        obsGameState.routeProperty(r).addListener((o, oV, nV)->{
             String owner = (nV==null) ? "" : nV.toString();
             route.getStyleClass().add(owner);
         });
