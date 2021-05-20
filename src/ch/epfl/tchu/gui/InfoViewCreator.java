@@ -53,9 +53,14 @@ public class InfoViewCreator {
         Text stats = new Text();
        //bind the stats in function of the state of the player
         stats.textProperty().bind(
-                Bindings.format(StringsFr.PLAYER_STATS, name, gameState.numberOfTicketsForGivenPlayerProperty(player), gameState.numberOfCardsForGivenPlayerProperty(player),
-                        gameState.numberOfCarsForGivenPlayerProperty(player), gameState.numberConstructsPointsForGivenPlayerProperty(player))
-        );
+                Bindings.format(
+                        StringsFr.PLAYER_STATS,
+                        name,
+                        gameState.numberOfTicketsForGivenPlayerProperty(player),
+                        gameState.numberOfCardsForGivenPlayerProperty(player),
+                        gameState.numberOfCarsForGivenPlayerProperty(player),
+                        gameState.numberConstructsPointsForGivenPlayerProperty(player)
+                ));
         textFlow.getChildren().add(stats);
 
         return textFlow;

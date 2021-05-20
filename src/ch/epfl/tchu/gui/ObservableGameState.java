@@ -96,7 +96,7 @@ public final class ObservableGameState {
 
     //set the percents of the cards and tickets
         restingTicketsPercents.set(generatePercents(gameState.ticketsCount(), ChMap.tickets().size()));
-        restingCardsPercents.set(generatePercents(gameState.cardState().deckSize(), gameState.cardState().totalSize()));
+        restingCardsPercents.set(generatePercents(gameState.cardState().deckSize(), gameState.cardState().deckSize()+gameState.cardState().discardsSize()));
 
     //set states for all players
         allPlayers.forEach((PlayerId plr)->{

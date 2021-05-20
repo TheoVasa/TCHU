@@ -48,7 +48,6 @@ final class SignatureChecks_4 {
         v05 = v12.ticketPoints();
         v13 = v12.tickets();
         v12 = v12.withAddedCard(v17);
-        v12 = v12.withAddedCards(v14);
         v12 = v12.withAddedTickets(v13);
         v12 = v12.withClaimedRoute(v15, v14);
     }

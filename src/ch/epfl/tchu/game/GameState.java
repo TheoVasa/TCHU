@@ -189,8 +189,6 @@ public final class GameState extends PublicGameState {
      * @throws IllegalArgumentException if we can not draw new cards form the deck
      */
     public GameState withDrawnFaceUpCard(int slot) {
-        //Check correctness of the argument
-        Preconditions.checkArgument(canDrawCards());
         //create new playerState
         PlayerState newPlayer = playerState.get(currentPlayerId()).withAddedCard(
                 cardState.faceUpCard(slot));
@@ -206,8 +204,6 @@ public final class GameState extends PublicGameState {
      * @throws IllegalArgumentException if we can not draw a new card from the deck of cards
      */
     public GameState withBlindlyDrawnCard() {
-        //Check correctness of the argument
-        Preconditions.checkArgument(canDrawCards());
         //create new playerState
         PlayerState newPlayer = playerState.get(currentPlayerId()).withAddedCard(
                 cardState.topDeckCard());

@@ -25,7 +25,6 @@ final class SignatureChecks_3 {
         v12 = v10.faceUpCard(v06);
         v11 = v10.faceUpCards();
         v05 = v10.isDeckEmpty();
-        v06 = v10.totalSize();
     }
 
     void checkCardState() {

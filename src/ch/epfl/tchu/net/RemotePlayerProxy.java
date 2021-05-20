@@ -26,7 +26,7 @@ public final class RemotePlayerProxy implements Player {
      *
      * @param socket the socket to handle the connection on internet.
      */
-    RemotePlayerProxy(Socket socket){
+    public RemotePlayerProxy(Socket socket){
         this.socket = socket;
     }
 

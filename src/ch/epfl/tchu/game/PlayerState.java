@@ -85,23 +85,12 @@ public final class PlayerState extends PublicPlayerState {
      * @return a PlayerState with the added card. (PlayerState)
      */
     public PlayerState withAddedCard(Card card) {
-        return withAddedCards(SortedBag.of(card));
-    }
-
-    /**
-     * Gives a new player state with given added cards.
-     *
-     * @param additionalCards the SortedBag of cards we want to add.
-     * @return a new player state with the added cards. (PlayerState)
-     */
-    public PlayerState withAddedCards(SortedBag<Card> additionalCards) {
         SortedBag.Builder<Card> newCardsBuilder = new SortedBag.Builder<>();
         newCardsBuilder.add(cards);
-        newCardsBuilder.add(additionalCards);
+        newCardsBuilder.add(card);
 
         return new PlayerState(tickets, newCardsBuilder.build(), routes());
     }
-
     /**
      * Determine if the player can claim a route depending on his state.
      *
