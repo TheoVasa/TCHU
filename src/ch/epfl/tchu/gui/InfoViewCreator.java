@@ -14,7 +14,7 @@ import javafx.scene.text.TextFlow;
 import java.util.Map;
 
 public class InfoViewCreator {
-    public static Node createInfoView(PlayerId currentPlayer, Map<PlayerId, String> playerNames, ObservableGameState gameState, ObservableList<Text> gameInfos) {
+    public static VBox createInfoView(PlayerId currentPlayer, Map<PlayerId, String> playerNames, ObservableGameState gameState, ObservableList<Text> gameInfos) {
         //create the vbox
         VBox vbox = new VBox();
         //set the style sheets

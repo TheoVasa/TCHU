@@ -2,6 +2,7 @@ package ch.epfl.tchu.gui;
 
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.Group;
 import javafx.scene.image.ImageView;
@@ -19,7 +20,7 @@ public class MapViewCreator {
     private final static int CIRCLE2_XPOS = 24;
     private final static int CIRCLE2_YPOS = 6;
 
-    public static Pane createMapView(ObservableGameState gameState, ObjectProperty<ActionHandler.ClaimRouteHandler> claimRouteHandler, CardChooser cardChooser){
+    public static Pane createMapView(ObservableGameState obsGameState, ObjectProperty<ActionHandler.ClaimRouteHandler> claimRouteHandler, CardChooser cardChooser){
         //the map
         Pane map = new Pane();
         map.getStylesheets().addAll("map.css", "colors.css");
@@ -28,11 +29,11 @@ public class MapViewCreator {
         map.getChildren().add(imageMap);
         //all routes
         for (Route r : ChMap.routes()) {
-            Group route = generateRoute(r, gameState);
+            Group route = generateRoute(r, obsGameState);
 
             //manage when the player click on a route.
             route.setOnMouseClicked((event)->{
-                List<SortedBag<Card>> possibleClaimCards = gameState.possibleClaimCards(r);
+                List<SortedBag<Card>> possibleClaimCards = obsGameState.possibleClaimCards(r);
                 //if the player have only one choice to claim the route.
                 if(possibleClaimCards.size()==1){
                     claimRouteHandler.get().onClaimRoute(r, possibleClaimCards.get(0));
@@ -43,8 +44,8 @@ public class MapViewCreator {
                 }
             });
             map.getChildren().add(route);
-            //able or not the route interactions with the user, in function of if the route is claimable or not.
-            route.disableProperty().bind(claimRouteHandler.isNull().or(gameState.claimable(r).not()));
+            //Disable or not the route interactions with the user, in function of if the route is claimable or not.
+            route.disableProperty().bind(claimRouteHandler.isNull().or(obsGameState.claimable(r).not()));
         }
         return map;
     }
@@ -62,7 +63,11 @@ public class MapViewCreator {
         });
 
         for(int i=1; i<=r.length(); ++i)
-            route.getChildren().add(generateCaseRoute(r.id() + "_" + i));
+            route.getChildren().add(generateCaseRoute(new StringBuilder()
+                                                        .append(r.id())
+                                                        .append("_")
+                                                        .append(i)
+                                                        .toString()));
        return route;
     }
     //generate the case of a route node

@@ -4,6 +4,7 @@ import ch.epfl.tchu.game.Card;
 import ch.epfl.tchu.game.Constants;
 import ch.epfl.tchu.game.Ticket;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.scene.Group;
@@ -141,7 +142,8 @@ public final class DecksViewCreator {
         cardViewLayout.setId("card-pane");
 
         //Create the button for the cards
-        Button buttonTickets = createButton("Billets");
+        Button buttonTickets = createButton("Billets", obsGameState.restingTicketsPercentsProperty());
+        buttonTickets.disableProperty().bind(drawTicketsHandler.isNull());
         buttonTickets.setOnAction(e -> drawTicketsHandler.get().onDrawTickets());
         cardViewLayout.getChildren().add(buttonTickets);
 
@@ -151,6 +153,7 @@ public final class DecksViewCreator {
             Card type = obsGameState.faceUpCardsProperty(i).get();
             StackPane card = createCard(type);
             int finalI = i;
+            card.disableProperty().bind(drawCardHandler.isNull());
             card.setOnMouseClicked((e) -> drawCardHandler.get().onDrawCard(finalI));
             cardViewLayout.getChildren().add(card);
 
@@ -162,20 +165,22 @@ public final class DecksViewCreator {
         }
 
         //Create the button for the cards
-        Button buttonDeck = createButton("Cartes");
-        buttonDeck.setOnAction(e -> drawCardHandler.get().onDrawCard(-1));
+        Button buttonDeck = createButton("Cartes", obsGameState.restingCardsPercentsProperty());
+        buttonDeck.disableProperty().bind(drawCardHandler.isNull());
+        buttonDeck.setOnAction(e -> drawCardHandler.get().onDrawCard(Constants.DECK_SLOT));
         cardViewLayout.getChildren().add(buttonDeck);
 
         return cardViewLayout;
     }
 
     //This method creates a button
-    private static Button createButton(String name){
+    private static Button createButton(String name, ReadOnlyIntegerProperty percentageProperty){
         //Create the gauge
         Rectangle background = new Rectangle(BUTTON_WIDTH, BUTTON_HEIGHT);
         background.getStyleClass().add("background");
         Rectangle foreground = new Rectangle(BUTTON_WIDTH, BUTTON_HEIGHT);
         foreground.getStyleClass().add("foreground");
+        foreground.widthProperty().bind(percentageProperty.multiply(50).divide(100));
         Group group = new Group(background, foreground);
 
         //Create button
