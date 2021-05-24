@@ -2,119 +2,133 @@ package ch.epfl.tchu.gui;
 
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
+import javafx.application.Platform;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 public class GraphicalPlayerAdapter implements Player {
-    /**
-     * Communicate at the player his own identity and the name of the different player, stocked in the given Map.
-     *
-     * @param ownId       the id of the player
-     * @param playerNames the names of the different player of the game
-     */
-    @Override public void initPlayers(PlayerId ownId,
-            Map<PlayerId, String> playerNames) {
+    //Constant
+    private final int CAPACITY = 1;
 
+    private GraphicalPlayer graphicalPlayer;
+    private BlockingQueue<SortedBag<Ticket>> ticketsQueue;
+    private BlockingQueue<SortedBag<Card>> claimCardQueue;
+    private BlockingQueue<TurnKind> turnKindQueue;
+    private BlockingQueue<Integer> cardSlotQueue;
+    private BlockingQueue<Route> claimRouteQueue;
+
+    public GraphicalPlayerAdapter(){
+        ticketsQueue = new ArrayBlockingQueue<>(CAPACITY);
+        claimCardQueue = new ArrayBlockingQueue<>(CAPACITY);
+        turnKindQueue = new ArrayBlockingQueue<>(CAPACITY);
+        cardSlotQueue = new ArrayBlockingQueue<>(CAPACITY);
+        claimRouteQueue = new ArrayBlockingQueue<>(CAPACITY);
     }
 
-    /**
-     * Communicate information during the game.
-     *
-     * @param info the information we want to communicate
-     */
-    @Override public void receiveInfo(String info) {
-
+    @Override
+    public void initPlayers(PlayerId ownId, Map<PlayerId, String> playerNames) {
+        graphicalPlayer = new GraphicalPlayer(ownId, playerNames);
     }
 
-    /**
-     * Used to change the state and communicate the player the new game state and his own state.
-     *
-     * @param newState the new state of the game
-     * @param ownState the state of the player
-     */
-    @Override public void updateState(PublicGameState newState,
-            PlayerState ownState) {
-
+    @Override
+    public void receiveInfo(String info) {
+        Platform.runLater(() -> graphicalPlayer.receiveInfo(info));
     }
 
-    /**
-     * Used to communicate to the player the tickets he choose to begin the game
-     *
-     * @param tickets the tickets the player choose
-     */
-    @Override public void setInitialTicketChoice(SortedBag<Ticket> tickets) {
-
+    @Override
+    public void updateState(PublicGameState newState, PlayerState ownState) {
+        Platform.runLater(() -> graphicalPlayer.setState(newState, ownState));
     }
 
-    /**
-     * Ask the player to choose the initial tickets.
-     *
-     * @return a SortedBag of tickets (SortedBag< Tickets >>)
-     */
-    @Override public SortedBag<Ticket> chooseInitialTickets() {
-        return null;
+    @Override
+    public void setInitialTicketChoice(SortedBag<Ticket> tickets) {
+        Platform.runLater(() -> graphicalPlayer.chooseTickets(tickets, ticketChoice -> {
+            try {
+                ticketsQueue.put(ticketChoice);
+            }catch (InterruptedException e){
+                throw new Error();
+            }
+        }));
     }
 
-    /**
-     * Used to know the kind of action the player want to do during his turn.
-     *
-     * @return a type of action the player wants to do for the turn (TurnKind)
-     */
-    @Override public TurnKind nextTurn() {
-        return null;
+    @Override
+    public SortedBag<Ticket> chooseInitialTickets() {
+        try{
+            return ticketsQueue.take();
+        }catch(InterruptedException e){
+            throw new Error();
+        }
     }
 
-    /**
-     * Used when the player decide to choose additional tickets during the game,
-     * communicate the drawn ticket and the chosen ones.
-     *
-     * @param options the additional tickets he can choose
-     * @return the tickets the player chose (SortedBag< Tickets >>)
-     */
-    @Override public SortedBag<Ticket> chooseTickets(
-            SortedBag<Ticket> options) {
-        return null;
+    @Override
+        public TurnKind nextTurn() {
+        graphicalPlayer.startTurn(
+                () -> {
+                    putTryCatch(turnKindQueue, TurnKind.DRAW_TICKETS);
+                },
+                i -> {
+                    putTryCatch(turnKindQueue, TurnKind.DRAW_CARDS);
+                    putTryCatch(cardSlotQueue, i);
+                },
+                (r, c) ->{
+                    putTryCatch(turnKindQueue, TurnKind.CLAIM_ROUTE);
+                }
+        );
+        return takeTryCatch(turnKindQueue);
     }
 
-    /**
-     * Used to know where the player want to draw a new Card, meaning the face up cards or the top of the deck.
-     *
-     * @return the slot of the draw, meaning 0 to 4 in the case the player draw a face up cards,
-     * or Constants.DECK_SLOT if he wants to pick up the top deck card
-     */
-    @Override public int drawSlot() {
-        return 0;
+    @Override
+    public SortedBag<Ticket> chooseTickets(SortedBag<Ticket> options) {
+        BlockingQueue<SortedBag<Ticket>> chosenTicket = new ArrayBlockingQueue<>(1);
+        Platform.runLater(() -> graphicalPlayer.chooseTickets(options, ticketChoice -> {
+            putTryCatch(chosenTicket, options);
+        }));
+        try{
+            return chosenTicket.take();
+        }catch (InterruptedException e){
+            throw new Error();
+        }
     }
 
-    /**
-     * When a player decide to try to claim a route, used to know which route it is.
-     *
-     * @return the route the player tries to claim (Route)
-     */
-    @Override public Route claimedRoute() {
-        return null;
+    @Override
+    public int drawSlot() {
+        if (cardSlotQueue.isEmpty())
+            graphicalPlayer.drawCard((i) -> putTryCatch(cardSlotQueue, i));
+        return takeTryCatch(cardSlotQueue);
     }
 
-    /**
-     * When a player decide to try to claim a route, used to know which initial he use to do it.
-     *
-     * @return the initial cards he used to try to claim an route (SortedBag< Card >>)
-     */
-    @Override public SortedBag<Card> initialClaimCards() {
-        return null;
+    @Override
+    public Route claimedRoute() {
+        return takeTryCatch(claimRouteQueue);
     }
 
-    /**
-     * When a player decide to try to claim a route,
-     * used to ask the player which additional cards he choose (if there is some).
-     *
-     * @param options the possibility of additional cards
-     * @return the cards the player want play additional,
-     * return a void SortedBag if he decide to not claim the route (SortedBag< Tickets >>)
-     */
-    @Override public SortedBag<Card> chooseAdditionalCards(
-            List<SortedBag<Card>> options) {
-        return null;
+    @Override
+    public SortedBag<Card> initialClaimCards() {
+        return takeTryCatch(claimCardQueue);
+    }
+
+    @Override
+    public SortedBag<Card> chooseAdditionalCards(List<SortedBag<Card>> options) {
+        graphicalPlayer.chooseAdditionalCards(options, (cards) -> putTryCatch(claimCardQueue, cards));
+        return takeTryCatch(claimCardQueue);
+    }
+
+    private <E> void putTryCatch(BlockingQueue<E> queue, E element){
+        try {
+            queue.put(element);
+        }catch (InterruptedException e){
+            throw new Error();
+        }
+    }
+
+    private <E> E takeTryCatch(BlockingQueue<E> queue){
+        try {
+            return queue.take();
+        }catch (InterruptedException e){
+            throw new Error();
+        }
     }
 }
