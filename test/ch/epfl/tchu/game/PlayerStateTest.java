@@ -111,7 +111,6 @@ class PlayerStateTest {
             for (int i = 0; i + batchSize < cards.size(); i += batchSize) {
                 var nextI = i + batchSize;
                 var cardsToAdd = cards.subList(i, nextI);
-                playerState = playerState.withAddedCards(SortedBag.of(cardsToAdd));
                 assertEquals(SortedBag.of(cards.subList(0, nextI)), playerState.cards());
             }
         }
