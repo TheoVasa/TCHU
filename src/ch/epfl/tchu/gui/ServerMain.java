@@ -32,14 +32,15 @@ public class ServerMain extends Application {
             //the players
             Player localPlayer = new GraphicalPlayerAdapter();
             Player distantPlayer = new RemotePlayerProxy(socket);
-            Map<PlayerId, Player> player = new EnumMap<PlayerId, Player>(PlayerId.class);
-            player.put(PLAYER_1, localPlayer);
-            player.put(PLAYER_2, distantPlayer);
 
             //playerNames
             Map<PlayerId, String> playerNames = new EnumMap<PlayerId, String>(PlayerId.class);
             playerNames.put(PLAYER_1, player1Name);
             playerNames.put(PLAYER_2, player2Name);
+
+            Map<PlayerId, Player> player = new EnumMap<PlayerId, Player>(PlayerId.class);
+            player.put(PLAYER_1, localPlayer);
+            player.put(PLAYER_2, distantPlayer);
 
             //launch the game
             new Thread(() -> Game.play(player, playerNames, SortedBag.of(ChMap.tickets()), new Random(Constants.RANDOM_SEED)));

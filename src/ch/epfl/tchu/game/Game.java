@@ -62,12 +62,13 @@ public final class Game {
 
     //Initialize the game
     private static void initGame() {
-        //Inform who will play first
-        receiveInfo(infos.get(gameState.currentPlayerId()).willPlayFirst());
 
         //Init players
         players.get(PlayerId.PLAYER_1).initPlayers(PlayerId.PLAYER_1, playerNames);
         players.get(PlayerId.PLAYER_2).initPlayers(PlayerId.PLAYER_2, playerNames);
+
+        //Inform who will play first
+        receiveInfo(infos.get(gameState.currentPlayerId()).willPlayFirst());
 
         //Update
         updateState();
