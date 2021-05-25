@@ -17,8 +17,6 @@ public class PublicCardState {
     private final int deckSize;
     //The size of the discard
     private final int discardsSize;
-    //The total amount of the cards in the deck, discard and facedUpCards
-    private final int totalSize;
     //The facedUpCards of the game
     private final List<Card> faceUpCards;
 
@@ -40,17 +38,6 @@ public class PublicCardState {
         this.faceUpCards = new ArrayList<>(faceUpCards);
         this.deckSize = deckSize;
         this.discardsSize = discardsSize;
-        this.totalSize = faceUpCards.size() + deckSize + discardsSize;
-    }
-
-
-    /**
-     * Gives the total amount of cards that aren't on any players hand, meaning the size of the discards and the deck.
-     *
-     * @return the total of public cards
-     */
-    public int totalSize() {
-        return totalSize;
     }
 
     /**
