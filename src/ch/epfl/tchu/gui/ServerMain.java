@@ -42,6 +42,7 @@ public class ServerMain extends Application {
             player.put(PLAYER_1, localPlayer);
             player.put(PLAYER_2, distantPlayer);
 
+
             //launch the game
             new Thread(() -> Game.play(player, playerNames, SortedBag.of(ChMap.tickets()), new Random(Constants.RANDOM_SEED)));
         }

@@ -85,8 +85,8 @@ public final class ObservableGameState {
         List<Route> playerRoutes = gameState.playerState(player).routes();
         List<Route> otherPlayerRoutes = gameState.playerState(otherPlayer).routes();
 
-    //set all state of the player
-        playerHasGivenRoute.forEach((r, p)->{
+        //set all state of the player
+        playerHasGivenRoute.forEach((r, p) -> {
             boolean hasRoute = playerRoutes.contains(r);
             p.set(hasRoute);
         });
@@ -94,28 +94,29 @@ public final class ObservableGameState {
         ticketsOfPlayer.setAll(playerTickets.toList());
         for(Card c : Card.ALL) numberOfCardsForEachType.get(c).set(playerCards.countOf(c));
 
-    //set the percents of the cards and tickets
-        restingTicketsPercents.set(generatePercents(gameState.ticketsCount(), ChMap.tickets().size()));
-        restingCardsPercents.set(generatePercents(gameState.cardState().deckSize(), gameState.cardState().deckSize()+gameState.cardState().discardsSize()));
+        //set the percents of the cards and tickets
+        restingTicketsPercents.setValue(generatePercents(gameState.ticketsCount(), ChMap.tickets().size()));
+        restingCardsPercents.setValue(generatePercents(gameState.cardState().deckSize(),
+                gameState.cardState().deckSize() + gameState.cardState().discardsSize()));
 
-    //set states for all players
-        allPlayers.forEach((PlayerId plr)->{
+        //set states for all players
+        allPlayers.forEach((plr)->{
             numberTicketsForEachPlayer.get(plr).set(gameState.playerState(plr).ticketCount());
             numberCardsForEachPlayer.get(plr).set(gameState.playerState(plr).cardCount());
             numberCarsForEachPlayer.get(plr).set(gameState.playerState(plr).carCount());
             numberConstructsPointsForEachPlayer.get(plr).set(gameState.playerState(plr).claimPoints());
         });
 
-    //set the owner of each route
-        playerRoutes.forEach((Route r)->ownersOfEachRoutes.get(r).set(player));
-        otherPlayerRoutes.forEach((Route r)->ownersOfEachRoutes.get(r).set(otherPlayer));
-    //set which routes are now claimable
-        claimableRoutes.forEach((route, bool)->{
+        //set the owner of each route
+        playerRoutes.forEach((r) -> ownersOfEachRoutes.get(r).set(player));
+        otherPlayerRoutes.forEach((r) -> ownersOfEachRoutes.get(r).set(otherPlayer));
+        //set which routes are now claimable
+        claimableRoutes.forEach((route, bool) -> {
             if(playerState.canClaimRoute(route) && ownersOfEachRoutes.get(route).get()==null)
                 claimableRoutes.get(route).set(true);
         });
 
-    //set the faceUpCards
+        //set the faceUpCards
         for (int slot : Constants.FACE_UP_CARD_SLOTS) {
             Card newCard = gameState.cardState().faceUpCard(slot);
             faceUpCards.get(slot).set(newCard);
@@ -148,7 +149,7 @@ public final class ObservableGameState {
      * @throws IllegalArgumentException if the slot isn't in face up cards
      */
     public ReadOnlyObjectProperty<Card> faceUpCardsProperty (int slot){
-        Preconditions.checkArgument(slot< faceUpCards.size());
+        Preconditions.checkArgument(slot < faceUpCards.size());
         return faceUpCards.get(slot);
     }
 
@@ -235,7 +236,6 @@ public final class ObservableGameState {
     public ReadOnlyIntegerProperty numberOfPlayerCardsForGivenTypeProperty(Card type){
         Preconditions.checkArgument(numberOfCardsForEachType.containsKey(type));
         return numberOfCardsForEachType.get(type);
-
     }
 
     /**
@@ -288,8 +288,8 @@ public final class ObservableGameState {
     //initialize the face uo cards with a "null" card for each slot.
     private static List<SimpleObjectProperty<Card>> createFaceUpCards(){
         List<SimpleObjectProperty<Card>> listOfProper = new ArrayList<>();
-        for(int i=0; i<Constants.FACE_UP_CARDS_COUNT; ++i) listOfProper.add(new SimpleObjectProperty<Card>(null));
-
+        for(int i=0; i<Constants.FACE_UP_CARDS_COUNT; ++i)
+            listOfProper.add(new SimpleObjectProperty<Card>(null));
         return listOfProper;
     }
 
@@ -297,7 +297,6 @@ public final class ObservableGameState {
     private static Map<Route, SimpleObjectProperty<PlayerId>> createAllRoutesOwners(){
         Map<Route, SimpleObjectProperty<PlayerId>> map = new HashMap<>();
         for(Route r : ChMap.routes()) map.put(r, new SimpleObjectProperty<PlayerId>(null));
-
         return map;
     }
 
@@ -305,17 +304,14 @@ public final class ObservableGameState {
     private static <E extends Enum<E>> Map<E, SimpleIntegerProperty> createEnumMapWithNullIntegerProperty(E[] tabOfEnum){
         Map<E, SimpleIntegerProperty> map = new HashMap<>();
         for(E element : tabOfEnum)map.put(element, new SimpleIntegerProperty(0));
-
         return map;
     }
 
     //generate percents given two numbers, in int (always between 0 and 100).
     private int generatePercents(int number, int total){
         int percent = (int) Math.ceil(((double) number / (double) total)*100);
-        if(percent>100)percent = 100;
-        else if(percent<0)percent = 0;
-
+        if(percent > 100) percent = 100;
+        else if(percent < 0) percent = 0;
         return percent;
     }
-
 }

@@ -1,22 +1,18 @@
 package ch.epfl.tchu.gui;
 
-
 import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionModel;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -30,21 +26,20 @@ import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
 import javafx.scene.control.SelectionMode;
 
-import javax.swing.*;
 import java.util.*;
 
 public final class GraphicalPlayer {
-    //Constants
-    private final int IN_GAME_DISCARABLE_CARD_SIZE = 1;
-    private final int INITIAL_DISCARDABLE_TICKETS = 0;
 
+    //Constants
+    private static final int IN_GAME_CHOOSE_CLAIM_CARD_SIZE = 1;
+    private static final int IN_GAME_DISCARDABLE_TICKETS_SIZE = 1;
+    private static final int INITIAL_DISCARDABLE_TICKETS_SIZE = 3;
     //Player informations
     private final PlayerId playerId;
     private final Map<PlayerId, String> playerNames;
     //Other attributes
     private final ObservableGameState obsGameState;
     private final ObservableList<Text> infoList;
-    private final ObjectProperty<Boolean> activateSelectionButton;
     //ActionHandler
     private final ObjectProperty<ActionHandler.DrawTicketsHandler> drawTicketsHandlerProperty;
     private final ObjectProperty<ActionHandler.DrawCardHandler> drawCardHandlerProperty;
@@ -53,8 +48,11 @@ public final class GraphicalPlayer {
     private final Stage mainWindow;
     private Stage choiceWindow;
 
-
-
+    /**
+     * Create a graphical player for the given playerId
+     * @param playerId the Id of the player
+     * @param playerNames the names of the two player that are playing
+     */
     public GraphicalPlayer(PlayerId playerId, Map<PlayerId, String> playerNames) {
         //Check if on thread of javaFX
         assert Platform.isFxApplicationThread();
@@ -67,7 +65,6 @@ public final class GraphicalPlayer {
         infoList = FXCollections.observableArrayList();
         for (int i = 0; i < Constants.FACE_UP_CARDS_COUNT; ++i)
             infoList.add(new Text());
-        activateSelectionButton = new SimpleObjectProperty<>();
         drawTicketsHandlerProperty = new SimpleObjectProperty<>();
         drawCardHandlerProperty = new SimpleObjectProperty<>();
         claimRouteHandlerProperty = new SimpleObjectProperty<>();
@@ -76,6 +73,11 @@ public final class GraphicalPlayer {
         choiceWindow = new Stage();
     }
 
+    /**
+     * Set the state of the game and of the player in the ObservableGameState
+     * @param gameState the game state that must be set in the ObservableGameState
+     * @param playerState the player state that must be set in the ObservableGameState
+     */
     public void setState(PublicGameState gameState, PlayerState playerState){
         //Check if on thread of javaFX
         assert Platform.isFxApplicationThread();
@@ -92,6 +94,12 @@ public final class GraphicalPlayer {
         infoList.get(infoList.size()-1).textProperty().setValue(info);
     }
 
+    /**
+     * Start the (next) turn, this methode allows the player to take an action
+     * @param drawTicketsHandler the ActionHandler to draw a ticket
+     * @param drawCardHandler the ActionHandler to draw a card
+     * @param claimRouteHandler the ActionHandle to claim a route
+     */
     public void startTurn(ActionHandler.DrawTicketsHandler drawTicketsHandler,
                           ActionHandler.DrawCardHandler drawCardHandler,
                           ActionHandler.ClaimRouteHandler claimRouteHandler){
@@ -125,22 +133,45 @@ public final class GraphicalPlayer {
             setActionHandlerOnNull();
         });
     }
-    private void setActionHandlerOnNull(){
-        drawTicketsHandlerProperty.setValue(null);
-        drawCardHandlerProperty.setValue(null);
-        claimRouteHandlerProperty.setValue(null);
-    }
 
+    /**
+     *
+     * @param options
+     * @param chooseTicketsHandler
+     */
     public void chooseTickets(SortedBag<Ticket> options,
                               ActionHandler.ChooseTicketsHandler chooseTicketsHandler){
         //Check if on thread of javaFX
         assert Platform.isFxApplicationThread();
-
         //Check correctness of arguments
         Preconditions.checkArgument(options.size() == 5 || options.size() == 3);
 
+        //Create ListView
+        int minChoiceSize = (obsGameState.numberOfTicketsForGivenPlayerProperty(playerId).get() == 0)
+                            ? INITIAL_DISCARDABLE_TICKETS_SIZE
+                            : IN_GAME_DISCARDABLE_TICKETS_SIZE;
+        ListView<Ticket> optionsView = new ListView<>(FXCollections.observableArrayList(options.toList()));
+        optionsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        //Create button
+        Button button = new Button("Choisir");
+        button.disableProperty().bind(Bindings
+                .size(optionsView.getSelectionModel().getSelectedItems())
+                .lessThan( minChoiceSize)
+        );
+        button.setOnAction(
+                (event) -> {
+                    SortedBag.Builder<Ticket> selection = new SortedBag.Builder<>();
+                    optionsView.getSelectionModel().getSelectedItems().forEach(i -> selection.add(i));
+                    chooseTicketsHandler.onChooseTickets(selection.build());
+                    choiceWindow.hide();
+                }
+        );
+
         //Chose the tickets
-        choiceWindow = createTicketsChoiceWindow(options, chooseTicketsHandler);
+        choiceWindow = createChoiceWindow(  StringsFr.TICKETS_CHOICE,
+                                            String.format(StringsFr.CHOOSE_TICKETS, minChoiceSize, StringsFr.plural(minChoiceSize)),
+                                            optionsView,
+                                            button);
         choiceWindow.show();
     }
 
@@ -149,33 +180,77 @@ public final class GraphicalPlayer {
         assert Platform.isFxApplicationThread();
         //Change the card handler
         this.drawCardHandlerProperty.setValue(i -> {
-                    setActionHandlerOnNull();
                     drawCardHandler.onDrawCard(i);
+                    setActionHandlerOnNull();
                 }
         );
     }
 
-
+    /**
+     * Create a window that allows the player to chose which cards he wants to player to claim a route
+     * @param options all the possible set of cards that he could play to claim the route
+     * @param chooseCardHandler the ActionHandler to choose a set of cards
+     */
     public void chooseClaimCards(List<SortedBag<Card>> options,
                                  ActionHandler.ChooseCardsHandler chooseCardHandler){
         //Check if on thread of javaFX
         assert Platform.isFxApplicationThread();
 
-        choiceWindow = createCardChoiceWindow(options, chooseCardHandler);
+        //Create the ListView
+        ListView<SortedBag<Card>> optionsView = new ListView<>(FXCollections.observableArrayList(options));
+        optionsView.setCellFactory(v -> new TextFieldListCell<>(new CardBagStringConverter()));
+        //Create the button
+        Button button = new Button("Choisir");
+        button.setOnAction(
+                (event) -> {
+                    SortedBag.Builder<Card> selection = new SortedBag.Builder<>();
+                    optionsView.getSelectionModel().getSelectedItems().forEach( i -> selection.add(i));
+                    chooseCardHandler.onChooseCards(selection.build());
+                    choiceWindow.hide();
+                }
+        );
+        button.disableProperty().bind(Bindings
+                .size(optionsView.getSelectionModel().getSelectedItems())
+                .lessThan(IN_GAME_CHOOSE_CLAIM_CARD_SIZE));
+
+        //Chose the claim cards
+        choiceWindow = createChoiceWindow(StringsFr.CARDS_CHOICE, StringsFr.CHOOSE_CARDS, optionsView, button);
         choiceWindow.show();
     }
 
-
+    /**
+     * Create a window that allows the player to chose which cards he wants to play as additional cards
+     * @param options all the possible set of cards that he could play as additional card
+     * @param chooseCardHandler the ActionHandler to choose a set of cards
+     */
     public void chooseAdditionalCards(List<SortedBag<Card>> options,
                                       ActionHandler.ChooseCardsHandler chooseCardHandler){
         //Check if on thread of javaFX
         assert Platform.isFxApplicationThread();
 
-        choiceWindow = createAdditionalCardChoiceWindow(options, chooseCardHandler);
+        //Create the ListView
+        ListView<SortedBag<Card>> optionsView = new ListView<>(FXCollections.observableArrayList(options));
+        optionsView.setCellFactory(v -> new TextFieldListCell<>(new CardBagStringConverter()));
+        //Create the button
+        Button button = new Button("Choisir");
+        button.setOnAction(
+                (event) -> {
+                    SortedBag.Builder<Card> selection = new SortedBag.Builder<>();
+                    optionsView.getSelectionModel().getSelectedItems().forEach( i -> selection.add(i));
+                    chooseCardHandler.onChooseCards(selection.build());
+                    choiceWindow.hide();
+                }
+        );
+        //Chose the additional cards
+        choiceWindow = createChoiceWindow(StringsFr.CARDS_CHOICE, StringsFr.CHOOSE_ADDITIONAL_CARDS ,optionsView, button);
         choiceWindow.show();
     }
 
+    //Create the main window
     private Stage createMainWindow(){
+        //Check if on thread of javaFX
+        assert Platform.isFxApplicationThread();
+
         //Create the Scene containing the BorderPane with all the 4 different view
         Pane mapView = MapViewCreator.createMapView(obsGameState, claimRouteHandlerProperty, (o, h) -> {
             if (o.size() > 0)
@@ -187,102 +262,28 @@ public final class GraphicalPlayer {
         Scene scene = new Scene(new BorderPane(mapView, null, cardView, handView, infoView));
 
         //Create stage of the main window
-        Stage mainWindow = new Stage();
-        mainWindow.setScene(scene);
-        mainWindow.setTitle(new StringBuilder()
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.setTitle(new StringBuilder()
                             .append("tCHu - ")
                             .append(playerNames.get(playerId))
                             .toString());
-        mainWindow.show();
-        return mainWindow;
+        stage.show();
+        return stage;
     }
 
-    private Stage createAdditionalCardChoiceWindow(List<SortedBag<Card>> options,
-                                                   ActionHandler.ChooseCardsHandler chooseCardsHandler){
-        return createChoiceWindow(  StringsFr.CHOOSE_ADDITIONAL_CARDS,
-                                    options,
-                                    SortedBag.of(),
-                                    chooseCardsHandler,
-                                    null);
-    }
-
-    private Stage createCardChoiceWindow(List<SortedBag<Card>> options,
-                                         ActionHandler.ChooseCardsHandler chooseCardsHandler){
-        return createChoiceWindow(  StringsFr.CHOOSE_CARDS,
-                options,
-                SortedBag.of(),
-                chooseCardsHandler,
-                null);
-    }
-
-    private Stage createTicketsChoiceWindow(SortedBag<Ticket> options,
-                                            ActionHandler.ChooseTicketsHandler chooseTicketsHandler){
-        return createChoiceWindow(  StringsFr.CHOOSE_CARDS,
-                List.of(),
-                options,
-                null,
-                chooseTicketsHandler);
-    }
-
-    private Stage createChoiceWindow(String choiceType,
-                                     List<SortedBag<Card>> cards,
-                                     SortedBag<Ticket> tickets,
-                                     ActionHandler.ChooseCardsHandler chooseCardsHandler,
-                                     ActionHandler.ChooseTicketsHandler chooseTicketsHandler){
-        //Both list can't be either both empty or both non empty !
-        Preconditions.checkArgument((chooseCardsHandler != null && chooseTicketsHandler == null && !cards.isEmpty()) ||
-                                    (chooseCardsHandler == null && chooseTicketsHandler != null && !tickets.isEmpty()));
-
-        //Set title of the choice window
-        String title = new StringBuilder()
-                .append((chooseCardsHandler != null)
-                        ? StringsFr.CARDS_CHOICE
-                        : StringsFr.TICKETS_CHOICE)
-                .toString();
-
+    //Create the choice window
+    private Stage createChoiceWindow(String title, String action, ListView listView, Button button){
         //Create VBox
         VBox vBox = new VBox();
-        Button button = new Button();
+        vBox.getChildren().add(listView);
+        vBox.getChildren().add(button);
 
         //Create the text view
-        Text text = new Text(choiceType);
+        Text text = new Text(action);
         TextFlow textFlow = new TextFlow();
         textFlow.getChildren().add(text);
         vBox.getChildren().add(textFlow);
-
-        //Create the options view and activation condition for button
-        if (chooseCardsHandler != null){
-            ListView<SortedBag<Card>> optionsView = new ListView<>(FXCollections.observableArrayList(cards));
-            optionsView.setCellFactory(v -> new TextFieldListCell<>(new CardBagStringConverter()));
-            vBox.getChildren().add(optionsView);
-            if (choiceType == StringsFr.CHOOSE_CARDS)
-                button.disableProperty().bind(
-                        Bindings.size(optionsView.getSelectionModel().getSelectedItems()).isEqualTo(IN_GAME_DISCARABLE_CARD_SIZE)
-                );
-            button.setOnAction(
-                    (event) -> {
-                        SortedBag.Builder<Card> selection = new SortedBag.Builder<>();
-                        optionsView.getSelectionModel().getSelectedItems().forEach( i -> selection.add(i));
-                        chooseCardsHandler.onChooseCards(selection.build());
-                        choiceWindow.hide();
-                    }
-            );
-        }else{
-            ListView<Ticket> optionsView = new ListView<>(FXCollections.observableArrayList(tickets.toList()));
-            vBox.getChildren().add(optionsView);
-            button.disableProperty().bind(
-                    Bindings.size(optionsView.getSelectionModel().getSelectedItems()).isEqualTo(INITIAL_DISCARDABLE_TICKETS)
-            );
-            button.setOnAction(
-                    (event) -> {
-                        SortedBag.Builder<Ticket> selection = new SortedBag.Builder<>();
-                        optionsView.getSelectionModel().getSelectedItems().forEach(i -> selection.add(i));
-                        chooseTicketsHandler.onChooseTickets(selection.build());
-                        choiceWindow.hide();
-                    }
-            );
-        }
-        vBox.getChildren().add(button);
 
         //Create scene
         Scene scene = new Scene(vBox);
@@ -297,88 +298,14 @@ public final class GraphicalPlayer {
 
         return choiceWindow;
     }
-/*
-    private Stage createCardChoiceWindow(String title, String textString, List<SortedBag<Card>> options,
-                                          ObjectProperty<ActionHandler.ChooseCardsHandler> handler, boolean isAdditionalCards){
-        //Create the text view
-        Text text = new Text(textString);
-        TextFlow textFlow = new TextFlow();
-        textFlow.getChildren().add(text);
-        //Create the options view
-        ListView<SortedBag<Card>> optionsView =new ListView<>(FXCollections.observableArrayList(options));
-        optionsView.setCellFactory(v -> new TextFieldListCell<>(new CardBagStringConverter()));
-        optionsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        //Create the button
-        Button button = new Button();
-        button.disableProperty().bind(Bindings.size(optionsView.getSelectionModel().getSelectedItems()).greaterThanOrEqualTo(
-                (isAdditionalCards)
-                ? MIN_ADDITIONAL_CARDS_SIZE
-                : MIN_CLAIM_CARD_SIZE
-        ));
-        button.setOnAction(
-            (event) -> {
-                choiceWindow.hide();
 
-                List<Integer> selection = optionsView.getSelectionModel().getSelectedIndices().sorted();
-                SortedBag.Builder<Card> selectionBag = new SortedBag.Builder<>();
-                for (Integer i : selection)
-                    selectionBag.add(options.get(i));
-                handler.get().onChooseCards(selectionBag.build());
-            }
-        );
-        //Attach them to each other
-        VBox vBox = new VBox();
-        vBox.getChildren().addAll(textFlow, optionsView, button);
-
-        return createChoiceWindow(vBox, title);
+    //Set the all the action handle to null
+    private void setActionHandlerOnNull(){
+        drawTicketsHandlerProperty.setValue(null);
+        drawCardHandlerProperty.setValue(null);
+        claimRouteHandlerProperty.setValue(null);
     }
 
-    private Stage createTicketChoiceWindow(String title, SortedBag<Ticket> options,
-                                           ActionHandler.ChooseTicketsHandler handler){
-        //Check correctness of the arguments
-        Preconditions.checkArgument(title.equals(StringsFr.TICKETS_CHOICE));
-
-        //Create the text view
-        String textString = String.format(StringsFr.CHOOSE_TICKETS, "%s", options.size() - 2);
-        Text text = new Text(textString);
-        TextFlow textFlow = new TextFlow();
-        textFlow.getChildren().add(text);
-        //Create the options view
-        ListView<Ticket> optionsView = new ListView<>(FXCollections.observableArrayList(options.toList()));
-        //Create the button
-        Button button = new Button();
-        button.setOnAction( (!activateSelectionButton.get())
-                ? Event::consume
-                : (event) -> {
-            choiceWindow.hide();
-            List<Integer> selection = optionsView.getSelectionModel().getSelectedIndices().sorted();
-            SortedBag.Builder<Ticket> selectionBag = new SortedBag.Builder<>();
-            for (Integer i : selection)
-                selectionBag.add(options.get(i));
-            handler.get().onChooseTickets(selectionBag.build());
-        });
-        //Attach them to each other
-        VBox vBox = new VBox();
-        vBox.getChildren().addAll(textFlow, optionsView, button);
-
-        return createChoiceWindow(vBox, title);
-    }
-
-    private Stage createChoiceWindow(VBox vBox, String title){
-        Scene scene = new Scene(vBox);
-        scene.getStylesheets().add("chooser.css");
-
-        //Create the choice window
-        Stage choiceWindow = new Stage(StageStyle.UTILITY);
-        choiceWindow.setTitle(title);
-        choiceWindow.setScene(scene);
-        choiceWindow.setOnCloseRequest(Event::consume);
-        choiceWindow.initOwner(mainWindow);
-        choiceWindow.initModality(Modality.WINDOW_MODAL);
-
-        return choiceWindow;
-    }
-*/
     private final class CardBagStringConverter extends StringConverter<SortedBag<Card>> {
         @Override
         public String toString(SortedBag<Card> object) {

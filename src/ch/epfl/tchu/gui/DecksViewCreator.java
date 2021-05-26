@@ -95,7 +95,7 @@ public final class DecksViewCreator {
     }
 
     //This method creates a Card
-    private static StackPane createCard(Card type){
+    private static final StackPane createCard(Card type){
         //Create the border of the card
         Rectangle border = new Rectangle(CARD_BORDER_WIDTH, CARD_BORDER_HEIGHT);
         border.getStyleClass().add("outside");
@@ -159,8 +159,7 @@ public final class DecksViewCreator {
 
             //Add a listener to the card
             obsGameState.faceUpCardsProperty(i).addListener((p, o, n) -> {
-                card.getStyleClass().removeAll();
-                card.getStyleClass().addAll((n == Card.LOCOMOTIVE) ? "NEUTRAL" : n.color().name(), "card");
+                card.getStyleClass().setAll((n.equals(Card.LOCOMOTIVE)) ? "NEUTRAL" : p.getValue().color().name(), "card");
             });
         }
 

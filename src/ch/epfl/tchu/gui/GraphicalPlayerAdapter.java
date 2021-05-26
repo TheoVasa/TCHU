@@ -30,7 +30,7 @@ public class GraphicalPlayerAdapter implements Player {
 
     @Override
     public void initPlayers(PlayerId ownId, Map<PlayerId, String> playerNames) {
-        graphicalPlayer = new GraphicalPlayer(ownId, playerNames);
+        Platform.runLater(() -> graphicalPlayer = new GraphicalPlayer(ownId, playerNames));
     }
 
     @Override
@@ -45,27 +45,20 @@ public class GraphicalPlayerAdapter implements Player {
 
     @Override
     public void setInitialTicketChoice(SortedBag<Ticket> tickets) {
-        Platform.runLater(() -> graphicalPlayer.chooseTickets(tickets, ticketChoice -> {
-            try {
-                ticketsQueue.put(ticketChoice);
-            }catch (InterruptedException e){
-                throw new Error();
-            }
-        }));
+        Platform.runLater(() ->
+            graphicalPlayer.chooseTickets(tickets, ticketChoice -> putTryCatch(ticketsQueue, ticketChoice))
+        );
     }
 
     @Override
     public SortedBag<Ticket> chooseInitialTickets() {
-        try{
-            return ticketsQueue.take();
-        }catch(InterruptedException e){
-            throw new Error();
-        }
+        return takeTryCatch(ticketsQueue);
     }
 
     @Override
-        public TurnKind nextTurn() {
-        graphicalPlayer.startTurn(
+    public TurnKind nextTurn() {
+        Platform.runLater(() ->
+            graphicalPlayer.startTurn(
                 () -> {
                     putTryCatch(turnKindQueue, TurnKind.DRAW_TICKETS);
                 },
@@ -74,29 +67,27 @@ public class GraphicalPlayerAdapter implements Player {
                     putTryCatch(cardSlotQueue, i);
                 },
                 (r, c) ->{
+                    putTryCatch(claimCardQueue, c);
+                    putTryCatch(claimRouteQueue, r);
                     putTryCatch(turnKindQueue, TurnKind.CLAIM_ROUTE);
                 }
+            )
         );
         return takeTryCatch(turnKindQueue);
     }
 
     @Override
     public SortedBag<Ticket> chooseTickets(SortedBag<Ticket> options) {
-        BlockingQueue<SortedBag<Ticket>> chosenTicket = new ArrayBlockingQueue<>(1);
-        Platform.runLater(() -> graphicalPlayer.chooseTickets(options, ticketChoice -> {
-            putTryCatch(chosenTicket, options);
-        }));
-        try{
-            return chosenTicket.take();
-        }catch (InterruptedException e){
-            throw new Error();
-        }
+        Platform.runLater(() ->
+            graphicalPlayer.chooseTickets(options, ticketChoice -> putTryCatch(ticketsQueue, options))
+        );
+        return  takeTryCatch(ticketsQueue);
     }
 
     @Override
     public int drawSlot() {
         if (cardSlotQueue.isEmpty())
-            graphicalPlayer.drawCard((i) -> putTryCatch(cardSlotQueue, i));
+            Platform.runLater(() -> graphicalPlayer.drawCard((i) -> putTryCatch(cardSlotQueue, i)));
         return takeTryCatch(cardSlotQueue);
     }
 
@@ -112,7 +103,7 @@ public class GraphicalPlayerAdapter implements Player {
 
     @Override
     public SortedBag<Card> chooseAdditionalCards(List<SortedBag<Card>> options) {
-        graphicalPlayer.chooseAdditionalCards(options, (cards) -> putTryCatch(claimCardQueue, cards));
+        Platform.runLater(() -> graphicalPlayer.chooseAdditionalCards(options, (cards) -> putTryCatch(claimCardQueue, cards)));
         return takeTryCatch(claimCardQueue);
     }
 

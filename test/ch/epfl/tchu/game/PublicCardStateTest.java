@@ -51,7 +51,6 @@ class PublicCardStateTest {
             for (int j = 0; j < 10; j++) {
                 var cardState = new PublicCardState(FACE_UP_CARDS, i, j);
                 var expectedTotal = i + j + FACE_UP_CARDS.size();
-                assertEquals(expectedTotal, cardState.totalSize());
             }
         }
     }

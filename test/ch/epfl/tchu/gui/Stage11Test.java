@@ -20,7 +20,7 @@ public final class Stage11Test extends Application {
         Map<PlayerId, Player> players =
                 Map.of(PlayerId.PLAYER_1, new GraphicalPlayerAdapter(),
                         PlayerId.PLAYER_2, new GraphicalPlayerAdapter());
-        Random rng = new Random();
+        Random rng = new Random(2001);
         new Thread(() -> Game.play(players, names, tickets, rng))
                 .start();
     }
