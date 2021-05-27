@@ -29,8 +29,8 @@ public final class PlayerState extends PublicPlayerState {
      */
     public PlayerState(SortedBag<Ticket> tickets, SortedBag<Card> cards, List<Route> routes) {
         super(tickets.size(), cards.size(), routes);
-        this.cards = SortedBag.of(cards);
-        this.tickets = SortedBag.of(tickets);
+        this.cards = cards;
+        this.tickets = tickets;
     }
 
     /**

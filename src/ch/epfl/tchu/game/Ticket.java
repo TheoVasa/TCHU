@@ -33,7 +33,7 @@ public final class Ticket implements Comparable<Ticket> {
 
         //Init the attributes
         text = computeText(trips);
-        this.trips = trips;
+        this.trips = List.copyOf(trips);
     }
 
     /**

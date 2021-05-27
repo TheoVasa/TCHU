@@ -22,11 +22,12 @@ public final class GameState extends PublicGameState {
     private final Map<PlayerId, PlayerState> playerState;
 
     //Create a GameState
+    //throw nullPointer if cardState or tickets are null
     private GameState(Deck<Ticket> ticketDeck, CardState cardState, Map<PlayerId, PlayerState> playerState, PlayerId currentPlayerId, PlayerId lastPlayer) {
         super(ticketDeck.size(), cardState, currentPlayerId, Map.copyOf(playerState), lastPlayer);
 
-        this.ticketDeck = ticketDeck;
-        this.cardState = cardState;
+        this.ticketDeck = Objects.requireNonNull(ticketDeck);
+        this.cardState = Objects.requireNonNull(cardState);
         this.playerState = Map.copyOf(playerState);
     }
 
@@ -232,7 +233,7 @@ public final class GameState extends PublicGameState {
      * @return true if the current player has 2 cards or less and the lastPlayer is unknown
      */
     public boolean lastTurnBegins() {
-        return lastPlayer() == null && playerState.get(currentPlayerId()).carCount() <= 2;
+        return lastPlayer() == null && playerState.get(currentPlayerId()).carCount() <=Constants.END_GAME_CARS_COUNT;
     }
 
     /**

@@ -19,11 +19,11 @@ public final class Route {
     private final Station station1;
     //Second station of the route
     private final Station station2;
-    //The id of the route
+
     private final String id;
-    //The length of the route
+
     private final int length;
-    //The level of the route
+    //The level of the route, underground or overground
     private final Level level;
     //The color of the route (null if no color)
     private final Color color;
@@ -158,22 +158,19 @@ public final class Route {
         List<Card> listOfPlayableCars = (color != null) ? Collections.singletonList(Card.of(color)) : Card.CARS;
 
         //Generate a list of a list of all possible sets of playable cards
-        if (level.equals(Level.UNDERGROUND)) {
             for (int numberOfLoco = 0; numberOfLoco <= length; ++numberOfLoco) {
                 for (Card card : listOfPlayableCars) {
-                    allPossibleClaimCards.add(SortedBag.of(length - numberOfLoco, card, numberOfLoco, Card.LOCOMOTIVE));
-
-                    //get out of the loop when we have added full loco
-                    if (numberOfLoco == length)
-                        break;
+                    if(level.equals(Level.UNDERGROUND)){
+                        allPossibleClaimCards.add(SortedBag.of(length - numberOfLoco, card, numberOfLoco, Card.LOCOMOTIVE));
+                        //get out of the loop when we have added full loco
+                        if (numberOfLoco == length)
+                            break;
+                    }else{
+                            if(!allPossibleClaimCards.contains(SortedBag.of(length, card)))
+                            allPossibleClaimCards.add(SortedBag.of(length, card));
+                    }
                 }
             }
-        } else if (level.equals(Level.OVERGROUND)) {
-            for (Card card : listOfPlayableCars) {
-                allPossibleClaimCards.add(SortedBag.of(length, card));
-            }
-        }
-
         return allPossibleClaimCards;
     }
 

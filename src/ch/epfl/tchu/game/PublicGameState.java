@@ -39,7 +39,7 @@ public class PublicGameState {
     public PublicGameState(int ticketsCount, PublicCardState cardState, PlayerId currentPlayerId, Map<PlayerId, PublicPlayerState> playerState, PlayerId lastPlayer) {
         //Check the correctness of the arguments
         Preconditions.checkArgument(ticketsCount >= 0);
-        Preconditions.checkArgument(playerState.size() == 2);
+        Preconditions.checkArgument(playerState.size() == PlayerId.COUNT);
 
         //init attributs and checking if they're null
         this.publicCardState = Objects.requireNonNull(cardState);
@@ -83,7 +83,7 @@ public class PublicGameState {
      * @return true if we can draw new cards (boolean)
      */
     public boolean canDrawCards() {
-        return (publicCardState.deckSize() + publicCardState.discardsSize()) >= 5;
+        return (publicCardState.deckSize() + publicCardState.discardsSize()) >= Constants.FACE_UP_CARDS_COUNT;
     }
 
     /**

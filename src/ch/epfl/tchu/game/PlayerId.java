@@ -29,6 +29,6 @@ public enum PlayerId {
      * @return the PlayerId of the next player in the enum. (PlayerId)
      */
     public PlayerId next() {
-        return ALL.get((ALL.indexOf(this) + 1) % ALL.size());
+        return ALL.get((this.ordinal()+1) % ALL.size());
     }
 }

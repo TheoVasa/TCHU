@@ -22,6 +22,10 @@ public final class Game {
     //The information that will be sent to the players during the game
     private static Map<PlayerId, Info> infos;
 
+    private Game() {
+        //this class is non instanciable
+    }
+
     /**
      * Loop of the game that will make the game run.
      *

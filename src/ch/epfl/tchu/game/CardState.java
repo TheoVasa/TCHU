@@ -102,11 +102,7 @@ public final class CardState extends PublicCardState {
         //Check correctness of argument
         Preconditions.checkArgument(deck.isEmpty());
 
-        //Create the new list of cards for the deck (containing the discards cards)
-        SortedBag.Builder<Card> newDeckBuilder = new SortedBag.Builder<>();
-        newDeckBuilder.add(discard);
-
-        return new CardState(super.faceUpCards(), Deck.of(newDeckBuilder.build(), rng), SortedBag.of());
+        return new CardState(super.faceUpCards(), Deck.of(discard, rng), SortedBag.of());
     }
 
     /**
@@ -116,11 +112,7 @@ public final class CardState extends PublicCardState {
      * @return a new CardState with the added discardCards (CardState)
      */
     public CardState withMoreDiscardedCards(SortedBag<Card> additionalDiscards) {
-        //Create the new discard
-        SortedBag.Builder<Card> newDiscard = new SortedBag.Builder<>();
-        newDiscard.add(discard);
-        newDiscard.add(additionalDiscards);
 
-        return new CardState(faceUpCards(), deck, newDiscard.build());
+        return new CardState(faceUpCards(), deck, additionalDiscards.union(discard));
     }
 }

@@ -230,32 +230,15 @@ public final class Info {
 
     //method generating the names of the players with "et" between
     private static String generatePlayersNames(List<String> playerNames) {
-        String names = "";
-        int counter = 0;
-
-        for (String player : playerNames) {
-
-            names = new StringBuilder()
-                    .append(names)
-                    .append(player)
-                    .toString();
-            counter++;
-            if (counter == playerNames.size())
-                break;
-            else names = new StringBuilder()
-                    .append(names)
-                    .append(StringsFr.AND_SEPARATOR)
-                    .toString();
-        }
-        return names;
+        return String.join(StringsFr.AND_SEPARATOR, playerNames);
     }
 
 
     //method generating the end of words depending if there is plural or not
     private static String generatePlural(int i) {
         if (i == 1 || i == -1) {
-            return StringsFr.plural(1);
-        } else return StringsFr.plural(0);
+            return StringsFr.plural(0);
+        } else return StringsFr.plural(1);
     }
 
 

@@ -28,8 +28,8 @@ public final class Trail {
     //Create a Trail with all the station it goes trough.
     private Trail(List<Route> routes, List<Station> stations) {
         //Init vars
-        this.routes = List.copyOf(routes); //Shouldn't be modifiable outside this class, but safer to take a copy !
-        this.stations = List.copyOf(stations);
+        this.routes = routes;
+        this.stations = stations;
         firstStation = (stations.size() != 0) ? stations.get(0) : null;
         lastStation = (stations.size() != 0) ? stations.get(stations.size() - 1) : null;
         this.length = generateLength();

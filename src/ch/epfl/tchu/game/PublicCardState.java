@@ -35,7 +35,7 @@ public class PublicCardState {
         Preconditions.checkArgument(deckSize >= 0 && discardsSize >= 0);
 
         //Init vars
-        this.faceUpCards = new ArrayList<>(faceUpCards);
+        this.faceUpCards = List.copyOf(faceUpCards);
         this.deckSize = deckSize;
         this.discardsSize = discardsSize;
     }
@@ -46,7 +46,7 @@ public class PublicCardState {
      * @return a list the faced up cards
      */
     public List<Card> faceUpCards() {
-        return List.copyOf(faceUpCards);
+        return faceUpCards;
     }
 
 
@@ -58,7 +58,7 @@ public class PublicCardState {
      */
     public Card faceUpCard(int slot) {
         //Check correctness of index and return the corresponding card of the index
-        return faceUpCards.get(Objects.checkIndex(slot, faceUpCards.size()));
+        return faceUpCards.get(Objects.checkIndex(slot, Constants.MINIMAL_DECK_SIZE_FOR_DRAW_CARDS));
     }
 
     /**

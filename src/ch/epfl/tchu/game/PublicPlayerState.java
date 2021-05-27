@@ -3,6 +3,7 @@ package ch.epfl.tchu.game;
 import ch.epfl.tchu.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -72,7 +73,7 @@ public class PublicPlayerState {
      * @return the routes of the player. (List)
      */
     public List<Route> routes() {
-        return new ArrayList<>(routes);
+        return Collections.unmodifiableList(routes);
     }
 
     /**

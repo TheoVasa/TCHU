@@ -36,6 +36,12 @@ public final class Constants {
         assert cardsBuilder.size() == TOTAL_CARDS_COUNT;
         return cardsBuilder.build();
     }
+    public static final int MINIMAL_DECK_SIZE_FOR_DRAW_CARDS = 5;
+
+    /**
+     * the number of cars from which the last turn begins
+     */
+    public static final int END_GAME_CARS_COUNT = 2;
 
     /**
      * the random seed used for the game

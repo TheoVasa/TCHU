@@ -29,6 +29,7 @@ public class ServerMain extends Application {
         //wait the connection and initialize the game if it's the case
         try (ServerSocket serverSocket = new ServerSocket(5108);
                 Socket socket = serverSocket.accept()) {
+
             //the players
             Player localPlayer = new GraphicalPlayerAdapter();
             Player distantPlayer = new RemotePlayerProxy(socket);
