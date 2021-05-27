@@ -45,7 +45,7 @@ public class ServerMain extends Application {
 
 
             //launch the game
-            new Thread(() -> Game.play(player, playerNames, SortedBag.of(ChMap.tickets()), new Random(Constants.RANDOM_SEED)));
+            new Thread(() -> Game.play(player, playerNames, SortedBag.of(ChMap.tickets()), new Random(Constants.RANDOM_SEED))).start();
         }
     }
 }
