@@ -308,8 +308,16 @@ public final class GraphicalPlayer {
     private final class CardBagStringConverter extends StringConverter<SortedBag<Card>> {
         @Override
         public String toString(SortedBag<Card> object) {
+            //Convert english text to french text
             List<String> toString = new ArrayList<>();
-            object.forEach(c -> toString.add(Info.cardName(c, object.countOf(c))));
+            Card.ALL.forEach(c -> {
+                if (object.contains(c))
+                    toString.add(new StringBuilder()
+                                .append(object.countOf(c))
+                                .append(" ")
+                                .append(Info.cardName(c, object.countOf(c)))
+                                .toString());
+            });
             return String.join(" et ", toString);
         }
 
