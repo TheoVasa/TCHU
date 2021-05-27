@@ -204,7 +204,7 @@ public final class GraphicalPlayer {
         button.setOnAction(
                 (event) -> {
                     SortedBag.Builder<Card> selection = new SortedBag.Builder<>();
-                    optionsView.getSelectionModel().getSelectedItems().forEach( i -> selection.add(i));
+                    optionsView.getSelectionModel().getSelectedItems().forEach(selection::add);
                     chooseCardHandler.onChooseCards(selection.build());
                     choiceWindow.hide();
                 }

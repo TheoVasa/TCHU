@@ -117,6 +117,7 @@ public final class ObservableGameState {
         claimableRoutes.forEach((route, bool) -> {
             if(playerState.canClaimRoute(route) && ownersOfEachRoutes.get(route).get()==null)
                 claimableRoutes.get(route).set(true);
+            else claimableRoutes.get(route).set(false);
         });
 
         //set the faceUpCards

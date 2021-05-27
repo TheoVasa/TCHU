@@ -7,7 +7,8 @@ import javafx.stage.Stage;
 public class ClientMain extends Application {
     public static void main(String[] args) { launch(args); }
 
-    @Override public void start(Stage primaryStage) throws Exception {
+    @Override
+    public void start(Stage primaryStage) throws Exception {
         //get the arguments of the program
         String hostName = this.getParameters().getRaw().get(0);
         int serverPort = Integer.parseInt(this.getParameters().getRaw().get(1));

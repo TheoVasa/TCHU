@@ -58,7 +58,9 @@ public class MapViewCreator {
         route.getStyleClass().addAll("route",r.level().toString(), routeColor);
         //manage route player
         obsGameState.routeProperty(r).addListener((o, oV, nV)->{
-            String owner = (nV==null) ? "" : nV.toString();
+            String owner = (nV==null)
+                    ? ""
+                    : nV.toString();
             route.getStyleClass().add(owner);
         });
 
