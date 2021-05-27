@@ -13,12 +13,14 @@ public class GraphicalPlayerAdapter implements Player {
     //Constant
     private final int CAPACITY = 1;
 
+    //Attributes
     private GraphicalPlayer graphicalPlayer;
-    private BlockingQueue<SortedBag<Ticket>> ticketsQueue;
-    private BlockingQueue<SortedBag<Card>> claimCardQueue;
-    private BlockingQueue<TurnKind> turnKindQueue;
-    private BlockingQueue<Integer> cardSlotQueue;
-    private BlockingQueue<Route> claimRouteQueue;
+    private final BlockingQueue<SortedBag<Ticket>> ticketsQueue;
+    private final BlockingQueue<SortedBag<Card>> claimCardQueue;
+    private final BlockingQueue<TurnKind> turnKindQueue;
+    private final BlockingQueue<Integer> cardSlotQueue;
+    private final BlockingQueue<Route> claimRouteQueue;
+
 
     public GraphicalPlayerAdapter(){
         ticketsQueue = new ArrayBlockingQueue<>(CAPACITY);
@@ -99,7 +101,6 @@ public class GraphicalPlayerAdapter implements Player {
 
     @Override
     public SortedBag<Card> initialClaimCards() {
-        //Platform.runLater(() -> graphicalPlayer.chooseClaimCards());
         return takeTryCatch(claimCardQueue);
     }
 

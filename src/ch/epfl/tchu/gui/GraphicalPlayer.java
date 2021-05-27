@@ -129,6 +129,7 @@ public final class GraphicalPlayer {
 
         //Change the claim route handler
         this.claimRouteHandlerProperty.setValue((route, cards) -> {
+
             claimRouteHandler.onClaimRoute(route ,cards);
             setActionHandlerOnNull();
         });
@@ -253,8 +254,7 @@ public final class GraphicalPlayer {
 
         //Create the Scene containing the BorderPane with all the 4 different view
         Pane mapView = MapViewCreator.createMapView(obsGameState, claimRouteHandlerProperty, (o, h) -> {
-            if (o.size() > 0)
-                h.onChooseCards(o.get(0));
+            chooseClaimCards(o, h);
         });
         VBox cardView = DecksViewCreator.createCardsView(obsGameState, drawTicketsHandlerProperty, drawCardHandlerProperty);
         HBox handView = DecksViewCreator.createHandView(obsGameState);
@@ -276,15 +276,14 @@ public final class GraphicalPlayer {
     private Stage createChoiceWindow(String title, String action, ListView listView, Button button){
         //Create VBox
         VBox vBox = new VBox();
-        vBox.getChildren().add(listView);
-        vBox.getChildren().add(button);
-
         //Create the text view
         Text text = new Text(action);
         TextFlow textFlow = new TextFlow();
         textFlow.getChildren().add(text);
+        //Add the different element to the choice window (text, options, button)
         vBox.getChildren().add(textFlow);
-
+        vBox.getChildren().add(listView);
+        vBox.getChildren().add(button);
         //Create scene
         Scene scene = new Scene(vBox);
         scene.getStylesheets().add("chooser.css");
