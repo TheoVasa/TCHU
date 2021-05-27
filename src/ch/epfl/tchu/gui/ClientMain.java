@@ -11,9 +11,7 @@ public class ClientMain extends Application {
     public void start(Stage primaryStage) throws Exception {
         //get the arguments of the program
         String hostName = this.getParameters().getRaw().get(0);
-        System.out.println("hostname : " + hostName);
         int serverPort = Integer.parseInt(this.getParameters().getRaw().get(1));
-        System.out.println("serverPort : " + serverPort);
 
         //the distant client
         RemotePlayerClient client = new RemotePlayerClient(new GraphicalPlayerAdapter(), hostName, serverPort);

@@ -89,7 +89,7 @@ public final class Game {
 
         //Give info about chosen tickets (first the info about the current player)
         for (PlayerId id: PlayerId.ALL)
-            receiveInfo(infos.get(PlayerId.PLAYER_1).keptTickets(chosenTicketsPlayer.get(id).size()));
+            receiveInfo(infos.get(id).keptTickets(chosenTicketsPlayer.get(id).size()));
     }
 
     //Make the current player play a turn

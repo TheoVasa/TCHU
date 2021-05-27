@@ -35,9 +35,9 @@ public final class RemotePlayerProxy implements Player {
         //Send message
         String msgIdString = MessageId.INIT_PLAYERS.name();
         String ownIdSerialized = Serdes.PLAYER_ID_SERDE.serialize(ownId);
-        String player1Name = Serdes.STRING_SERDE.serialize(playerNames.get(PlayerId.PLAYER_1));
-        String player2Name = Serdes.STRING_SERDE.serialize(playerNames.get(PlayerId.PLAYER_2));
-        List<String> dataList = List.of(msgIdString, ownIdSerialized, player1Name, player2Name, "\n");
+        List<String> players = List.of(playerNames.get(PlayerId.PLAYER_1), playerNames.get(PlayerId.PLAYER_2));
+        String dataPlayers = Serdes.LIST_STRING_SERDE.serialize(players);
+        List<String> dataList = List.of(msgIdString, ownIdSerialized, dataPlayers, "\n");
 
         String sendMessage = String.join(" ", dataList);
         sendMessage(sendMessage);
