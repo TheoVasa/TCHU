@@ -34,7 +34,7 @@ public final class GraphicalPlayer {
     private static final int IN_GAME_CHOOSE_CLAIM_CARD_SIZE = 1;
     private static final int IN_GAME_DISCARDABLE_TICKETS_SIZE = 1;
     private static final int INITIAL_DISCARDABLE_TICKETS_SIZE = 3;
-    //Player informations
+    //Player information
     private final PlayerId playerId;
     private final Map<PlayerId, String> playerNames;
     //Other attributes
@@ -120,8 +120,8 @@ public final class GraphicalPlayer {
         //Change the card handler
         this.drawCardHandlerProperty.setValue(
                 (!obsGameState.canDrawCards())
-                        ? null
-                        : (i) -> {
+                ? null
+                : (i) -> {
                     drawCardHandler.onDrawCard(i);
                     setActionHandlerOnNull();
                 }

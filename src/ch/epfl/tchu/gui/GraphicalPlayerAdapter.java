@@ -86,6 +86,7 @@ public class GraphicalPlayerAdapter implements Player {
 
     @Override
     public int drawSlot() {
+        System.out.println("drawSlot");
         if (cardSlotQueue.isEmpty())
             Platform.runLater(() -> graphicalPlayer.drawCard((i) -> putTryCatch(cardSlotQueue, i)));
         return takeTryCatch(cardSlotQueue);
@@ -98,6 +99,7 @@ public class GraphicalPlayerAdapter implements Player {
 
     @Override
     public SortedBag<Card> initialClaimCards() {
+        //Platform.runLater(() -> graphicalPlayer.chooseClaimCards());
         return takeTryCatch(claimCardQueue);
     }
 

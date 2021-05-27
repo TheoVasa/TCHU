@@ -38,11 +38,11 @@ public final class Game {
      */
     public static void play(Map<PlayerId, Player> players, Map<PlayerId, String> playerNames, SortedBag<Ticket> tickets, Random rng) {
         //Check correctness of the arguments
-        Preconditions.checkArgument(players.size() == 2);
-        Preconditions.checkArgument(playerNames.size() == 2);
+        Preconditions.checkArgument(players.size() == PlayerId.COUNT);
+        Preconditions.checkArgument(playerNames.size() == PlayerId.COUNT);
 
         //Init vars from parameters
-        Game.players = Map.copyOf(players);
+        Game.players = players;
         Game.playerNames = Map.copyOf(playerNames);
         Game.gameState = GameState.initial(tickets, rng);
 
@@ -66,32 +66,30 @@ public final class Game {
 
     //Initialize the game
     private static void initGame() {
-
-        //Init players
-        players.get(PlayerId.PLAYER_1).initPlayers(PlayerId.PLAYER_1, playerNames);
-        players.get(PlayerId.PLAYER_2).initPlayers(PlayerId.PLAYER_2, playerNames);
+        //Init the players
+        for (PlayerId id : PlayerId.ALL)
+            players.get(id).initPlayers(id, playerNames);
 
         //Inform who will play first
         receiveInfo(infos.get(gameState.currentPlayerId()).willPlayFirst());
 
-        //Update
+        //Give initial tickets choice to the players
         updateState();
+        for (PlayerId id : PlayerId.ALL)
+            players.get(id).setInitialTicketChoice(gameState.topTickets(Constants.INITIAL_TICKETS_COUNT));
 
-        //Chose tickets player 1
-        players.get(PlayerId.PLAYER_1).setInitialTicketChoice(gameState.topTickets(Constants.INITIAL_TICKETS_COUNT));
-        SortedBag<Ticket> chosenTicketsPlayer1 = players.get(PlayerId.PLAYER_1).chooseInitialTickets();
-        gameState = gameState.withInitiallyChosenTickets(PlayerId.PLAYER_1, chosenTicketsPlayer1);
-        gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
-        //Chose tickets player 2
-        players.get(PlayerId.PLAYER_2).setInitialTicketChoice(gameState.topTickets(Constants.INITIAL_TICKETS_COUNT));
-        SortedBag<Ticket> chosenTicketsPlayer2 = players.get(PlayerId.PLAYER_2).chooseInitialTickets();
-        gameState = gameState.withInitiallyChosenTickets(PlayerId.PLAYER_2, chosenTicketsPlayer2);
-        gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
-
+        //handle the tickets choice of the player (put them in their hand)
+        updateState();
+        EnumMap<PlayerId, SortedBag<Ticket>> chosenTicketsPlayer = new EnumMap<>(PlayerId.class);
+        for (PlayerId id : PlayerId.ALL){
+            chosenTicketsPlayer.put(id ,players.get(id).chooseInitialTickets());
+            gameState = gameState.withInitiallyChosenTickets(id, chosenTicketsPlayer.get(id));
+            gameState = gameState.withoutTopTickets(Constants.INITIAL_TICKETS_COUNT);
+        }
 
         //Give info about chosen tickets (first the info about the current player)
-        receiveInfo(infos.get(PlayerId.PLAYER_1).keptTickets(chosenTicketsPlayer1.size()));
-        receiveInfo(infos.get(PlayerId.PLAYER_2).keptTickets(chosenTicketsPlayer2.size()));
+        for (PlayerId id: PlayerId.ALL)
+            receiveInfo(infos.get(PlayerId.PLAYER_1).keptTickets(chosenTicketsPlayer.get(id).size()));
     }
 
     //Make the current player play a turn
@@ -134,7 +132,7 @@ public final class Game {
                         //Send info that the player drew from deck
                         receiveInfo(infos.get(id).drewBlindCard());
                         gameState = gameState.withBlindlyDrawnCard();
-                    } else if (Constants.FACE_UP_CARD_SLOTS.contains(cardSlot)) {
+                    } else {
                         //Send info that the player drew from faced up cards
                         receiveInfo(infos.get(id).drewVisibleCard(gameState.cardState().faceUpCard(cardSlot)));
                         gameState = gameState.withDrawnFaceUpCard(cardSlot);

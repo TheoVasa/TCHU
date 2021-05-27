@@ -27,7 +27,7 @@ public class PublicGameState {
     /**
      * Create a PublicGameState.
      *
-     * @param ticketsCount    number of tickets
+     * @param ticketsCount    number of tickets        int totalCardSize = gameState.cardState().deckSize() + gameState.cardState().discardsSize() + playerState.cardCount()
      * @param cardState       public state of the cards
      * @param currentPlayerId the current player
      * @param playerState     the public state of the players

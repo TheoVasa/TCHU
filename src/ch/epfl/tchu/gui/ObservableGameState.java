@@ -13,6 +13,9 @@ import java.util.*;
  * This class contains all the observable property in a game of tchu, those property "observe" what's passing during the game and must be set each time the state of the game change.
  */
 public final class ObservableGameState {
+    //Constants
+    private static final int TOTAL_CARDS_IN_GAME = 110;
+    private static final int TOTAL_TICKETS_IN_GAME = ChMap.tickets().size();
 
     //the player attached to the observable game state.
     private final PlayerId player;
@@ -57,7 +60,7 @@ public final class ObservableGameState {
         ownersOfEachRoutes= createAllRoutesOwners();
         //set that all routes aren't claimable
         claimableRoutes = new HashMap<>();
-        ChMap.routes().forEach((route)->claimableRoutes.put(route, new SimpleBooleanProperty(false)));
+        ChMap.routes().forEach((route) -> claimableRoutes.put(route, new SimpleBooleanProperty(false)));
 
         numberTicketsForEachPlayer = createEnumMapWithNullIntegerProperty(PlayerId.values());
         numberCardsForEachPlayer = createEnumMapWithNullIntegerProperty(PlayerId.values());
@@ -67,7 +70,7 @@ public final class ObservableGameState {
         ticketsOfPlayer = FXCollections.observableArrayList();
         numberOfCardsForEachType = createEnumMapWithNullIntegerProperty(Card.values());
         playerHasGivenRoute = new HashMap<>();
-        ChMap.routes().forEach((route)->playerHasGivenRoute.put(route, new SimpleBooleanProperty(false)));
+        ChMap.routes().forEach((route) -> playerHasGivenRoute.put(route, new SimpleBooleanProperty(false)));
     }
 
     /**
@@ -95,9 +98,9 @@ public final class ObservableGameState {
         for(Card c : Card.ALL) numberOfCardsForEachType.get(c).set(playerCards.countOf(c));
 
         //set the percents of the cards and tickets
-        restingTicketsPercents.setValue(generatePercents(gameState.ticketsCount(), ChMap.tickets().size()));
+        restingTicketsPercents.setValue(generatePercents(gameState.ticketsCount(), TOTAL_TICKETS_IN_GAME));
         restingCardsPercents.setValue(generatePercents(gameState.cardState().deckSize(),
-                gameState.cardState().deckSize() + gameState.cardState().discardsSize()));
+                TOTAL_CARDS_IN_GAME));
 
         //set states for all players
         allPlayers.forEach((plr)->{
@@ -296,7 +299,7 @@ public final class ObservableGameState {
     //create all route owner trough the chmap routes and set a null owner for all of them.
     private static Map<Route, SimpleObjectProperty<PlayerId>> createAllRoutesOwners(){
         Map<Route, SimpleObjectProperty<PlayerId>> map = new HashMap<>();
-        for(Route r : ChMap.routes()) map.put(r, new SimpleObjectProperty<PlayerId>(null));
+        for(Route r : ChMap.routes()) map.put(r, new SimpleObjectProperty<>(null));
         return map;
     }
 

@@ -4,7 +4,6 @@ import ch.epfl.tchu.game.Card;
 import ch.epfl.tchu.game.Constants;
 import ch.epfl.tchu.game.Ticket;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
 import javafx.scene.Group;
@@ -26,8 +25,8 @@ public final class DecksViewCreator {
     private static final int CARD_BORDER_WIDTH  = 60;
     private static final int CARD_FILL_HEIGHT   = 70;
     private static final int CARD_FILL_WIDTH    = 40;
-    private static final int BUTTON_HEIGHT      = 5;
-    private static final int BUTTON_WIDTH       = 50;
+    private static final int BUTTON_GAUGE_HEIGHT = 5;
+    private static final int BUTTON_GAUGE_WIDTH = 50;
 
 
     /**
@@ -175,12 +174,16 @@ public final class DecksViewCreator {
     //This method creates a button
     private static Button createButton(String name, ReadOnlyIntegerProperty percentageProperty){
         //Create the gauge
-        Rectangle background = new Rectangle(BUTTON_WIDTH, BUTTON_HEIGHT);
-        background.getStyleClass().add("background");
-        Rectangle foreground = new Rectangle(BUTTON_WIDTH, BUTTON_HEIGHT);
-        foreground.getStyleClass().add("foreground");
-        foreground.widthProperty().bind(percentageProperty.multiply(50).divide(100));
-        Group group = new Group(background, foreground);
+        Rectangle backgroundGauge = new Rectangle(BUTTON_GAUGE_WIDTH, BUTTON_GAUGE_HEIGHT);
+        backgroundGauge.getStyleClass().add("background");
+        Rectangle foregroundGauge = new Rectangle(BUTTON_GAUGE_WIDTH, BUTTON_GAUGE_HEIGHT);
+        foregroundGauge.getStyleClass().add("foreground");
+        percentageProperty.addListener((p, o, n) -> {
+            System.out.println(name + "    " + n.doubleValue());
+            }
+        );
+        foregroundGauge.widthProperty().bind(percentageProperty.multiply(50).divide(100));
+        Group group = new Group(backgroundGauge, foregroundGauge);
 
         //Create button
         Button button = new Button();
