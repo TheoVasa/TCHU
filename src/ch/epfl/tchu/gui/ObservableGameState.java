@@ -43,7 +43,6 @@ public final class ObservableGameState {
     //private states of the player
     private final ObservableList<Ticket> ticketsOfPlayer;
     private final Map<Card, SimpleIntegerProperty> numberOfCardsForEachType;
-    private final Map<Route, SimpleBooleanProperty> playerHasGivenRoute;
 
     /**
      * Construct an ObservableGameState.
@@ -69,8 +68,6 @@ public final class ObservableGameState {
 
         ticketsOfPlayer = FXCollections.observableArrayList();
         numberOfCardsForEachType = createEnumMapWithNullIntegerProperty(Card.values());
-        playerHasGivenRoute = new HashMap<>();
-        ChMap.routes().forEach((route) -> playerHasGivenRoute.put(route, new SimpleBooleanProperty(false)));
     }
 
     /**
@@ -88,19 +85,12 @@ public final class ObservableGameState {
         List<Route> playerRoutes = gameState.playerState(player).routes();
         List<Route> otherPlayerRoutes = gameState.playerState(otherPlayer).routes();
 
-        //set all state of the player
-        playerHasGivenRoute.forEach((r, p) -> {
-            boolean hasRoute = playerRoutes.contains(r);
-            p.set(hasRoute);
-        });
-
         ticketsOfPlayer.setAll(playerTickets.toList());
         for(Card c : Card.ALL) numberOfCardsForEachType.get(c).set(playerCards.countOf(c));
 
         //set the percents of the cards and tickets
         restingTicketsPercents.setValue(generatePercents(gameState.ticketsCount(), TOTAL_TICKETS_IN_GAME));
-        restingCardsPercents.setValue(generatePercents(gameState.cardState().deckSize(),
-                TOTAL_CARDS_IN_GAME));
+        restingCardsPercents.setValue(generatePercents(gameState.cardState().deckSize(), TOTAL_CARDS_IN_GAME));
 
         //set states for all players
         allPlayers.forEach((plr)->{
@@ -115,8 +105,11 @@ public final class ObservableGameState {
         otherPlayerRoutes.forEach((r) -> ownersOfEachRoutes.get(r).set(otherPlayer));
         //set which routes are now claimable
         claimableRoutes.forEach((route, bool) -> {
-            if(playerState.canClaimRoute(route) && ownersOfEachRoutes.get(route).get()==null)
+            if(playerState.canClaimRoute(route)
+                    && ownersOfEachRoutes.get(route).get()==null
+                        && ownersOfEachRoutes.get(getRouteNeighbor(route, ChMap.routes())).get()==null)
                 claimableRoutes.get(route).set(true);
+
             else claimableRoutes.get(route).set(false);
         });
 
@@ -243,18 +236,6 @@ public final class ObservableGameState {
     }
 
     /**
-     * Used to get the boolean property attached to the given route.
-     *
-     * @param route we want to know the property attached to it.
-     * @return the property attached to the route (ReadOnlyBooleanProperty).
-     * @throws IllegalArgumentException if the route isn't in the map.
-     */
-    public ReadOnlyBooleanProperty playerHasGivenRouteProperty(Route route){
-        Preconditions.checkArgument(playerHasGivenRoute.containsKey(route));
-        return playerHasGivenRoute.get(route);
-    }
-
-    /**
      *
      * @return canDrawTickets from the current gameState(boolean).
      */
@@ -311,11 +292,28 @@ public final class ObservableGameState {
         return map;
     }
 
-    //generate percents given two numbers, in int (always between 0 and 100).
-    private int generatePercents(int number, int total){
-        int percent = (int) Math.ceil(((double) number / (double) total)*100);
-        if(percent > 100) percent = 100;
-        else if(percent < 0) percent = 0;
-        return percent;
+    //return the neighbor route if there is one, return the current Route if there's not
+    private Route getRouteNeighbor(Route route, List<Route> map) {
+        Route neighbor = route;
+        for (Route r : map) {
+            //twos neighbors routes will have the same stations
+            if (r.station1() == route.station1() && r.station2() == route.station2() && r != route) {
+                neighbor = r;
+                break;
+            }
+        }
+        return neighbor;
     }
+
+        //generate percents given two numbers, in int (always between 0 and 100).
+        private int generatePercents ( int number, int total){
+            int percent = (int) Math
+                    .ceil(((double) number / (double) total) * 100);
+            if (percent > 100)
+                percent = 100;
+            else if (percent < 0)
+                percent = 0;
+            return percent;
+        }
+
 }
