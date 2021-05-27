@@ -71,9 +71,10 @@ public final class RemotePlayerClient {
         switch (MessageId.valueOf(listOfData.next())){
             case INIT_PLAYERS :
                 PlayerId ownId = Serdes.PLAYER_ID_SERDE.deserialize(listOfData.next());
+                List<String> players = Serdes.LIST_STRING_SERDE.deserialize(listOfData.next());
                 Map<PlayerId, String> playerNames = Map.of(
-                        PlayerId.PLAYER_1, Serdes.STRING_SERDE.deserialize(listOfData.next()),
-                        PlayerId.PLAYER_2, Serdes.STRING_SERDE.deserialize(listOfData.next())
+                        PlayerId.PLAYER_1, players.get(0),
+                        PlayerId.PLAYER_2, players.get(1)
                 );
                 player.initPlayers(ownId, playerNames);
                 break;

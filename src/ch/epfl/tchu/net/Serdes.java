@@ -31,11 +31,11 @@ public final class Serdes {
     public static final Serde<String> STRING_SERDE = Serde.of(
             //serialize
             (String str)-> (!str.isEmpty())
-                            ? Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8))
+                            ? Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.US_ASCII))
                             : "",
             //deserialize
             (String data)-> (!data.isEmpty())
-                            ? new String (Base64.getDecoder().decode(data), StandardCharsets.UTF_8)
+                            ? new String (Base64.getDecoder().decode(data), StandardCharsets.US_ASCII)
                             : ""
     );
 
