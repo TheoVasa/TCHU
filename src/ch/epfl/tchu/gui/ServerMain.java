@@ -21,6 +21,7 @@ import static ch.epfl.tchu.game.PlayerId.PLAYER_2;
  * @author Selien Wicki (314357)
  */
 public class ServerMain extends Application {
+
     public static void main(String[] args) { launch(args); }
 
     @Override
