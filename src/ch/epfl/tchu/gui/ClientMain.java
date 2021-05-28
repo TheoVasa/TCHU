@@ -4,6 +4,9 @@ import ch.epfl.tchu.net.RemotePlayerClient;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+/**
+ * This class represent the client, used to connect and get the information from the server, extends from a javaFX application.
+ */
 public class ClientMain extends Application {
     public static void main(String[] args) { launch(args); }
 

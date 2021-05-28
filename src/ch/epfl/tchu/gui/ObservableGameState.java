@@ -140,7 +140,7 @@ public final class ObservableGameState {
      * Used to get the property of a given face up card.
      *
      * @param slot of the face up card.
-     * @return the property attached to the card (ReadOnlyObjectProperty)
+     * @return the property attached to the card. (ReadOnlyObjectProperty)
      * @throws IllegalArgumentException if the slot isn't in face up cards
      */
     public ReadOnlyObjectProperty<Card> faceUpCardsProperty (int slot){
@@ -152,7 +152,7 @@ public final class ObservableGameState {
      * Used to get the property attached of an owner of a given route.
      *
      * @param route we want to know the property of his owner.
-     * @return the property attached to the owner (ReadOnlyObjectProperty)
+     * @return the property attached to the owner. (ReadOnlyObjectProperty)
      * @throws IllegalArgumentException if the route
      */
     public ReadOnlyObjectProperty<PlayerId> routeProperty (Route route){
@@ -170,7 +170,6 @@ public final class ObservableGameState {
     public ReadOnlyIntegerProperty numberOfTicketsForGivenPlayerProperty(PlayerId plr){
         Preconditions.checkArgument(numberTicketsForEachPlayer.containsKey(plr));
         return numberTicketsForEachPlayer.get(plr);
-
     }
 
     /**
@@ -196,7 +195,6 @@ public final class ObservableGameState {
     public ReadOnlyIntegerProperty numberOfCarsForGivenPlayerProperty(PlayerId plr){
         Preconditions.checkArgument(numberCarsForEachPlayer.containsKey(plr));
         return numberCarsForEachPlayer.get(plr);
-
     }
 
     /**
@@ -209,7 +207,6 @@ public final class ObservableGameState {
     public ReadOnlyIntegerProperty numberConstructsPointsForGivenPlayerProperty(PlayerId plr){
         Preconditions.checkArgument(numberConstructsPointsForEachPlayer.containsKey(plr));
         return numberConstructsPointsForEachPlayer.get(plr);
-
     }
 
     /**
@@ -235,7 +232,7 @@ public final class ObservableGameState {
 
     /**
      *
-     * @return canDrawTickets from the current gameState(boolean).
+     * @return canDrawTickets from the current gameState (boolean).
      */
     public boolean canDrawTickets(){
         return gameState.canDrawTickets();
@@ -263,12 +260,14 @@ public final class ObservableGameState {
      *
      * @param route we want to know if claimable.
      * @return a property containing if the route is claimable. (ReadOnlyBooleanProperty)
+     * @throws IllegalArgumentException if the route isn't on the map
      */
-    public ReadOnlyBooleanProperty claimable (Route route){
+    public ReadOnlyBooleanProperty claimableProperty(Route route){
+        Preconditions.checkArgument(claimableRoutes.containsKey(route));
         return claimableRoutes.get(route);
     }
 
-    //initialize the face uo cards with a "null" card for each slot.
+    //initialize the face up cards with a "null" card for each slot.
     private static List<SimpleObjectProperty<Card>> createFaceUpCards(){
         List<SimpleObjectProperty<Card>> listOfProper = new ArrayList<>();
         for(int i=0; i<Constants.FACE_UP_CARDS_COUNT; ++i)

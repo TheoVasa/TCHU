@@ -2,7 +2,6 @@ package ch.epfl.tchu.gui;
 
 import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.Group;
 import javafx.scene.image.ImageView;
@@ -11,7 +10,11 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import java.util.List;
 
-public class MapViewCreator {
+/**
+ * this class will generate the graphic visualisation of the map during the game, non instantiable and private package.
+ */
+class MapViewCreator {
+    //graphical constants
     private final static int RECTANGLES_WIGHT = 36;
     private final static int RECTANGLES_HEIGHT = 12;
     private final static int CIRCLES_RADIUS = 3;
@@ -20,6 +23,19 @@ public class MapViewCreator {
     private final static int CIRCLE2_XPOS = 24;
     private final static int CIRCLE2_YPOS = 6;
 
+    //private constructor
+    private MapViewCreator(){
+        //do nothing this class is not instantiable
+    }
+
+    /**
+     * This method will construct a pane representing the map in the game.
+     *
+     * @param obsGameState the gameState that the map will represent.
+     * @param claimRouteHandler a property containing the action handler when the player want to claim a route.
+     * @param cardChooser a cardChooser
+     * @return a new Pane representing the map. (Pane)
+     */
     public static Pane createMapView(ObservableGameState obsGameState, ObjectProperty<ActionHandler.ClaimRouteHandler> claimRouteHandler, CardChooser cardChooser){
         //the map
         Pane map = new Pane();
@@ -27,17 +43,18 @@ public class MapViewCreator {
         //the image of the map
         ImageView imageMap = new ImageView();
         map.getChildren().add(imageMap);
+
         //all routes
         for (Route r : ChMap.routes()) {
             Group route = generateRoute(r, obsGameState);
-
             //manage when the player click on a route.
-            route.setOnMouseClicked((event)->{
+            route.setOnMouseClicked((event) -> {
                 List<SortedBag<Card>> possibleClaimCards = obsGameState.possibleClaimCards(r);
+
                 //if the player have only one choice to claim the route.
-                if(possibleClaimCards.size()==1){
+                if (possibleClaimCards.size() == 1) {
                     claimRouteHandler.get().onClaimRoute(r, possibleClaimCards.get(0));
-                }else{
+                } else {
                     //if not
                     ActionHandler.ChooseCardsHandler chooseCardsH = chosenCards -> claimRouteHandler.get().onClaimRoute(r, chosenCards);
                     cardChooser.chooseCards(possibleClaimCards, chooseCardsH);
@@ -45,7 +62,7 @@ public class MapViewCreator {
             });
             map.getChildren().add(route);
             //Disable or not the route interactions with the user, in function of if the route is claimable or not.
-            route.disableProperty().bind(claimRouteHandler.isNull().or(obsGameState.claimable(r).not()));
+            route.disableProperty().bind(claimRouteHandler.isNull().or(obsGameState.claimableProperty(r).not()));
         }
         return map;
     }
@@ -59,11 +76,12 @@ public class MapViewCreator {
         //manage route player
         obsGameState.routeProperty(r).addListener((o, oV, nV)->{
             String owner = (nV==null)
-                    ? ""
-                    : nV.toString();
+                            ? ""
+                            : nV.toString();
             route.getStyleClass().add(owner);
         });
 
+        //generate all case in the route
         for(int i=1; i<=r.length(); ++i)
             route.getChildren().add(generateCaseRoute(new StringBuilder()
                                                         .append(r.id())
@@ -83,6 +101,7 @@ public class MapViewCreator {
 
         return caseOfRoute;
     }
+
     //generate the car on the case of a route node
     private static Group generateCarGroup(){
         Group car = new Group();
@@ -102,6 +121,9 @@ public class MapViewCreator {
         return car;
     }
 
+    /**
+     * this functional interface is used to contain the method that manage when a player need to choose the card to claim a route.
+     */
     @FunctionalInterface
     interface CardChooser {
         void chooseCards(List<SortedBag<Card>> options,

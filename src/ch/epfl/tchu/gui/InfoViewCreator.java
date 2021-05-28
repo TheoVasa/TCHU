@@ -4,7 +4,6 @@ import ch.epfl.tchu.game.PlayerId;
 import javafx.beans.binding.Bindings;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
-import javafx.scene.Node;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
@@ -13,7 +12,25 @@ import javafx.scene.text.TextFlow;
 
 import java.util.Map;
 
-public class InfoViewCreator {
+/**
+ * this class generate the part of the graphical interface where all the infos of the players are write, non instantiable and private package.
+ */
+class InfoViewCreator {
+
+    //private constructor
+    private InfoViewCreator(){
+        //do nothing, this class is non instantiable
+    }
+
+    /**
+     * This method generate a node where all the stats, states, and infos in the game are written.
+     *
+     * @param currentPlayer, the current player in the game.
+     * @param playerNames, all the names of the player in the game.
+     * @param gameState the current state of the game.
+     * @param gameInfos the infos in the game.
+     * @return a new Node representing al the infos in the game. (VBox)
+     */
     public static VBox createInfoView(PlayerId currentPlayer, Map<PlayerId, String> playerNames, ObservableGameState gameState, ObservableList<Text> gameInfos) {
         //create the vbox
         VBox vbox = new VBox();
@@ -41,6 +58,7 @@ public class InfoViewCreator {
     }
 
     private static TextFlow generatePlayersStatistic(PlayerId player, String name, ObservableGameState gameState){
+        //the name of the player
         TextFlow textFlow = new TextFlow();
         textFlow.getStyleClass().add(player.toString());
 
@@ -51,7 +69,7 @@ public class InfoViewCreator {
 
         //generate the statistics
         Text stats = new Text();
-       //bind the stats in function of the state of the player
+        //bind the stats in function of the state of the player
         stats.textProperty().bind(
                 Bindings.format(
                         StringsFr.PLAYER_STATS,

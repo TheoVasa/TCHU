@@ -12,23 +12,25 @@ import java.net.Socket;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Random;
-
 import static ch.epfl.tchu.game.PlayerId.PLAYER_1;
 import static ch.epfl.tchu.game.PlayerId.PLAYER_2;
 
+/**
+ * This class represent the server used to run the game and to communicate with the different clients, extends from a javaFX application.
+ */
 public class ServerMain extends Application {
     public static void main(String[] args) { launch(args); }
 
-    @Override public void start(Stage primaryStage)
-            throws  IOException {
+    @Override
+    public void start(Stage primaryStage) throws  IOException {
         //get the arguments of the program
         String player1Name = this.getParameters().getRaw().get(0);
         String player2Name = this.getParameters().getRaw().get(1);
 
         //wait the connection and initialize the game if it's the case
         try (ServerSocket serverSocket = new ServerSocket(5108)) {
-
             Socket socket = serverSocket.accept();
+
             //the players
             Player localPlayer = new GraphicalPlayerAdapter();
             Player distantPlayer = new RemotePlayerProxy(socket);
@@ -46,8 +48,8 @@ public class ServerMain extends Application {
 
             //launch the game
             new Thread(() -> Game
-                    .play(player, playerNames, SortedBag.of(ChMap.tickets()),
-                            new Random(Constants.RANDOM_SEED))).start();
+                    .play(player, playerNames, SortedBag.of(ChMap.tickets()), new Random()))
+                    .start();
         }
     }
 }

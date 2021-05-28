@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+/**
+ * This class adapt a graphicalPlayer to the interface Player, implements Player.
+ */
 public class GraphicalPlayerAdapter implements Player {
     //Constant
     private final int CAPACITY = 1;
@@ -21,7 +24,9 @@ public class GraphicalPlayerAdapter implements Player {
     private final BlockingQueue<Integer> cardSlotQueue;
     private final BlockingQueue<Route> claimRouteQueue;
 
-
+    /**
+     * constructs a new GraphicalPlayerAdapter and initialize all the different queue.
+     */
     public GraphicalPlayerAdapter(){
         ticketsQueue = new ArrayBlockingQueue<>(CAPACITY);
         claimCardQueue = new ArrayBlockingQueue<>(CAPACITY);
@@ -110,6 +115,7 @@ public class GraphicalPlayerAdapter implements Player {
         return takeTryCatch(claimCardQueue);
     }
 
+    //TODO
     private <E> void putTryCatch(BlockingQueue<E> queue, E element){
         try {
             queue.put(element);
@@ -118,6 +124,7 @@ public class GraphicalPlayerAdapter implements Player {
         }
     }
 
+    //TODO
     private <E> E takeTryCatch(BlockingQueue<E> queue){
         try {
             return queue.take();
