@@ -119,7 +119,7 @@ public class GraphicalPlayerAdapter implements Player {
     private <E> void putTryCatch(BlockingQueue<E> queue, E element){
         try {
             queue.put(element);
-        }catch (InterruptedException e){
+        } catch (InterruptedException e) {
             throw new Error();
         }
     }
@@ -128,7 +128,7 @@ public class GraphicalPlayerAdapter implements Player {
     private <E> E takeTryCatch(BlockingQueue<E> queue){
         try {
             return queue.take();
-        }catch (InterruptedException e){
+        } catch (InterruptedException e) {
             throw new Error();
         }
     }

@@ -125,7 +125,7 @@ class MapViewCreator {
      * this functional interface is used to contain the method that manage when a player need to choose the card to claim a route.
      */
     @FunctionalInterface
-    interface CardChooser {
+    protected interface CardChooser {
         void chooseCards(List<SortedBag<Card>> options,
                 ActionHandler.ChooseCardsHandler handler);
     }
