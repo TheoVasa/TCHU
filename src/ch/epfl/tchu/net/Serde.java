@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
  * @param <E> the type value the Serde will be able do serialize/deserialize.
  */
 public interface Serde<E> {
-
     /**
      * This method serialize the data information of the game.
      *
