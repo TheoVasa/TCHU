@@ -134,7 +134,7 @@ class DecksViewCreator {
     }
 
     //This method creates a card.
-    private static final StackPane createCard(Card type){
+    private static StackPane createCard(Card type){
         //Create the border of the card
         Rectangle border = new Rectangle(CARD_BORDER_WIDTH, CARD_BORDER_HEIGHT);
         border.getStyleClass().add("outside");

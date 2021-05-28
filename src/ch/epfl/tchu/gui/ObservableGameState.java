@@ -273,7 +273,7 @@ public final class ObservableGameState {
     private static List<SimpleObjectProperty<Card>> createFaceUpCards(){
         List<SimpleObjectProperty<Card>> listOfProper = new ArrayList<>();
         for(int i=0; i<Constants.FACE_UP_CARDS_COUNT; ++i)
-            listOfProper.add(new SimpleObjectProperty<Card>(null));
+            listOfProper.add(new SimpleObjectProperty<>(null));
         return listOfProper;
     }
 

@@ -38,12 +38,12 @@ public class ServerMain extends Application {
             Player distantPlayer = new RemotePlayerProxy(socket);
 
             //playerNames
-            Map<PlayerId, String> playerNames = new EnumMap<PlayerId, String>(
+            Map<PlayerId, String> playerNames = new EnumMap<>(
                     PlayerId.class);
             playerNames.put(PLAYER_1, player1Name);
             playerNames.put(PLAYER_2, player2Name);
 
-            Map<PlayerId, Player> player = new EnumMap<PlayerId, Player>(
+            Map<PlayerId, Player> player = new EnumMap<>(
                     PlayerId.class);
             player.put(PLAYER_1, localPlayer);
             player.put(PLAYER_2, distantPlayer);

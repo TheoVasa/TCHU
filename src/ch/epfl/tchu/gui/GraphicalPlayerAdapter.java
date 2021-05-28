@@ -19,7 +19,7 @@ import java.util.concurrent.BlockingQueue;
  */
 public class GraphicalPlayerAdapter implements Player {
     //Constant
-    private final int CAPACITY = 1;
+    private final int BOCKING_QUEUE_CAPACITY = 1;
 
     //Attributes
     private GraphicalPlayer graphicalPlayer;
@@ -33,11 +33,11 @@ public class GraphicalPlayerAdapter implements Player {
      * constructs a new GraphicalPlayerAdapter and initialize all the different queue.
      */
     public GraphicalPlayerAdapter(){
-        ticketsQueue = new ArrayBlockingQueue<>(CAPACITY);
-        claimCardQueue = new ArrayBlockingQueue<>(CAPACITY);
-        turnKindQueue = new ArrayBlockingQueue<>(CAPACITY);
-        cardSlotQueue = new ArrayBlockingQueue<>(CAPACITY);
-        claimRouteQueue = new ArrayBlockingQueue<>(CAPACITY);
+        ticketsQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
+        claimCardQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
+        turnKindQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
+        cardSlotQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
+        claimRouteQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
     }
 
     @Override
@@ -71,9 +71,7 @@ public class GraphicalPlayerAdapter implements Player {
     public TurnKind nextTurn() {
         Platform.runLater(() ->
             graphicalPlayer.startTurn(
-                () -> {
-                    putTryCatch(turnKindQueue, TurnKind.DRAW_TICKETS);
-                },
+                () -> putTryCatch(turnKindQueue, TurnKind.DRAW_TICKETS),
                 i -> {
                     putTryCatch(turnKindQueue, TurnKind.DRAW_CARDS);
                     putTryCatch(cardSlotQueue, i);
