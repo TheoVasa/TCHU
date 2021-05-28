@@ -11,6 +11,8 @@ import java.util.*;
 
 /**
  * This class contains all the observable property in a game of tchu, those property "observe" what's passing during the game and must be set each time the state of the game change.
+ * @author Théo Vasarino (313191)
+ * @author Selien Wicki (314357)
  */
 public final class ObservableGameState {
     //the player attached to the observable game state.

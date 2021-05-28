@@ -47,10 +47,6 @@ public final class Constants {
      */
     public static final int END_GAME_CARS_COUNT = 2;
 
-    /**
-     * the random seed used for the game
-     */
-    public static final int RANDOM_SEED = 2021;
 
     /**
      * Numéro d'emplacement fictif désignant la pioche de cartes.

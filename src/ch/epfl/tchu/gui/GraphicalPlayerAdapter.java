@@ -11,6 +11,11 @@ import java.util.concurrent.BlockingQueue;
 
 /**
  * This class adapt a graphicalPlayer to the interface Player, implements Player.
+ *
+ * @author Théo Vasarino (313191)
+ * @author Selien Wicki (314357)
+ *
+ *
  */
 public class GraphicalPlayerAdapter implements Player {
     //Constant
@@ -86,7 +91,7 @@ public class GraphicalPlayerAdapter implements Player {
     @Override
     public SortedBag<Ticket> chooseTickets(SortedBag<Ticket> options) {
         Platform.runLater(() ->
-            graphicalPlayer.chooseTickets(options, ticketChoice -> putTryCatch(ticketsQueue, options))
+            graphicalPlayer.chooseTickets(options, ticketChoice -> putTryCatch(ticketsQueue, ticketChoice))
         );
         return  takeTryCatch(ticketsQueue);
     }
@@ -115,7 +120,7 @@ public class GraphicalPlayerAdapter implements Player {
         return takeTryCatch(claimCardQueue);
     }
 
-    //TODO
+    //Generic try catch for to handle the method ".put" for BlockingQueue
     private <E> void putTryCatch(BlockingQueue<E> queue, E element){
         try {
             queue.put(element);
@@ -124,7 +129,7 @@ public class GraphicalPlayerAdapter implements Player {
         }
     }
 
-    //TODO
+    //Generic try catch for to handle the method ".take" for BlockingQueue
     private <E> E takeTryCatch(BlockingQueue<E> queue){
         try {
             return queue.take();

@@ -17,6 +17,8 @@ import static ch.epfl.tchu.game.PlayerId.PLAYER_2;
 
 /**
  * This class represent the server used to run the game and to communicate with the different clients, extends from a javaFX application.
+ * @author Théo Vasarino (313191)
+ * @author Selien Wicki (314357)
  */
 public class ServerMain extends Application {
     public static void main(String[] args) { launch(args); }

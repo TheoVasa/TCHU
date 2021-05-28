@@ -14,6 +14,9 @@ import java.util.Map;
 
 /**
  * this class generate the part of the graphical interface where all the infos of the players are write, non instantiable and private package.
+ *
+ * @author Théo Vasarino (313191)
+ * @author Selien Wicki (314357)
  */
 class InfoViewCreator {
 
