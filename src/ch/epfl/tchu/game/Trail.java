@@ -71,7 +71,7 @@ public final class Trail {
                         List<Route> extendedTrailRoute = new ArrayList<>(trail.routes);
                         List<Station> extendedStations = new ArrayList<>(trail.stations);
                         extendedTrailRoute.add(route);
-                        extendedStations.add((route.station2().equals(trail.lastStation)) ? route.station1() : route.station2());
+                        extendedStations.add(route.stationOpposite(trail.lastStation));
                         extendedTrails.add(new Trail(extendedTrailRoute, extendedStations));
                     }
                 }

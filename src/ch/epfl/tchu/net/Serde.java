@@ -43,7 +43,7 @@ public interface Serde<E> {
      * @return a new Serde with the given serialization and deserialization functions (Serde)
      */
     static <T> Serde<T> of(Function<T, String> serialization, Function<String, T> deserialization){
-        return new Serde<T>() {
+        return new Serde<>() {
             @Override
             public String serialize(T t) {
                 return serialization.apply(t);
@@ -74,8 +74,8 @@ public interface Serde<E> {
                         : "",
                 //deserialization function
                 (String data) ->  (!data.isEmpty())
-                                    ? enumList.get(Integer.parseInt(data))
-                                    : null
+                        ? enumList.get(Integer.parseInt(data))
+                        : null
         );
     }
 
@@ -103,7 +103,7 @@ public interface Serde<E> {
                 (String data) -> {
                     //If data is empty then return an empty list
                     if (data.isEmpty())
-                        return new ArrayList<T>();
+                        return new ArrayList<>();
                     //If data is not empty then deserialize element by element
                     List<T> deserializedList = new ArrayList<>();
                     String[] splitData = data.split(Pattern.quote(separator), -1);

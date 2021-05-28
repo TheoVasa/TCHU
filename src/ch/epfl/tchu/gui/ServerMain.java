@@ -17,6 +17,8 @@ import static ch.epfl.tchu.game.PlayerId.PLAYER_2;
 
 /**
  * This class represent the server used to run the game and to communicate with the different clients, extends from a javaFX application.
+ * @author Théo Vasarino (313191)
+ * @author Selien Wicki (314357)
  */
 public class ServerMain extends Application {
     public static void main(String[] args) { launch(args); }
@@ -36,12 +38,12 @@ public class ServerMain extends Application {
             Player distantPlayer = new RemotePlayerProxy(socket);
 
             //playerNames
-            Map<PlayerId, String> playerNames = new EnumMap<PlayerId, String>(
+            Map<PlayerId, String> playerNames = new EnumMap<>(
                     PlayerId.class);
             playerNames.put(PLAYER_1, player1Name);
             playerNames.put(PLAYER_2, player2Name);
 
-            Map<PlayerId, Player> player = new EnumMap<PlayerId, Player>(
+            Map<PlayerId, Player> player = new EnumMap<>(
                     PlayerId.class);
             player.put(PLAYER_1, localPlayer);
             player.put(PLAYER_2, distantPlayer);

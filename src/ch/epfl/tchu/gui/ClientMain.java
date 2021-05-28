@@ -6,6 +6,9 @@ import javafx.stage.Stage;
 
 /**
  * This class represent the client, used to connect and get the information from the server, extends from a javaFX application.
+ *
+ * @author Théo Vasarino (313191)
+ * @author Selien Wicki (314357)
  */
 public class ClientMain extends Application {
     public static void main(String[] args) { launch(args); }

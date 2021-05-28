@@ -17,8 +17,15 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
-
-public final class DecksViewCreator {
+/**
+ * This class creates the view f the deck (draw tickets button, faced up cards, draw cards button)
+ * and of the hand of the player (his cards and his tickets).
+ * It is package private, immutable and non instantiable.
+ *
+ * @author Théo Vasarino (313191)
+ * @author Selien Wicki (314357)
+ */
+class DecksViewCreator {
 
     //Dimension of the cards and button
     private static final int CARD_BORDER_HEIGHT = 90;
@@ -28,10 +35,12 @@ public final class DecksViewCreator {
     private static final int BUTTON_GAUGE_HEIGHT = 5;
     private static final int BUTTON_GAUGE_WIDTH = 50;
 
+    //Non instantiable
+    private DecksViewCreator(){}
 
     /**
      * Create the view of the hand of a player,
-     * this view draw the tickets and the cards that a player possesses
+     * this view draw the tickets and the cards that a player possesses.
      *
      * @param obsGameState the observable state of the game
      * @return the view of the hand of a player that can be displayed
@@ -51,25 +60,56 @@ public final class DecksViewCreator {
     }
 
     /**
-     * Creates the view of the Cards,
+     * Creates the view of the cards,
      * this view contains two button (draw tickets and draw cards) and
      * the five faced up cards that can also be drawn.
      *
      * @param obsGameState the observable game state
-     * @param drawTicketsHandler the handler for the tickets button
-     * @param drawCardHandler the handler for the cards button
+     * @param drawTicketsHandlerProperty the handler property for the tickets button
+     * @param drawCardHandlerProperty the handler property for the cards button
      * @return the view of the cards and tickets that can be drawn
      */
     public static VBox createCardsView(ObservableGameState obsGameState,
-                                       ObjectProperty<ActionHandler.DrawTicketsHandler> drawTicketsHandler,
-                                       ObjectProperty<ActionHandler.DrawCardHandler> drawCardHandler){
+                                       ObjectProperty<ActionHandler.DrawTicketsHandler> drawTicketsHandlerProperty,
+                                       ObjectProperty<ActionHandler.DrawCardHandler> drawCardHandlerProperty){
+        //Create the top node of the cardsView
+        VBox cardViewLayout = new VBox();
+        cardViewLayout.getStylesheets().addAll("decks.css", "colors.css");
+        cardViewLayout.setId("card-pane");
 
-        //Return the created layout of the cardView
-        return createCardsViewLayout(obsGameState, drawTicketsHandler, drawCardHandler);
+        //Create the button for the cards
+        Button buttonTickets = createButton("Billets", obsGameState.restingTicketsPercentsProperty());
+        buttonTickets.disableProperty().bind(drawTicketsHandlerProperty.isNull());
+        buttonTickets.setOnAction(e -> drawTicketsHandlerProperty.get().onDrawTickets());
+        cardViewLayout.getChildren().add(buttonTickets);
+
+        //Create the layout for the faceUpCards
+        for (int i = 0; i < Constants.FACE_UP_CARDS_COUNT; ++i){
+            //Add child(facedUpCard) to VBox
+            Card type = obsGameState.faceUpCardsProperty(i).get();
+            StackPane card = createCard(type);
+            card.disableProperty().bind(drawCardHandlerProperty.isNull());
+            int finalI = i;
+            card.setOnMouseClicked((e) -> drawCardHandlerProperty.get().onDrawCard(finalI));
+            cardViewLayout.getChildren().add(card);
+
+            //Add a listener to the card
+            obsGameState.faceUpCardsProperty(i).addListener((p, o, n) ->
+                    card.getStyleClass().setAll((n.equals(Card.LOCOMOTIVE)) ? "NEUTRAL" : p.getValue().color().name(), "card")
+            );
+        }
+
+        //Create the button for the cards
+        Button buttonDeck = createButton("Cartes", obsGameState.restingCardsPercentsProperty());
+        buttonDeck.disableProperty().bind(drawCardHandlerProperty.isNull());
+        buttonDeck.setOnAction(e -> drawCardHandlerProperty.get().onDrawCard(Constants.DECK_SLOT));
+        cardViewLayout.getChildren().add(buttonDeck);
+
+        return cardViewLayout;
     }
 
     //Create the view of the card of that the player
-    //has in its hands and create the layout of them
+    //has in its hands and create the layout of them.
     private static HBox createHandCardsLayout(ObservableGameState obsGameState){
         //Create a HBox with the correct css id
         HBox handCardsLayout = new HBox();
@@ -86,15 +126,15 @@ public final class DecksViewCreator {
     }
 
     //Create the view of the tickets and
-    //put them in the right layout
+    //put them in the right layout.
     private static ListView<Ticket> createHandTicketsLayout(ObservableGameState observableGameState){
         ListView<Ticket> ticketsView = new ListView<>(observableGameState.ticketsOfPlayerProperty());
         ticketsView.setId("tickets");
         return ticketsView;
     }
 
-    //This method creates a Card
-    private static final StackPane createCard(Card type){
+    //This method creates a card.
+    private static StackPane createCard(Card type){
         //Create the border of the card
         Rectangle border = new Rectangle(CARD_BORDER_WIDTH, CARD_BORDER_HEIGHT);
         border.getStyleClass().add("outside");
@@ -116,7 +156,7 @@ public final class DecksViewCreator {
     }
 
     //Create a card with the text for the
-    //representation of the card of the player
+    //representation of the card of the player.
     private static StackPane createCardWithText(Card type, ReadOnlyIntegerProperty count){
         //Create the text for the number of the cards
         Text cardText = new Text();
@@ -131,57 +171,13 @@ public final class DecksViewCreator {
         return cardsWithNumber;
     }
 
-    //This method creates the layout of the CardView
-    private static VBox createCardsViewLayout(ObservableGameState obsGameState,
-                                              ObjectProperty<ActionHandler.DrawTicketsHandler> drawTicketsHandler,
-                                              ObjectProperty<ActionHandler.DrawCardHandler> drawCardHandler){
-        //Create the top node of the cardsView
-        VBox cardViewLayout = new VBox();
-        cardViewLayout.getStylesheets().addAll("decks.css", "colors.css");
-        cardViewLayout.setId("card-pane");
-
-        //Create the button for the cards
-        Button buttonTickets = createButton("Billets", obsGameState.restingTicketsPercentsProperty());
-        buttonTickets.disableProperty().bind(drawTicketsHandler.isNull());
-        buttonTickets.setOnAction(e -> drawTicketsHandler.get().onDrawTickets());
-        cardViewLayout.getChildren().add(buttonTickets);
-
-        //Create the layout for the faceUpCards
-        for (int i = 0; i < Constants.FACE_UP_CARDS_COUNT; ++i){
-            //Add child(facedUpCard) to VBox
-            Card type = obsGameState.faceUpCardsProperty(i).get();
-            StackPane card = createCard(type);
-            int finalI = i;
-            card.disableProperty().bind(drawCardHandler.isNull());
-            card.setOnMouseClicked((e) -> drawCardHandler.get().onDrawCard(finalI));
-            cardViewLayout.getChildren().add(card);
-
-            //Add a listener to the card
-            obsGameState.faceUpCardsProperty(i).addListener((p, o, n) -> {
-                card.getStyleClass().setAll((n.equals(Card.LOCOMOTIVE)) ? "NEUTRAL" : p.getValue().color().name(), "card");
-            });
-        }
-
-        //Create the button for the cards
-        Button buttonDeck = createButton("Cartes", obsGameState.restingCardsPercentsProperty());
-        buttonDeck.disableProperty().bind(drawCardHandler.isNull());
-        buttonDeck.setOnAction(e -> drawCardHandler.get().onDrawCard(Constants.DECK_SLOT));
-        cardViewLayout.getChildren().add(buttonDeck);
-
-        return cardViewLayout;
-    }
-
-    //This method creates a button
+    //This method creates a button.
     private static Button createButton(String name, ReadOnlyIntegerProperty percentageProperty){
         //Create the gauge
         Rectangle backgroundGauge = new Rectangle(BUTTON_GAUGE_WIDTH, BUTTON_GAUGE_HEIGHT);
         backgroundGauge.getStyleClass().add("background");
         Rectangle foregroundGauge = new Rectangle(BUTTON_GAUGE_WIDTH, BUTTON_GAUGE_HEIGHT);
         foregroundGauge.getStyleClass().add("foreground");
-        percentageProperty.addListener((p, o, n) -> {
-            System.out.println(name + "    " + n.doubleValue());
-            }
-        );
         foregroundGauge.widthProperty().bind(percentageProperty.multiply(50).divide(100));
         Group group = new Group(backgroundGauge, foregroundGauge);
 

@@ -22,9 +22,8 @@ public final class Game {
     //The information that will be sent to the players during the game
     private static Map<PlayerId, Info> infos;
 
-    private Game() {
-        //this class is non instanciable
-    }
+    //this class is non instantiable
+    private Game(){}
 
     /**
      * Loop of the game that will make the game run.
@@ -43,7 +42,7 @@ public final class Game {
 
         //Init vars from parameters
         Game.players = players;
-        Game.playerNames = Map.copyOf(playerNames);
+        Game.playerNames = playerNames;
         Game.gameState = GameState.initial(tickets, rng);
 
         infos = new EnumMap<>(PlayerId.class);
@@ -95,9 +94,10 @@ public final class Game {
     //Make the current player play a turn
     private static void playTurn(Random rng) {
         PlayerId id = gameState.currentPlayerId();
+        Info info = infos.get(id);
 
         //Send info that the player can play --> turn begins
-        receiveInfo(infos.get(id).canPlay());
+        receiveInfo(info.canPlay());
 
         //Update
         updateState();
@@ -106,7 +106,7 @@ public final class Game {
         switch (players.get(id).nextTurn()) {
             case DRAW_TICKETS:
                 //Send info that the player drew tickets
-                receiveInfo(infos.get(id).drewTickets(Constants.IN_GAME_TICKETS_COUNT));
+                receiveInfo(info.drewTickets(Constants.IN_GAME_TICKETS_COUNT));
 
                 //chose tickets
                 SortedBag<Ticket> drawnTickets = gameState.topTickets(Constants.IN_GAME_TICKETS_COUNT);
@@ -114,7 +114,7 @@ public final class Game {
                 gameState = gameState.withChosenAdditionalTickets(drawnTickets, keptTickets);
 
                 //Send info that the player kept some tickets
-                receiveInfo(infos.get(id).keptTickets(keptTickets.size()));
+                receiveInfo(info.keptTickets(keptTickets.size()));
                 break;
             case DRAW_CARDS:
                 //Ask twice which card the current player wants
@@ -130,11 +130,11 @@ public final class Game {
                     int cardSlot = players.get(id).drawSlot();
                     if (cardSlot == Constants.DECK_SLOT) {
                         //Send info that the player drew from deck
-                        receiveInfo(infos.get(id).drewBlindCard());
+                        receiveInfo(info.drewBlindCard());
                         gameState = gameState.withBlindlyDrawnCard();
                     } else {
                         //Send info that the player drew from faced up cards
-                        receiveInfo(infos.get(id).drewVisibleCard(gameState.cardState().faceUpCard(cardSlot)));
+                        receiveInfo(info.drewVisibleCard(gameState.cardState().faceUpCard(cardSlot)));
                         gameState = gameState.withDrawnFaceUpCard(cardSlot);
                     }
                 }
@@ -147,10 +147,10 @@ public final class Game {
                     if (claimRoute.level().equals(Route.Level.OVERGROUND)) {
                         gameState = gameState.withClaimedRoute(claimRoute, claimCards);
                         //Send info that the player toke a route
-                        receiveInfo(infos.get(id).claimedRoute(claimRoute, claimCards));
+                        receiveInfo(info.claimedRoute(claimRoute, claimCards));
                     } else {
                         //Send info that the player attempts to take an underground route
-                        receiveInfo(infos.get(id).attemptsTunnelClaim(claimRoute, claimCards));
+                        receiveInfo(info.attemptsTunnelClaim(claimRoute, claimCards));
 
                         //Take the three first cards of the deck
                         SortedBag.Builder<Card> drawnCardsBuilder = new SortedBag.Builder<>();
@@ -169,7 +169,7 @@ public final class Game {
                                 : 0;
 
                         //Send message to inform which card has been drawn
-                        receiveInfo(infos.get(id).drewAdditionalCards(drawnCards, additionalCardsCount));
+                        receiveInfo(info.drewAdditionalCards(drawnCards, additionalCardsCount));
 
                         //Determine all possibilities to play additional cards (if needed)
                         List<SortedBag<Card>> possibleAddCards = (additionalCardsCount > 0)
@@ -191,11 +191,11 @@ public final class Game {
                             gameState = gameState.withClaimedRoute(claimRoute, claimCards);
 
                             //Send info that the player toke a route
-                            receiveInfo(infos.get(id).claimedRoute(claimRoute, claimCards));
+                            receiveInfo(info.claimedRoute(claimRoute, claimCards));
 
                         } else {
                             //Send info that the player did not take a route
-                            receiveInfo(infos.get(id).didNotClaimRoute(claimRoute));
+                            receiveInfo(info.didNotClaimRoute(claimRoute));
                         }
 
 
@@ -210,7 +210,7 @@ public final class Game {
 
         //If last turn begins draw message
         if (gameState.lastTurnBegins())
-            receiveInfo(infos.get(id).lastTurnBegins(gameState.currentPlayerState().carCount()));
+            receiveInfo(info.lastTurnBegins(gameState.currentPlayerState().carCount()));
 
         //Game state for the next turn
         gameState = gameState.forNextTurn();

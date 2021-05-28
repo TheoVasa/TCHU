@@ -28,12 +28,17 @@ import javafx.scene.control.SelectionMode;
 
 import java.util.*;
 
+/**
+ * This class represent the graphical player.
+ * It creates the main window and allows the player to take actions in the game.
+ *
+ * @author Théo Vasarino (313191)
+ * @author Selien Wicki (314357)
+ */
 public final class GraphicalPlayer {
 
     //Constants
-    private static final int IN_GAME_CHOOSE_CLAIM_CARD_SIZE = 1;
-    private static final int IN_GAME_DISCARDABLE_TICKETS_SIZE = 1;
-    private static final int INITIAL_DISCARDABLE_TICKETS_SIZE = 3;
+    private static final int IN_GAME_MIN_CHOOSE_CLAIM_CARD_SIZE = 1;
     //Player information
     private final PlayerId playerId;
     private final Map<PlayerId, String> playerNames;
@@ -49,7 +54,8 @@ public final class GraphicalPlayer {
     private Stage choiceWindow;
 
     /**
-     * Create a graphical player for the given playerId
+     * Create a graphical player for the given playerId.
+     *
      * @param playerId the Id of the player
      * @param playerNames the names of the two player that are playing
      */
@@ -74,7 +80,8 @@ public final class GraphicalPlayer {
     }
 
     /**
-     * Set the state of the game and of the player in the ObservableGameState
+     * Set the state of the game and of the player in the ObservableGameState.
+     *
      * @param gameState the game state that must be set in the ObservableGameState
      * @param playerState the player state that must be set in the ObservableGameState
      */
@@ -84,6 +91,11 @@ public final class GraphicalPlayer {
         obsGameState.setState(gameState, playerState);
     }
 
+    /**
+     * Receive the infos of the game and put them in the InfoView.
+     *
+     * @param info the info that will be displayed in the info view
+     */
     public void receiveInfo(String info){
         //Check if on thread of javaFX
         assert Platform.isFxApplicationThread();
@@ -95,7 +107,8 @@ public final class GraphicalPlayer {
     }
 
     /**
-     * Start the (next) turn, this methode allows the player to take an action
+     * Start the (next) turn, this methode allows the player to take an action.
+     *
      * @param drawTicketsHandler the ActionHandler to draw a ticket
      * @param drawCardHandler the ActionHandler to draw a card
      * @param claimRouteHandler the ActionHandle to claim a route
@@ -129,16 +142,16 @@ public final class GraphicalPlayer {
 
         //Change the claim route handler
         this.claimRouteHandlerProperty.setValue((route, cards) -> {
-
             claimRouteHandler.onClaimRoute(route ,cards);
             setActionHandlerOnNull();
         });
     }
 
     /**
+     * This methode will create a choice window to allow the player to choose the tickets he wants to keep.
      *
-     * @param options
-     * @param chooseTicketsHandler
+     * @param options the tickets he could choose
+     * @param chooseTicketsHandler handle the action of the player
      */
     public void chooseTickets(SortedBag<Ticket> options,
                               ActionHandler.ChooseTicketsHandler chooseTicketsHandler){
@@ -149,20 +162,20 @@ public final class GraphicalPlayer {
 
         //Create ListView
         int minChoiceSize = (obsGameState.numberOfTicketsForGivenPlayerProperty(playerId).get() == 0)
-                            ? INITIAL_DISCARDABLE_TICKETS_SIZE
-                            : IN_GAME_DISCARDABLE_TICKETS_SIZE;
+                            ? Constants.INITIAL_TICKETS_COUNT - Constants.DISCARDABLE_TICKETS_COUNT
+                            : Constants.IN_GAME_TICKETS_COUNT - Constants.DISCARDABLE_TICKETS_COUNT;
         ListView<Ticket> optionsView = new ListView<>(FXCollections.observableArrayList(options.toList()));
         optionsView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         //Create button
         Button button = new Button("Choisir");
         button.disableProperty().bind(Bindings
                 .size(optionsView.getSelectionModel().getSelectedItems())
-                .lessThan( minChoiceSize)
+                .lessThan(minChoiceSize)
         );
         button.setOnAction(
                 (event) -> {
                     SortedBag.Builder<Ticket> selection = new SortedBag.Builder<>();
-                    optionsView.getSelectionModel().getSelectedItems().forEach(i -> selection.add(i));
+                    optionsView.getSelectionModel().getSelectedItems().forEach(selection::add);
                     chooseTicketsHandler.onChooseTickets(selection.build());
                     choiceWindow.hide();
                 }
@@ -176,6 +189,12 @@ public final class GraphicalPlayer {
         choiceWindow.show();
     }
 
+    /**
+     * This methode is used to change the ActionHandler that handle the drawing of a card.
+     * This method is essential for the choice of the second card (block all all actions other than drawing a card).
+     *
+     * @param drawCardHandler handle the action of the player
+     */
     public void drawCard(ActionHandler.DrawCardHandler drawCardHandler){
         //Check if on thread of javaFX
         assert Platform.isFxApplicationThread();
@@ -188,9 +207,10 @@ public final class GraphicalPlayer {
     }
 
     /**
-     * Create a window that allows the player to chose which cards he wants to player to claim a route
-     * @param options all the possible set of cards that he could play to claim the route
-     * @param chooseCardHandler the ActionHandler to choose a set of cards
+     * Create a window that allows the player to chose which cards he wants to player to claim a route.
+     *
+     * @param options all the possible set of cards that he could play to claim the route.
+     * @param chooseCardHandler the ActionHandler to choose a set of cards.
      */
     public void chooseClaimCards(List<SortedBag<Card>> options,
                                  ActionHandler.ChooseCardsHandler chooseCardHandler){
@@ -212,7 +232,7 @@ public final class GraphicalPlayer {
         );
         button.disableProperty().bind(Bindings
                 .size(optionsView.getSelectionModel().getSelectedItems())
-                .lessThan(IN_GAME_CHOOSE_CLAIM_CARD_SIZE));
+                .lessThan(IN_GAME_MIN_CHOOSE_CLAIM_CARD_SIZE));
 
         //Chose the claim cards
         choiceWindow = createChoiceWindow(StringsFr.CARDS_CHOICE, StringsFr.CHOOSE_CARDS, optionsView, button);
@@ -220,7 +240,8 @@ public final class GraphicalPlayer {
     }
 
     /**
-     * Create a window that allows the player to chose which cards he wants to play as additional cards
+     * Create a window that allows the player to chose which cards he wants to play as additional cards.
+     *
      * @param options all the possible set of cards that he could play as additional card
      * @param chooseCardHandler the ActionHandler to choose a set of cards
      */
@@ -237,7 +258,7 @@ public final class GraphicalPlayer {
         button.setOnAction(
                 (event) -> {
                     SortedBag.Builder<Card> selection = new SortedBag.Builder<>();
-                    optionsView.getSelectionModel().getSelectedItems().forEach( i -> selection.add(i));
+                    optionsView.getSelectionModel().getSelectedItems().forEach(selection::add);
                     chooseCardHandler.onChooseCards(selection.build());
                     choiceWindow.hide();
                 }
@@ -253,9 +274,7 @@ public final class GraphicalPlayer {
         assert Platform.isFxApplicationThread();
 
         //Create the Scene containing the BorderPane with all the 4 different view
-        Pane mapView = MapViewCreator.createMapView(obsGameState, claimRouteHandlerProperty, (o, h) -> {
-            chooseClaimCards(o, h);
-        });
+        Pane mapView = MapViewCreator.createMapView(obsGameState, claimRouteHandlerProperty, this::chooseClaimCards);
         VBox cardView = DecksViewCreator.createCardsView(obsGameState, drawTicketsHandlerProperty, drawCardHandlerProperty);
         HBox handView = DecksViewCreator.createHandView(obsGameState);
         VBox infoView = InfoViewCreator.createInfoView(playerId, playerNames, obsGameState, infoList);
@@ -265,15 +284,15 @@ public final class GraphicalPlayer {
         Stage stage = new Stage();
         stage.setScene(scene);
         stage.setTitle(new StringBuilder()
-                            .append("tCHu - ")
-                            .append(playerNames.get(playerId))
-                            .toString());
+                           .append("tCHu - ")
+                           .append(playerNames.get(playerId))
+                           .toString());
         stage.show();
         return stage;
     }
 
     //Create the choice window
-    private Stage createChoiceWindow(String title, String action, ListView listView, Button button){
+    private <T> Stage createChoiceWindow(String title, String action, ListView<T> listView, Button button){
         //Create VBox
         VBox vBox = new VBox();
         //Create the text view
@@ -305,7 +324,8 @@ public final class GraphicalPlayer {
         claimRouteHandlerProperty.setValue(null);
     }
 
-    private final class CardBagStringConverter extends StringConverter<SortedBag<Card>> {
+    //This class is used to translate the english text of a SortedBag in french
+    private static final class CardBagStringConverter extends StringConverter<SortedBag<Card>> {
         @Override
         public String toString(SortedBag<Card> object) {
             //Convert english text to french text

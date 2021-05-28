@@ -11,10 +11,15 @@ import java.util.concurrent.BlockingQueue;
 
 /**
  * This class adapt a graphicalPlayer to the interface Player, implements Player.
+ *
+ * @author Théo Vasarino (313191)
+ * @author Selien Wicki (314357)
+ *
+ *
  */
 public class GraphicalPlayerAdapter implements Player {
     //Constant
-    private final int CAPACITY = 1;
+    private final int BOCKING_QUEUE_CAPACITY = 1;
 
     //Attributes
     private GraphicalPlayer graphicalPlayer;
@@ -28,11 +33,11 @@ public class GraphicalPlayerAdapter implements Player {
      * constructs a new GraphicalPlayerAdapter and initialize all the different queue.
      */
     public GraphicalPlayerAdapter(){
-        ticketsQueue = new ArrayBlockingQueue<>(CAPACITY);
-        claimCardQueue = new ArrayBlockingQueue<>(CAPACITY);
-        turnKindQueue = new ArrayBlockingQueue<>(CAPACITY);
-        cardSlotQueue = new ArrayBlockingQueue<>(CAPACITY);
-        claimRouteQueue = new ArrayBlockingQueue<>(CAPACITY);
+        ticketsQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
+        claimCardQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
+        turnKindQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
+        cardSlotQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
+        claimRouteQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
     }
 
     @Override
@@ -66,9 +71,7 @@ public class GraphicalPlayerAdapter implements Player {
     public TurnKind nextTurn() {
         Platform.runLater(() ->
             graphicalPlayer.startTurn(
-                () -> {
-                    putTryCatch(turnKindQueue, TurnKind.DRAW_TICKETS);
-                },
+                () -> putTryCatch(turnKindQueue, TurnKind.DRAW_TICKETS),
                 i -> {
                     putTryCatch(turnKindQueue, TurnKind.DRAW_CARDS);
                     putTryCatch(cardSlotQueue, i);
@@ -86,7 +89,7 @@ public class GraphicalPlayerAdapter implements Player {
     @Override
     public SortedBag<Ticket> chooseTickets(SortedBag<Ticket> options) {
         Platform.runLater(() ->
-            graphicalPlayer.chooseTickets(options, ticketChoice -> putTryCatch(ticketsQueue, options))
+            graphicalPlayer.chooseTickets(options, ticketChoice -> putTryCatch(ticketsQueue, ticketChoice))
         );
         return  takeTryCatch(ticketsQueue);
     }
@@ -115,7 +118,7 @@ public class GraphicalPlayerAdapter implements Player {
         return takeTryCatch(claimCardQueue);
     }
 
-    //TODO
+    //Generic try catch for to handle the method ".put" for BlockingQueue
     private <E> void putTryCatch(BlockingQueue<E> queue, E element){
         try {
             queue.put(element);
@@ -124,7 +127,7 @@ public class GraphicalPlayerAdapter implements Player {
         }
     }
 
-    //TODO
+    //Generic try catch for to handle the method ".take" for BlockingQueue
     private <E> E takeTryCatch(BlockingQueue<E> queue){
         try {
             return queue.take();

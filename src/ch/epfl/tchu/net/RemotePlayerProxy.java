@@ -162,6 +162,7 @@ public final class RemotePlayerProxy implements Player {
 
         return Serdes.SORTED_BAG_CARD_SERDE.deserialize(receiveMessage);
     }
+
     //Send a message to the player that isn't on the same machine as the server
     //parameter is the serialized message (instruction) to send
     private void sendMessage(String msg) {
