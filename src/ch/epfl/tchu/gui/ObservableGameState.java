@@ -13,10 +13,6 @@ import java.util.*;
  * This class contains all the observable property in a game of tchu, those property "observe" what's passing during the game and must be set each time the state of the game change.
  */
 public final class ObservableGameState {
-    //Constants
-    private static final int TOTAL_CARDS_IN_GAME = 110;
-    private static final int TOTAL_TICKETS_IN_GAME = ChMap.tickets().size();
-
     //the player attached to the observable game state.
     private final PlayerId player;
     //the other one
@@ -32,7 +28,6 @@ public final class ObservableGameState {
     private final SimpleIntegerProperty restingCardsPercents;
     private final List<SimpleObjectProperty<Card>> faceUpCards;
     private final Map<Route, SimpleObjectProperty<PlayerId>> ownersOfEachRoutes;
-    private final Map<Route, SimpleBooleanProperty> claimableRoutes;
 
     //public states of all players
     private final Map<PlayerId, SimpleIntegerProperty> numberTicketsForEachPlayer;
@@ -43,6 +38,7 @@ public final class ObservableGameState {
     //private states of the player
     private final ObservableList<Ticket> ticketsOfPlayer;
     private final Map<Card, SimpleIntegerProperty> numberOfCardsForEachType;
+    private final Map<Route, SimpleBooleanProperty> claimableRoutes;
 
     /**
      * Construct an ObservableGameState.
@@ -61,13 +57,13 @@ public final class ObservableGameState {
         claimableRoutes = new HashMap<>();
         ChMap.routes().forEach((route) -> claimableRoutes.put(route, new SimpleBooleanProperty(false)));
 
-        numberTicketsForEachPlayer = createEnumMapWithNullIntegerProperty(PlayerId.values());
-        numberCardsForEachPlayer = createEnumMapWithNullIntegerProperty(PlayerId.values());
-        numberCarsForEachPlayer = createEnumMapWithNullIntegerProperty(PlayerId.values());
-        numberConstructsPointsForEachPlayer = createEnumMapWithNullIntegerProperty(PlayerId.values());
+        numberTicketsForEachPlayer = createMapWithNullIntegerProperty(PlayerId.values());
+        numberCardsForEachPlayer = createMapWithNullIntegerProperty(PlayerId.values());
+        numberCarsForEachPlayer = createMapWithNullIntegerProperty(PlayerId.values());
+        numberConstructsPointsForEachPlayer = createMapWithNullIntegerProperty(PlayerId.values());
 
         ticketsOfPlayer = FXCollections.observableArrayList();
-        numberOfCardsForEachType = createEnumMapWithNullIntegerProperty(Card.values());
+        numberOfCardsForEachType = createMapWithNullIntegerProperty(Card.values());
     }
 
     /**
@@ -80,17 +76,14 @@ public final class ObservableGameState {
         this.gameState = gameState;
         this.playerState = playerState;
         List<PlayerId> allPlayers = List.of(player, otherPlayer);
-        SortedBag<Card> playerCards = playerState.cards();
-        SortedBag<Ticket> playerTickets = playerState.tickets();
-        List<Route> playerRoutes = gameState.playerState(player).routes();
-        List<Route> otherPlayerRoutes = gameState.playerState(otherPlayer).routes();
 
-        ticketsOfPlayer.setAll(playerTickets.toList());
-        for(Card c : Card.ALL) numberOfCardsForEachType.get(c).set(playerCards.countOf(c));
+        ticketsOfPlayer.setAll(playerState.tickets().toList());
+        for(Card c : Card.ALL)
+            numberOfCardsForEachType.get(c).set(playerState.cards().countOf(c));
 
         //set the percents of the cards and tickets
-        restingTicketsPercents.setValue(generatePercents(gameState.ticketsCount(), TOTAL_TICKETS_IN_GAME));
-        restingCardsPercents.setValue(generatePercents(gameState.cardState().deckSize(), TOTAL_CARDS_IN_GAME));
+        restingTicketsPercents.setValue(generatePercents(gameState.ticketsCount(), ChMap.tickets().size()));
+        restingCardsPercents.setValue(generatePercents(gameState.cardState().deckSize(), Constants.ALL_CARDS.size()));
 
         //set states for all players
         allPlayers.forEach((plr)->{
@@ -101,13 +94,18 @@ public final class ObservableGameState {
         });
 
         //set the owner of each route
-        playerRoutes.forEach((r) -> ownersOfEachRoutes.get(r).set(player));
-        otherPlayerRoutes.forEach((r) -> ownersOfEachRoutes.get(r).set(otherPlayer));
+        gameState.playerState(player).routes().forEach((r) -> ownersOfEachRoutes.get(r).set(player));
+        gameState.playerState(otherPlayer).routes().forEach((r) -> ownersOfEachRoutes.get(r).set(otherPlayer));
+
         //set which routes are now claimable
-        claimableRoutes.forEach((route, bool) -> {
-            if(playerState.canClaimRoute(route)
-                    && ownersOfEachRoutes.get(route).get()==null
-                        && ownersOfEachRoutes.get(getRouteNeighbor(route, ChMap.routes())).get()==null)
+        //a route is claimable by the player if : - the player have the cards and have sufficient cars.
+        //                                        - the player is the current player.
+        //                                        - the route and her neighbor (if there's one) don't have already an owner.
+        claimableRoutes.forEach((route, isClaimable) -> {
+            if (playerState.canClaimRoute(route)
+                    && player == gameState.currentPlayerId()
+                        && ownersOfEachRoutes.get(route).get() == null
+                            && ownersOfEachRoutes.get(getRouteNeighbor(route, ChMap.routes())).get() == null)
                 claimableRoutes.get(route).set(true);
 
             else claimableRoutes.get(route).set(false);
@@ -281,14 +279,16 @@ public final class ObservableGameState {
     //create all route owner trough the chmap routes and set a null owner for all of them.
     private static Map<Route, SimpleObjectProperty<PlayerId>> createAllRoutesOwners(){
         Map<Route, SimpleObjectProperty<PlayerId>> map = new HashMap<>();
-        for(Route r : ChMap.routes()) map.put(r, new SimpleObjectProperty<>(null));
+        for(Route r : ChMap.routes())
+            map.put(r, new SimpleObjectProperty<>(null));
         return map;
     }
 
     //create a map from elements of an enum with for all elements, an integer property to 0.
-    private static <E extends Enum<E>> Map<E, SimpleIntegerProperty> createEnumMapWithNullIntegerProperty(E[] tabOfEnum){
+    private static <E extends Enum<E>> Map<E, SimpleIntegerProperty> createMapWithNullIntegerProperty(E[] tabOfEnum){
         Map<E, SimpleIntegerProperty> map = new HashMap<>();
-        for(E element : tabOfEnum)map.put(element, new SimpleIntegerProperty(0));
+        for(E element : tabOfEnum)
+            map.put(element, new SimpleIntegerProperty(0));
         return map;
     }
 

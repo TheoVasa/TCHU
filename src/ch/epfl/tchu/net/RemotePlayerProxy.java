@@ -15,7 +15,6 @@ import java.util.Map;
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
  */
-
 public final class RemotePlayerProxy implements Player {
 
     //the socket of the proxy
@@ -152,6 +151,7 @@ public final class RemotePlayerProxy implements Player {
 
     @Override
     public SortedBag<Card> chooseAdditionalCards(List<SortedBag<Card>> options) {
+        //send message
         String msgIdString = MessageId.CHOOSE_ADDITIONAL_CARDS.name();
         String optionsSerialized = Serdes.LIST_SORTED_BAG_CARD_SERDE.serialize(options);
         String sendMessage = String.join(" ", msgIdString, optionsSerialized, "\n");
@@ -164,10 +164,11 @@ public final class RemotePlayerProxy implements Player {
     }
     //Send a message to the player that isn't on the same machine as the server
     //parameter is the serialized message (instruction) to send
-    private void sendMessage(String msg){
-        try{
+    private void sendMessage(String msg) {
+        try {
             BufferedWriter sender = new BufferedWriter(
-                    new OutputStreamWriter(this.socket.getOutputStream(), StandardCharsets.US_ASCII));
+                                        new OutputStreamWriter(this.socket.getOutputStream(),
+                                                                StandardCharsets.US_ASCII));
             sender.write(msg);
             sender.flush();
         } catch (IOException e) {
@@ -180,7 +181,8 @@ public final class RemotePlayerProxy implements Player {
     private String receiveMessage() {
         try {
             BufferedReader receiver = new BufferedReader(
-                    new InputStreamReader(this.socket.getInputStream(), StandardCharsets.US_ASCII));
+                                          new InputStreamReader(this.socket.getInputStream(),
+                                                                StandardCharsets.US_ASCII));
             return receiver.readLine();
         } catch (IOException e) {
             throw new UncheckedIOException(e);

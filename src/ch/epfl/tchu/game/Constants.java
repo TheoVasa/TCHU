@@ -36,6 +36,10 @@ public final class Constants {
         assert cardsBuilder.size() == TOTAL_CARDS_COUNT;
         return cardsBuilder.build();
     }
+
+    /**
+     * the minimal deck size for drawing new cards
+     */
     public static final int MINIMAL_DECK_SIZE_FOR_DRAW_CARDS = 5;
 
     /**

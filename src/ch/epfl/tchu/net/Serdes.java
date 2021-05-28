@@ -133,7 +133,7 @@ public final class Serdes {
             },
             //deserialize
             (String data)->{
-                String[] listOfData = data.split(";", -1);//Serde.listOf(STRING_SERDE, ";").deserialize(data);
+                String[] listOfData = data.split(";", -1);
                 int ticketCount = INTEGER_SERDE.deserialize(listOfData[0]);
                 int cardCount = INTEGER_SERDE.deserialize(listOfData[1]);
                 List<Route> routes = LIST_ROUTE_SERDE.deserialize(listOfData[2]);
@@ -198,5 +198,10 @@ public final class Serdes {
                 return new PublicGameState(ticketsCount, cardState, currentPlayerId, playerState, lastPlayer);
             }
     );
+
+    //private constructor
+    private Serdes(){
+        //do nothing, this class isn't instantiable.
+    }
 
 }

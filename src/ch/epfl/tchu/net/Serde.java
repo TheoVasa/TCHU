@@ -1,5 +1,6 @@
 package ch.epfl.tchu.net;
 
+import ch.epfl.tchu.Preconditions;
 import ch.epfl.tchu.SortedBag;
 
 import java.util.ArrayList;
@@ -12,6 +13,8 @@ import java.util.regex.Pattern;
  *
  * @author Selien Wicki (314357)
  * @author Theo Vasarino (313191)
+ *
+ * @param <E> the type value the Serde will be able do serialize/deserialize.
  */
 public interface Serde<E> {
 
@@ -59,9 +62,11 @@ public interface Serde<E> {
      * @param enumList the list of all objects.
      * @param <T> the type of the object.
      * @return the new Serde for the given enum (Serde).
-     * //TODO --> throw illegal si la liste est vie
+     * @throws IllegalArgumentException if the enumList is empty.
      */
     static <T> Serde<T> oneOf(List<T> enumList) {
+        //check that the list is non empty
+        Preconditions.checkArgument(!enumList.isEmpty());
         return Serde.of(
                 //serialization function
                 (T t) -> (t != null && enumList.contains(t))
@@ -81,8 +86,11 @@ public interface Serde<E> {
      * @param separator used to separate all the different objects in the list in the serialization and deserialization.
      * @param <T> type of the objects.
      * @return the new Serde (Serde).
+     * @throws IllegalArgumentException if the serde is null.
      */
     static <T> Serde<List<T>> listOf(Serde<T> serde, String separator){
+        //check the argument
+        Preconditions.checkArgument(serde!=null);
         return Serde.of(
                 //serialization function
                 (List<T> l) -> {
@@ -113,9 +121,11 @@ public interface Serde<E> {
      * @param separator used to separate all the different objects in the bag in the serialization and deserialization.
      * @param <T> type of the objects.
      * @return the new Serde (Serde).
+     * @throws IllegalArgumentException if the serde is null.
      */
-    //peut etre opti avec une methode privée qui transform un serde de list en serde de SortedBag, mais bon.. a faire
     static <T extends Comparable<T>> Serde<SortedBag<T>> bagOf(Serde<T> serde, String separator){
+        //check the argument
+        Preconditions.checkArgument(serde!=null);
         return Serde.of(
                 //serialization function
                 (SortedBag<T> bag)-> Serde.listOf(serde, separator).serialize(bag.toList()),

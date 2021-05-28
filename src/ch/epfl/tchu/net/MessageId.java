@@ -1,5 +1,12 @@
 package ch.epfl.tchu.net;
 
+/**
+ * This enumeration contains all different messages that the server can send to the clients, public.
+ *
+ * @author Selien Wicki (314357)
+ * @author Theo Vasarino (313191)
+ */
+
 public enum MessageId {
 
     //The elements of the enumeration
