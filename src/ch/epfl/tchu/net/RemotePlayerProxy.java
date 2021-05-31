@@ -6,6 +6,7 @@ import ch.epfl.tchu.game.*;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,11 +19,13 @@ import java.util.Map;
 public final class RemotePlayerProxy implements Player {
     //the socket of the proxy
     private final Socket socket;
+    //TODO rajouter une deuxieme socket pour le chat
 
     /**
      * Create a RemotePlayerProxy with connected to a given Socket.
      *
-     * @param socket the socket to handle the connection on internet.
+     * @param socket the socket for the connection with the client.
+     *
      */
     public RemotePlayerProxy(Socket socket){
         this.socket = socket;
@@ -37,6 +40,36 @@ public final class RemotePlayerProxy implements Player {
         String dataPlayers = Serdes.LIST_STRING_SERDE.serialize(players);
         List<String> dataList = List.of(msgIdString, ownIdSerialized, dataPlayers, "\n");
 
+        String sendMessage = String.join(" ", dataList);
+        sendMessage(sendMessage);
+    }
+
+    /**
+     * get the lastChat that the player send.
+     *
+     * @return the chat. (String)
+     */
+    @Override
+    public String lastChat() {
+        //ask the client the new chat
+        List<String> dataList = List.of(Serdes.STRING_SERDE.serialize(MessageId.LAST_CHAT.name()), "\n");
+        String sendMessage = String.join(" ", dataList);
+        sendMessage(sendMessage);
+
+        //get the answer
+        String data = receiveMessage();
+        return Serdes.STRING_SERDE.deserialize(data);
+    }
+
+    /**
+     * used to inform the player he receive a new chat.
+     *
+     * @param chat the player need the receive.
+     */
+    @Override
+    public void receiveChat(String chat) {
+        //send the chat to the client
+        List<String> dataList = List.of(Serdes.STRING_SERDE.serialize(MessageId.RECEIVE_CHAT.name()), Serdes.STRING_SERDE.serialize(chat), "\n");
         String sendMessage = String.join(" ", dataList);
         sendMessage(sendMessage);
     }

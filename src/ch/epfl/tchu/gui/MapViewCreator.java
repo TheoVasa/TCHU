@@ -12,9 +12,6 @@ import java.util.List;
 
 /**
  * this class will generate the graphic visualisation of the map during the game, non instantiable and private package.
- *
- * @author Théo Vasarino (313191)
- * @author Selien Wicki (314357)
  */
 class MapViewCreator {
     //graphical constants

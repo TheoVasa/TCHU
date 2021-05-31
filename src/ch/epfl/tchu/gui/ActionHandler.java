@@ -61,4 +61,14 @@ public interface ActionHandler {
          */
         void onChooseCards(SortedBag<Card> chooseCards);
     }
+
+    @FunctionalInterface
+    interface sendChatHandler{
+        /**
+         * Manage when the player choose to send a new chat.
+         *
+         * @param chat the chat the player want to send.
+         */
+        void sendChat(String chat);
+    }
 }

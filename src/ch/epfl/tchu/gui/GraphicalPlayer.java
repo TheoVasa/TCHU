@@ -7,6 +7,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -52,6 +53,10 @@ public final class GraphicalPlayer {
     //Windows
     private final Stage mainWindow;
     private Stage choiceWindow;
+    //Chat
+    private String lastChat = "";
+    private ObservableChat chat;
+
 
     /**
      * Create a graphical player for the given playerId.
@@ -77,6 +82,24 @@ public final class GraphicalPlayer {
         //Init window
         mainWindow = createMainWindow();
         choiceWindow = new Stage();
+    }
+
+    /**
+     * To get the last chat send by the player.
+     *
+     * @return the last chat send by the player. (String)
+     */
+    public String lastChat(){
+        return lastChat;
+    }
+
+    /**
+     * To inform the player he receive a new chat.
+     *
+     * @param chat the player just receive.
+     */
+    public void receiveChat(String chat){
+        this.chat.addNewChat(false, chat);
     }
 
     /**
@@ -278,6 +301,10 @@ public final class GraphicalPlayer {
         VBox cardView = DecksViewCreator.createCardsView(obsGameState, drawTicketsHandlerProperty, drawCardHandlerProperty);
         HBox handView = DecksViewCreator.createHandView(obsGameState);
         VBox infoView = InfoViewCreator.createInfoView(playerId, playerNames, obsGameState, infoList);
+        Pane chat = ChatViewCreator.createChatView(this.chat, this::sendChat);
+
+        //TODO créer le bouton et afficher le chat ou les infos en fonction de son etat
+
         Scene scene = new Scene(new BorderPane(mapView, null, cardView, handView, infoView));
 
         //Create stage of the main window
@@ -346,4 +373,11 @@ public final class GraphicalPlayer {
             throw new UnsupportedOperationException();
         }
     }
+
+    //send a chat
+    private void sendChat(String chat){
+        this.chat.addNewChat(true, chat);
+        lastChat = chat;
+    }
+
 }

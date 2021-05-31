@@ -45,6 +45,22 @@ public class GraphicalPlayerAdapter implements Player {
         Platform.runLater(() -> graphicalPlayer = new GraphicalPlayer(ownId, playerNames));
     }
 
+    /**
+     * get the lastChat that the player send.
+     *
+     * @return the chat. (String)
+     */
+    @Override
+    public String lastChat() {
+        //TODO implementer lastChat dans GPA
+        return null;
+    }
+
+    @Override
+    public void receiveChat(String chat) {
+        Platform.runLater(() -> graphicalPlayer.receiveChat(chat));
+    }
+
     @Override
     public void receiveInfo(String info) {
         Platform.runLater(() -> graphicalPlayer.receiveInfo(info));

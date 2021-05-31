@@ -22,6 +22,20 @@ public interface Player {
     void initPlayers(PlayerId ownId, Map<PlayerId, String> playerNames);
 
     /**
+     * get the lastChat that the player send.
+     *
+     * @return the chat. (String)
+     */
+    String lastChat();
+
+    /**
+     * used to inform the player he receive a new chat.
+     *
+     * @param chat the player need the receive.
+     */
+    void receiveChat(String chat);
+
+    /**
      * Communicate information during the game.
      *
      * @param info the information we want to communicate

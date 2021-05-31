@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
  * @author Theo Vasarino (313191)
  */
 public final class RemotePlayerClient {
+    //TODO rajouter une deuxieme socket pour le chat
 
     //The player that is not on the same machine than the server
     private final Player player;
@@ -120,6 +121,13 @@ public final class RemotePlayerClient {
                 List<SortedBag<Card>> option = Serdes.LIST_SORTED_BAG_CARD_SERDE.deserialize(listOfData.next());
                 SortedBag<Card> chosenOption = player.chooseAdditionalCards(option);
                 sendMessage(Serdes.SORTED_BAG_CARD_SERDE.serialize(chosenOption));
+                break;
+            case LAST_CHAT:
+                sendMessage(Serdes.STRING_SERDE.serialize(player.lastChat()));
+                break;
+            case RECEIVE_CHAT:
+                String chat = Serdes.STRING_SERDE.deserialize(listOfData.next());
+                player.receiveChat(chat);
                 break;
             default:
                 //do nothing

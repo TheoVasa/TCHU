@@ -20,5 +20,7 @@ public enum MessageId {
     DRAW_SLOT,
     ROUTE,
     CARDS,
-    CHOOSE_ADDITIONAL_CARDS
+    CHOOSE_ADDITIONAL_CARDS,
+    LAST_CHAT,
+    RECEIVE_CHAT
 }
