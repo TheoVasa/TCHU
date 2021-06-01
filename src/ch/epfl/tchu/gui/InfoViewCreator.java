@@ -61,6 +61,7 @@ class InfoViewCreator {
 
         //create the show chat button
         Button showInfoButton = new Button("afficher le chat");
+        showInfoButton.setPrefWidth(220);
         showInfoButton.getStyleClass().add("button");
         showInfoButton.setOnAction((event) -> isChatDisplayed.set(!isChatDisplayed.getValue()));
         vbox.getChildren().add(showInfoButton);
