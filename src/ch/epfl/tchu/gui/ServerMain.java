@@ -20,14 +20,13 @@ import static ch.epfl.tchu.game.PlayerId.PLAYER_2;
 /**
  * This class represent the server used to run the game and to communicate with the different clients, extends from a javaFX application.
  */
-public class ServerMain extends Application {
+public class ServerMain{
 
-    public static void main(String[] args) { launch(args); }
+    public static void main(String[] args) throws IOException { run(args); }
 
-    @Override
-    public void start(Stage primaryStage) throws  IOException {
+    public static void run(String[] parameters) throws  IOException {
         //get the arguments of the program
-        String player1Name = this.getParameters().getRaw().get(0);
+        String player1Name = parameters[0];
 
         //wait the connection and initialize the game if it's the case
         try (ServerSocket gameServerSocket = new ServerSocket(5108);

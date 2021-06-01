@@ -1,6 +1,7 @@
 package ch.epfl.tchu.gui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -14,6 +15,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -23,13 +25,15 @@ public class Main extends Application {
     private SimpleBooleanProperty isServerMenu = new SimpleBooleanProperty(false);
     private SimpleBooleanProperty isConnectable = new SimpleBooleanProperty(false);
 
+    private boolean launched = false;
+
     //Effectively final
     private VBox center = new VBox();
     private BorderPane borderPane = new BorderPane();
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         launch(args);
-    }
+    }*/
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -104,7 +108,15 @@ public class Main extends Application {
         TextField nameArea = new TextField();
         HBox hBoxName = textAreaCreator("Choisissez votre nom :    ", nameArea);
         hostButton.setOnAction((event) -> {
-            ServerMain.main(new String[]{nameArea.getText()});
+            if (!launched) {
+                Platform.runLater(() -> {
+                        try{
+                            ServerMain.main(new String[]{nameArea.getText()});
+                        } catch (IOException e) {
+                        }
+                });
+                launched = true;
+            }
         });
 
         vBox.getChildren().addAll(hBoxIp, hBoxName);
@@ -119,7 +131,13 @@ public class Main extends Application {
         HBox hBoxName = textAreaCreator("Choisissez votre nom :             ", nameField);
         vBox.getChildren().addAll(hBoxIP, hBoxName);
         connectionButton.setOnAction((event) -> {
-            ClientMain.main(new String[]{ipField.getText(), "5108", "5109", nameField.getText()});
+            if (!launched){
+                try {
+                    ClientMain.main(new String[]{ipField.getText(), "5108", "5109", nameField.getText()});
+                } catch (IOException e) {
+                }
+                launched = true;
+            }
         });
         return vBox;
     }
