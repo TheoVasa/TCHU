@@ -17,13 +17,17 @@ public class ClientMain extends Application {
     public void start(Stage primaryStage) throws Exception {
         //get the arguments of the program
         String hostName = this.getParameters().getRaw().get(0);
-        int serverPort = Integer.parseInt(this.getParameters().getRaw().get(1));
-        String playerName = this.getParameters().getRaw().get(2);
+        int serverGamePort = Integer.parseInt(this.getParameters().getRaw().get(1));
+        int serverChatPort = Integer.parseInt(this.getParameters().getRaw().get(2));
+        String playerName = this.getParameters().getRaw().get(3);
+
 
         //the distant client
-        RemotePlayerClient client = new RemotePlayerClient(new GraphicalPlayerAdapter(), hostName, serverPort, playerName);
+        RemotePlayerClient client = new RemotePlayerClient(new GraphicalPlayerAdapter(), hostName, serverGamePort, serverChatPort, playerName);
 
         //start the thread
-        new Thread(client::run).start();
+        new Thread(client::runGame).start();
+        new Thread(client::runChat).start();
+
     }
 }

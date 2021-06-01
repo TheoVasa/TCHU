@@ -21,34 +21,44 @@ import java.util.regex.Pattern;
  * @author Theo Vasarino (313191)
  */
 public final class RemotePlayerClient {
-    //TODO rajouter une deuxieme socket pour le chat
 
     //The player that is not on the same machine than the server
     private final Player player;
     //The name of the server
     private final String serverName;
     private final String playerName;
+
     //The port to connect via tcpip
-    private final int port;
+    private final int gamePort;
+    private final int chatPort;
+
     //The socket to handle the connection of the game
-    private Socket socket;
+    private Socket gameSocket;
+    private Socket chatSocket;
+
     //BufferReader
-    private BufferedReader receiver;
+    private BufferedReader gameReceiver;
+    private BufferedReader chatReceiver;
+
     //BufferWriter
-    private BufferedWriter sender;
+    private BufferedWriter gameSender;
+    private BufferedWriter chatSender;
+
 
     /**
      * Construct a RemotePlayerClient and connect him to the server
      *
      * @param player represented by the client
      * @param serverName of the server
-     * @param port to connect to properly communicate with the proxy
+     * @param gamePort to connect to properly communicate with the proxy
+     * @param chatPort to connect to properly communicate with the proxy
      * @param playerName the name of the player that will be send to the server just after the connection
      */
-    public RemotePlayerClient(Player player, String serverName, int port, String playerName){
+    public RemotePlayerClient(Player player, String serverName, int gamePort, int chatPort, String playerName){
         this.player = player;
         this.serverName = serverName;
-        this.port = port;
+        this.gamePort = gamePort;
+        this.chatPort = chatPort;
         this.playerName = playerName;
 
         //Connect to the server
@@ -60,13 +70,20 @@ public final class RemotePlayerClient {
      * This method : - Wait a message from the proxy
      *               - In function of the type of the message, do the proper actions with the player.
      */
-    public void run(){
-        while (socket.isConnected()){
-            String receivedMessage = receiveMessage();
+    public void runGame(){
+        while (gameSocket.isConnected()){
+            String receivedMessage = receiveMessage(gameReceiver);
             if (!receivedMessage.isEmpty())
                 handleReceivedMessage(receivedMessage);
         }
+    }
 
+    public void runChat(){
+        while (chatSocket.isConnected()){
+            String receivedMessage = receiveMessage(chatReceiver);
+            if (!receivedMessage.isEmpty())
+                handleReceivedMessage(receivedMessage);
+        }
     }
 
     //In function of the type of message, deserialize and do the proper actions with the player.
@@ -97,36 +114,36 @@ public final class RemotePlayerClient {
                 break;
             case CHOOSE_INITIAL_TICKETS:
                 SortedBag<Ticket> chosenTickets = player.chooseInitialTickets();
-                sendMessage(Serdes.SORTED_BAG_TICKETS_SERDE.serialize(chosenTickets));
+                sendMessage(Serdes.SORTED_BAG_TICKETS_SERDE.serialize(chosenTickets), gameSender);
                 break;
             case NEXT_TURN:
                 Player.TurnKind turnKind = player.nextTurn();
-                sendMessage(Serdes.TURN_KIND_SERDE.serialize(turnKind));
+                sendMessage(Serdes.TURN_KIND_SERDE.serialize(turnKind), gameSender);
                 break;
             case CHOOSE_TICKETS:
                 SortedBag<Ticket> options = Serdes.SORTED_BAG_TICKETS_SERDE.deserialize(listOfData.next());
                 SortedBag<Ticket> chosenOptions = player.chooseTickets(options);
-                sendMessage(Serdes.SORTED_BAG_TICKETS_SERDE.serialize(chosenOptions));
+                sendMessage(Serdes.SORTED_BAG_TICKETS_SERDE.serialize(chosenOptions), gameSender);
                 break;
             case DRAW_SLOT:
                 int drawSlot = player.drawSlot();
-                sendMessage(Serdes.INTEGER_SERDE.serialize(drawSlot));
+                sendMessage(Serdes.INTEGER_SERDE.serialize(drawSlot), gameSender);
                 break;
             case ROUTE:
                 Route route = player.claimedRoute();
-                sendMessage(Serdes.ROUTE_SERDE.serialize(route));
+                sendMessage(Serdes.ROUTE_SERDE.serialize(route), gameSender);
                 break;
             case CARDS:
                 SortedBag<Card> cards = player.initialClaimCards();
-                sendMessage(Serdes.SORTED_BAG_CARD_SERDE.serialize(cards));
+                sendMessage(Serdes.SORTED_BAG_CARD_SERDE.serialize(cards), gameSender);
                 break;
             case CHOOSE_ADDITIONAL_CARDS:
                 List<SortedBag<Card>> option = Serdes.LIST_SORTED_BAG_CARD_SERDE.deserialize(listOfData.next());
                 SortedBag<Card> chosenOption = player.chooseAdditionalCards(option);
-                sendMessage(Serdes.SORTED_BAG_CARD_SERDE.serialize(chosenOption));
+                sendMessage(Serdes.SORTED_BAG_CARD_SERDE.serialize(chosenOption), gameSender);
                 break;
             case LAST_CHAT:
-                sendMessage(Serdes.STRING_SERDE.serialize(player.lastChat()));
+                sendMessage(Serdes.STRING_SERDE.serialize(player.lastChat()), chatSender);
                 break;
             case RECEIVE_CHAT:
                 String chat = Serdes.STRING_SERDE.deserialize(listOfData.next());
@@ -141,21 +158,28 @@ public final class RemotePlayerClient {
     //connect the client to the server.
     private void connect(){
         try{
-            socket = new Socket(serverName, port);
-            receiver = new BufferedReader(
-                            new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
-            sender = new BufferedWriter(
-                            new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.US_ASCII));
+            gameSocket = new Socket(serverName, gamePort);
+            chatSocket = new Socket(serverName, chatPort);
+
+            gameReceiver = new BufferedReader(
+                            new InputStreamReader(gameSocket.getInputStream(), StandardCharsets.US_ASCII));
+            chatReceiver = new BufferedReader(
+                            new InputStreamReader(chatSocket.getInputStream(), StandardCharsets.US_ASCII));
+
+            gameSender = new BufferedWriter(
+                            new OutputStreamWriter(gameSocket.getOutputStream(), StandardCharsets.US_ASCII));
+            chatSender = new BufferedWriter(
+                            new OutputStreamWriter(chatSocket.getOutputStream(), StandardCharsets.US_ASCII));
 
         }catch (IOException e){
             throw new UncheckedIOException(e);
         }
         //Send player name
-        sendMessage(Serdes.STRING_SERDE.serialize(playerName));
+        sendMessage(Serdes.STRING_SERDE.serialize(playerName), gameSender);
     }
 
     //receive a message from the server.
-    private String receiveMessage(){
+    private String receiveMessage(BufferedReader receiver){
         try {
             String message = receiver.readLine();
             return (message == null) ? "" : message;
@@ -165,7 +189,7 @@ public final class RemotePlayerClient {
     }
 
     //send a message to the server.
-    private  void sendMessage(String msg){
+    private  void sendMessage(String msg, BufferedWriter sender){
         try {
             msg = new StringBuilder(msg).append("\n").toString();
             sender.write(msg);
