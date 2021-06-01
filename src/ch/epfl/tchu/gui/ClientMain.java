@@ -28,6 +28,5 @@ public class ClientMain extends Application {
         //start the thread
         new Thread(client::runGame).start();
         new Thread(client::runChat).start();
-
     }
 }

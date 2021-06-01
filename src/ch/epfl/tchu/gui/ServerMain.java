@@ -28,7 +28,6 @@ public class ServerMain extends Application {
     public void start(Stage primaryStage) throws  IOException {
         //get the arguments of the program
         String player1Name = this.getParameters().getRaw().get(0);
-        //String player2Name = this.getParameters().getRaw().get(1);
 
         //wait the connection and initialize the game if it's the case
         try (ServerSocket gameServerSocket = new ServerSocket(5108);

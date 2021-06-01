@@ -27,7 +27,7 @@ public class TestServer {
         System.out.println("Starting server!");
         try (ServerSocket serverSocket = new ServerSocket(5107);
                 Socket socket = serverSocket.accept()) {
-            Player playerProxy = new RemotePlayerProxy(socket);
+            Player playerProxy = new RemotePlayerProxy(socket, null);
             var playerNames = Map.of(PLAYER_1, "Ada", PLAYER_2, "Charles");
 
             generateSendingMessage("initPlayer");
