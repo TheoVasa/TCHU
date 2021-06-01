@@ -6,6 +6,7 @@ import ch.epfl.tchu.game.*;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -56,6 +57,7 @@ public final class GraphicalPlayer {
     //Chat
     private String lastChat = "";
     private ObservableChat chat;
+    private SimpleBooleanProperty isChatDisplayed;
 
 
     /**
@@ -71,6 +73,7 @@ public final class GraphicalPlayer {
         //Init player attributes
         this.playerId = playerId;
         this.playerNames = Map.copyOf(playerNames);
+
         //Init observable
         this.obsGameState = new ObservableGameState(playerId);
         infoList = FXCollections.observableArrayList();
@@ -79,6 +82,11 @@ public final class GraphicalPlayer {
         drawTicketsHandlerProperty = new SimpleObjectProperty<>();
         drawCardHandlerProperty = new SimpleObjectProperty<>();
         claimRouteHandlerProperty = new SimpleObjectProperty<>();
+
+        //init the chat
+        this.chat = new ObservableChat();
+        isChatDisplayed = new SimpleBooleanProperty(true);
+
         //Init window
         mainWindow = createMainWindow();
         choiceWindow = new Stage();
@@ -301,11 +309,21 @@ public final class GraphicalPlayer {
         VBox cardView = DecksViewCreator.createCardsView(obsGameState, drawTicketsHandlerProperty, drawCardHandlerProperty);
         HBox handView = DecksViewCreator.createHandView(obsGameState);
         VBox infoView = InfoViewCreator.createInfoView(playerId, playerNames, obsGameState, infoList);
-        Pane chat = ChatViewCreator.createChatView(this.chat, this::sendChat);
+        Pane chatView = ChatViewCreator.createChatView(this.chat, this::sendChat);
 
-        //TODO créer le bouton et afficher le chat ou les infos en fonction de son etat
+        //add the button for the chat or the info
+        Button button = generateChatOrInfoButton(isChatDisplayed);
+        chatView.getChildren().add(button);
+        infoView.getChildren().add(button);
 
-        Scene scene = new Scene(new BorderPane(mapView, null, cardView, handView, infoView));
+        //display the chat or the info in function of the button
+        BorderPane border = new BorderPane(mapView, null, cardView, handView, infoView);
+        if(isChatDisplayed.getValue())
+            border.setLeft(chatView);
+        else
+            border.setLeft(infoView);
+
+        Scene scene = new Scene(border);
 
         //Create stage of the main window
         Stage stage = new Stage();
@@ -378,6 +396,22 @@ public final class GraphicalPlayer {
     private void sendChat(String chat){
         this.chat.addNewChat(true, chat);
         lastChat = chat;
+    }
+
+    private static Button generateChatOrInfoButton(SimpleBooleanProperty isChat){
+        //create the button
+        Button button = new Button();
+        button.setPrefWidth(220);
+        if(isChat.getValue())
+            button.setText("Afficher les infos");
+        else{
+            button.setText("Afficher le chat");
+        }
+        button.setOnAction((event) -> {
+            isChat.set(!isChat.getValue());
+        });
+
+        return button;
     }
 
 }

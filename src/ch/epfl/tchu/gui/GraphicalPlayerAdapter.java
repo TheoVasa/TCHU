@@ -19,7 +19,7 @@ import java.util.concurrent.BlockingQueue;
  */
 public class GraphicalPlayerAdapter implements Player {
     //Constant
-    private final int BOCKING_QUEUE_CAPACITY = 1;
+    private final int BLOCKING_QUEUE_CAPACITY = 1;
 
     //Attributes
     private GraphicalPlayer graphicalPlayer;
@@ -28,16 +28,18 @@ public class GraphicalPlayerAdapter implements Player {
     private final BlockingQueue<TurnKind> turnKindQueue;
     private final BlockingQueue<Integer> cardSlotQueue;
     private final BlockingQueue<Route> claimRouteQueue;
+    private final BlockingQueue<String> lastChatQueue;
 
     /**
      * constructs a new GraphicalPlayerAdapter and initialize all the different queue.
      */
     public GraphicalPlayerAdapter(){
-        ticketsQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
-        claimCardQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
-        turnKindQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
-        cardSlotQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
-        claimRouteQueue = new ArrayBlockingQueue<>(BOCKING_QUEUE_CAPACITY);
+        ticketsQueue = new ArrayBlockingQueue<>(BLOCKING_QUEUE_CAPACITY);
+        claimCardQueue = new ArrayBlockingQueue<>(BLOCKING_QUEUE_CAPACITY);
+        turnKindQueue = new ArrayBlockingQueue<>(BLOCKING_QUEUE_CAPACITY);
+        cardSlotQueue = new ArrayBlockingQueue<>(BLOCKING_QUEUE_CAPACITY);
+        claimRouteQueue = new ArrayBlockingQueue<>(BLOCKING_QUEUE_CAPACITY);
+        lastChatQueue = new ArrayBlockingQueue<>(BLOCKING_QUEUE_CAPACITY);
     }
 
     @Override
@@ -52,8 +54,8 @@ public class GraphicalPlayerAdapter implements Player {
      */
     @Override
     public String lastChat() {
-        //TODO implementer lastChat dans GPA
-        return null;
+        Platform.runLater(() -> putTryCatch(lastChatQueue, graphicalPlayer.lastChat()));
+        return takeTryCatch(lastChatQueue);
     }
 
     @Override

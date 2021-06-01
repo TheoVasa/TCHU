@@ -1,0 +1,20 @@
+.chatField{
+    -fx-pref-height:650;
+    -fx-pref-width:200;
+    -fx-spacing:15;
+}
+
+.ownChat{
+
+    -fx-background-color:green;
+    -fx-text-fill:white;
+    -fx-pref-width:150px;
+
+}
+.otherChat{
+
+    -fx-background-color:grey;
+    -fx-text-fill:white;
+    -fx-pref-width:150px;
+}
+

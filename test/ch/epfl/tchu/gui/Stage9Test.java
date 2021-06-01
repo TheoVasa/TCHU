@@ -4,6 +4,7 @@ import ch.epfl.tchu.SortedBag;
 import ch.epfl.tchu.game.*;
 import javafx.application.Application;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -49,9 +50,12 @@ public class Stage9Test extends Application {
                 new Text("\nSeconde information.\n"));
         Node infoView = InfoViewCreator
                 .createInfoView(PLAYER_1, playerNames, gameState, infos);
+        ObservableChat chat = new ObservableChat();
+
+        Node chatView = ChatViewCreator.createChatView(chat, (s) -> chat.addNewChat(false, s));
 
         BorderPane mainPane =
-                new BorderPane(mapView, null, cardsView, handView, infoView);
+                new BorderPane(mapView, null, cardsView, handView, chatView);
         primaryStage.setScene(new Scene(mainPane));
         primaryStage.show();
 

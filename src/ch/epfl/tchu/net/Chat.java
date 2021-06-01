@@ -27,14 +27,15 @@ public class Chat {
         boolean stopCondition = false;
 
         while(!stopCondition) {
-
-            if (player1.lastChat().equals(playersLastChat.get(player1))) {
-                playersLastChat.put(player1, player1.lastChat());
-                sendNewChat(player2, playersLastChat.get(player1));
-            }
-            if (player2.lastChat().equals(playersLastChat.get(player2))) {
-                playersLastChat.put(player2, player2.lastChat());
-                sendNewChat(player1, playersLastChat.get(player1));
+            if(player1 != null && player2 != null) {
+                if (player1.lastChat().equals(playersLastChat.get(player1))) {
+                    playersLastChat.put(player1, player1.lastChat());
+                    sendNewChat(player2, playersLastChat.get(player1));
+                }
+                if (player2.lastChat().equals(playersLastChat.get(player2))) {
+                    playersLastChat.put(player2, player2.lastChat());
+                    sendNewChat(player1, playersLastChat.get(player1));
+                }
             }
         }
     }

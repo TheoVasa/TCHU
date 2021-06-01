@@ -36,6 +36,24 @@ public class TestClient {
         }
 
         /**
+         * get the lastChat that the player send.
+         *
+         * @return the chat. (String)
+         */
+        @Override public String lastChat() {
+            return null;
+        }
+
+        /**
+         * used to inform the player he receive a new chat.
+         *
+         * @param chat the player need the receive.
+         */
+        @Override public void receiveChat(String chat) {
+
+        }
+
+        /**
          * Communicate information during the game.
          *
          * @param info the information we want to communicate
