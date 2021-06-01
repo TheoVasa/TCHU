@@ -66,7 +66,7 @@ public class ChatViewCreator {
         Button sendButton = new Button("Envoi");
         sendButton.setOnAction((event -> {
             //we cannot send empty messages
-            if(textField.getText()!="") {
+            if(!textField.getText().equals("")) {
                 //send the message
                 chatHandler.sendChat(textField.getText());
                 //clean the textfield
