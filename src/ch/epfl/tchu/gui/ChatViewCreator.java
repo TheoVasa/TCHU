@@ -36,7 +36,7 @@ public class ChatViewCreator {
 
         //create the show info button
         Button showInfoButton = new Button("afficher les infos");
-        showInfoButton.setPrefWidth(200);
+        showInfoButton.setPrefWidth(220);
         showInfoButton.setOnAction((event) -> isChatDisplayed.set(!isChatDisplayed.getValue()));
 
         root.getChildren().addAll(scroller, textField, showInfoButton);
@@ -65,10 +65,13 @@ public class ChatViewCreator {
         //the button to send the chat
         Button sendButton = new Button("Envoi");
         sendButton.setOnAction((event -> {
-            //send the message
-            chatHandler.sendChat(textField.getText());
-            //clean the textfield
-            textField.setText("");
+            //we cannot send empty messages
+            if(textField.getText()!="") {
+                //send the message
+                chatHandler.sendChat(textField.getText());
+                //clean the textfield
+                textField.setText("");
+            }
         }));
         hbox.getChildren().addAll(textField, sendButton);
 

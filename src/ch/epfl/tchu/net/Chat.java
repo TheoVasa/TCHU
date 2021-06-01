@@ -17,6 +17,8 @@ public class Chat {
 
     public static void runChat(Player plr1, Player plr2){
         //TODO trouver une moyen de le run en boucle jusqu'a la fin de la game et améliorer la classe
+        //TODO faire un proprieté pour lastChat plutot?
+        //TODO regler le bug pour l'envoie de message à double
 
         Player player1 = plr1;
         Player player2 = plr2;
