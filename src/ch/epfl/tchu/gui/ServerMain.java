@@ -31,12 +31,15 @@ public class ServerMain extends Application {
         //String player2Name = this.getParameters().getRaw().get(1);
 
         //wait the connection and initialize the game if it's the case
-        try (ServerSocket serverSocket = new ServerSocket(5108)) {
-            Socket socket = serverSocket.accept();
+        try (ServerSocket gameServerSocket = new ServerSocket(5108);
+             ServerSocket chatServerSocket = new ServerSocket(5109)) {
+
+            Socket gameSocket = gameServerSocket.accept();
+            Socket chatSocket = chatServerSocket.accept();
 
             //the players
             Player localPlayer = new GraphicalPlayerAdapter();
-            Player distantPlayer = new RemotePlayerProxy(socket);
+            Player distantPlayer = new RemotePlayerProxy(gameSocket, chatSocket);
 
             String distantPlayerName = distantPlayer.receivePlayerName();
             System.out.println(distantPlayerName);
