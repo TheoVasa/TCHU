@@ -1,4 +1,5 @@
 .chatField{
+    -fx-alignment: bottom_center;
     -fx-pref-height:650;
     -fx-pref-width:200;
     -fx-spacing:15;

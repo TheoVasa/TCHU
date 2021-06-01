@@ -85,6 +85,7 @@ public final class GraphicalPlayer {
 
         //init the chat
         this.chat = new ObservableChat();
+        //show first the info
         isChatDisplayed = new SimpleBooleanProperty(true);
 
         //Init window
@@ -308,21 +309,21 @@ public final class GraphicalPlayer {
         Pane mapView = MapViewCreator.createMapView(obsGameState, claimRouteHandlerProperty, this::chooseClaimCards);
         VBox cardView = DecksViewCreator.createCardsView(obsGameState, drawTicketsHandlerProperty, drawCardHandlerProperty);
         HBox handView = DecksViewCreator.createHandView(obsGameState);
-        VBox infoView = InfoViewCreator.createInfoView(playerId, playerNames, obsGameState, infoList);
-        Pane chatView = ChatViewCreator.createChatView(this.chat, this::sendChat);
+        VBox infoView = InfoViewCreator.createInfoView(playerId, playerNames, obsGameState, infoList, isChatDisplayed);
+        VBox chatView = ChatViewCreator.createChatView(this.chat, this::sendChat, isChatDisplayed);
 
-        //add the button for the chat or the info
-        Button button = generateChatOrInfoButton(isChatDisplayed);
-        chatView.getChildren().add(button);
-        infoView.getChildren().add(button);
+        //display the chat or the info in function of if the chat is displayed
+        BorderPane border = isChatDisplayed.getValue()
+                            ? new BorderPane(mapView, null, cardView, handView, chatView)
+                            : new BorderPane(mapView, null, cardView, handView, infoView);
 
-        //display the chat or the info in function of the button
-        BorderPane border = new BorderPane(mapView, null, cardView, handView, infoView);
-        if(isChatDisplayed.getValue())
-            border.setLeft(chatView);
-        else
-            border.setLeft(infoView);
-
+        isChatDisplayed.addListener((ov, nV, o) -> {
+            if(isChatDisplayed.getValue()) {
+                border.setLeft(chatView);
+            }
+            else
+                border.setLeft(infoView);
+        });
         Scene scene = new Scene(border);
 
         //Create stage of the main window
@@ -397,21 +398,4 @@ public final class GraphicalPlayer {
         this.chat.addNewChat(true, chat);
         lastChat = chat;
     }
-
-    private static Button generateChatOrInfoButton(SimpleBooleanProperty isChat){
-        //create the button
-        Button button = new Button();
-        button.setPrefWidth(220);
-        if(isChat.getValue())
-            button.setText("Afficher les infos");
-        else{
-            button.setText("Afficher le chat");
-        }
-        button.setOnAction((event) -> {
-            isChat.set(!isChat.getValue());
-        });
-
-        return button;
-    }
-
 }

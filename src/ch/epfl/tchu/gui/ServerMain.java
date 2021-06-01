@@ -53,11 +53,6 @@ public class ServerMain extends Application {
             new Thread(() -> Game
                     .play(player, playerNames, SortedBag.of(ChMap.tickets()), new Random()))
                     .start();
-
-            //start the chat 
-            new Thread(() -> Chat
-                    .runChat(localPlayer, distantPlayer))
-                    .start();;
         }
     }
 }

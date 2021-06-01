@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -18,7 +19,7 @@ public class ChatViewCreator {
     private ChatViewCreator() {
     }
 
-    public static Pane createChatView(ObservableChat chat, ActionHandler.sendChatHandler chatHandler) {
+    public static VBox createChatView(ObservableChat chat, ActionHandler.sendChatHandler chatHandler, SimpleBooleanProperty isChatDisplayed) {
 
         VBox root = new VBox();
         root.getStylesheets().add("chat.css");
@@ -33,7 +34,12 @@ public class ChatViewCreator {
         //the text field and the button
         HBox textField = generateTextFieldAndSendButton(chatHandler);
 
-        root.getChildren().addAll(scroller, textField);
+        //create the show info button
+        Button showInfoButton = new Button("afficher les infos");
+        showInfoButton.setPrefWidth(200);
+        showInfoButton.setOnAction((event) -> isChatDisplayed.set(!isChatDisplayed.getValue()));
+
+        root.getChildren().addAll(scroller, textField, showInfoButton);
 
         //add the new chat if needed
         chat.allChatsProperty().addListener((MapChangeListener<? super String, ? super Boolean>) change -> {
@@ -70,20 +76,26 @@ public class ChatViewCreator {
     }
 
     private static void addCaseOfChat(VBox chatField, String chat, Boolean isOwnPlayerChat){
+
+        HBox hbox = new HBox();
+
         Label message = new Label(chat);
         message.setAlignment(Pos.CENTER);
         message.setWrapText(true);
 
         //set the message at right if we send the chat
         if (isOwnPlayerChat) {
-            chatField.setAlignment(Pos.BOTTOM_RIGHT);
             message.getStyleClass().add("ownChat");
+            hbox.setAlignment(Pos.BASELINE_RIGHT);
+
         } else {
-            chatField.setAlignment(Pos.BOTTOM_LEFT);
             message.getStyleClass().add("otherChat");
+            hbox.setAlignment(Pos.BASELINE_LEFT);
+
         }
         //add the message to the chatField
-        chatField.getChildren().add(message);
+        hbox.getChildren().add(message);
+        chatField.getChildren().add(hbox);
     }
 
 }

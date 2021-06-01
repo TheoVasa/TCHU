@@ -2,8 +2,10 @@ package ch.epfl.tchu.gui;
 
 import ch.epfl.tchu.game.PlayerId;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
+import javafx.scene.control.Button;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
@@ -34,7 +36,7 @@ class InfoViewCreator {
      * @param gameInfos the infos in the game.
      * @return a new Node representing al the infos in the game. (VBox)
      */
-    public static VBox createInfoView(PlayerId currentPlayer, Map<PlayerId, String> playerNames, ObservableGameState gameState, ObservableList<Text> gameInfos) {
+    public static VBox createInfoView(PlayerId currentPlayer, Map<PlayerId, String> playerNames, ObservableGameState gameState, ObservableList<Text> gameInfos, SimpleBooleanProperty isChatDisplayed) {
         //create the vbox
         VBox vbox = new VBox();
         //set the style sheets
@@ -57,6 +59,11 @@ class InfoViewCreator {
         //create the game infos
         vbox.getChildren().add(generateGameInfo(gameInfos));
 
+        //create the show chat button
+        Button showInfoButton = new Button("afficher le chat");
+        showInfoButton.getStyleClass().add("button");
+        showInfoButton.setOnAction((event) -> isChatDisplayed.set(!isChatDisplayed.getValue()));
+        vbox.getChildren().add(showInfoButton);
         return vbox;
     }
 

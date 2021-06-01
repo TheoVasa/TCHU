@@ -53,6 +53,11 @@ public final class Game {
         //Init the game
         initGame();
 
+        //init the chat
+        new Thread(() -> Chat
+                .runChat(players.get(PlayerId.PLAYER_1), players.get(PlayerId.PLAYER_2)))
+                .start();
+
         //Play the game
         boolean endGame = false;
         while (!endGame) {

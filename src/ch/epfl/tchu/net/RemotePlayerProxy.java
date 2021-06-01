@@ -52,7 +52,7 @@ public final class RemotePlayerProxy implements Player {
     @Override
     public String lastChat() {
         //ask the client the new chat
-        List<String> dataList = List.of(Serdes.STRING_SERDE.serialize(MessageId.LAST_CHAT.name()), "\n");
+        List<String> dataList = List.of(MessageId.LAST_CHAT.name(), "\n");
         String sendMessage = String.join(" ", dataList);
         sendMessage(sendMessage);
 
@@ -69,7 +69,7 @@ public final class RemotePlayerProxy implements Player {
     @Override
     public void receiveChat(String chat) {
         //send the chat to the client
-        List<String> dataList = List.of(Serdes.STRING_SERDE.serialize(MessageId.RECEIVE_CHAT.name()), Serdes.STRING_SERDE.serialize(chat), "\n");
+        List<String> dataList = List.of(MessageId.RECEIVE_CHAT.name(), Serdes.STRING_SERDE.serialize(chat), "\n");
         String sendMessage = String.join(" ", dataList);
         sendMessage(sendMessage);
     }

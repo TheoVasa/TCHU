@@ -49,10 +49,10 @@ public class Stage9Test extends Application {
                 new Text("Première information.\n"),
                 new Text("\nSeconde information.\n"));
         Node infoView = InfoViewCreator
-                .createInfoView(PLAYER_1, playerNames, gameState, infos);
+                .createInfoView(PLAYER_1, playerNames, gameState, infos, new SimpleBooleanProperty(false));
         ObservableChat chat = new ObservableChat();
 
-        Node chatView = ChatViewCreator.createChatView(chat, (s) -> chat.addNewChat(false, s));
+        Node chatView = ChatViewCreator.createChatView(chat, (s) -> chat.addNewChat(false, s), new SimpleBooleanProperty(false));
 
         BorderPane mainPane =
                 new BorderPane(mapView, null, cardsView, handView, chatView);
