@@ -135,6 +135,11 @@ public class GraphicalPlayerAdapter implements Player {
         return takeTryCatch(claimCardQueue);
     }
 
+    @Override
+    public String receivePlayerName() {
+        return null;
+    }
+
     //Generic try catch for to handle the method ".put" for BlockingQueue
     private <E> void putTryCatch(BlockingQueue<E> queue, E element){
         try {

@@ -18,9 +18,10 @@ public class ClientMain extends Application {
         //get the arguments of the program
         String hostName = this.getParameters().getRaw().get(0);
         int serverPort = Integer.parseInt(this.getParameters().getRaw().get(1));
+        String playerName = this.getParameters().getRaw().get(2);
 
         //the distant client
-        RemotePlayerClient client = new RemotePlayerClient(new GraphicalPlayerAdapter(), hostName, serverPort);
+        RemotePlayerClient client = new RemotePlayerClient(new GraphicalPlayerAdapter(), hostName, serverPort, playerName);
 
         //start the thread
         new Thread(client::run).start();

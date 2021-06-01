@@ -8,7 +8,6 @@ package ch.epfl.tchu.net;
  */
 
 public enum MessageId {
-
     //The elements of the enumeration
     INIT_PLAYERS,
     RECEIVE_INFO,

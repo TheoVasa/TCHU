@@ -113,6 +113,12 @@ public interface Player {
     SortedBag<Card> chooseAdditionalCards(List<SortedBag<Card>> options);
 
     /**
+     * Receive the player name at the very begining of the game
+     * @return the name of the player
+     */
+    String receivePlayerName();
+
+    /**
      * represent all different actions the player can do during his turn, nested in Player.
      */
     enum TurnKind {

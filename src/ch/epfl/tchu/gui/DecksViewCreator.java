@@ -127,8 +127,8 @@ class DecksViewCreator {
 
     //Create the view of the tickets and
     //put them in the right layout.
-    private static ListView<Ticket> createHandTicketsLayout(ObservableGameState observableGameState){
-        ListView<Ticket> ticketsView = new ListView<>(observableGameState.ticketsOfPlayerProperty());
+    private static ListView<Ticket> createHandTicketsLayout(ObservableGameState obsGameState){
+        ListView<Ticket> ticketsView = new ListView<>(obsGameState.ticketsOfPlayerProperty());
         ticketsView.setId("tickets");
         return ticketsView;
     }

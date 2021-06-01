@@ -26,7 +26,8 @@ public final class RemotePlayerClient {
     //The player that is not on the same machine than the server
     private final Player player;
     //The name of the server
-    private final String name;
+    private final String serverName;
+    private final String playerName;
     //The port to connect via tcpip
     private final int port;
     //The socket to handle the connection of the game
@@ -40,13 +41,15 @@ public final class RemotePlayerClient {
      * Construct a RemotePlayerClient and connect him to the server
      *
      * @param player represented by the client
-     * @param name of the server
+     * @param serverName of the server
      * @param port to connect to properly communicate with the proxy
+     * @param playerName the name of the player that will be send to the server just after the connection
      */
-    public RemotePlayerClient(Player player, String name, int port){
+    public RemotePlayerClient(Player player, String serverName, int port, String playerName){
         this.player = player;
-        this.name = name;
+        this.serverName = serverName;
         this.port = port;
+        this.playerName = playerName;
 
         //Connect to the server
         connect();
@@ -138,14 +141,17 @@ public final class RemotePlayerClient {
     //connect the client to the server.
     private void connect(){
         try{
-            socket = new Socket(name, port);
+            socket = new Socket(serverName, port);
             receiver = new BufferedReader(
                             new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
             sender = new BufferedWriter(
                             new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.US_ASCII));
+
         }catch (IOException e){
             throw new UncheckedIOException(e);
         }
+        //Send player name
+        sendMessage(Serdes.STRING_SERDE.serialize(playerName));
     }
 
     //receive a message from the server.

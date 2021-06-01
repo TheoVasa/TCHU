@@ -240,8 +240,13 @@ public class GameTest {
             }
         }
 
+        @Override
+        public String receivePlayerName() {
+            return null;
+        }
+
         private String expectedInfo(TurnKind turnKind, PlayerState playerState,
-                PublicGameState gameState) {
+                                    PublicGameState gameState) {
 
             switch (turnKind) {
                 case DRAW_TICKETS:

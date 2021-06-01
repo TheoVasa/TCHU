@@ -28,7 +28,7 @@ public class ServerMain extends Application {
     public void start(Stage primaryStage) throws  IOException {
         //get the arguments of the program
         String player1Name = this.getParameters().getRaw().get(0);
-        String player2Name = this.getParameters().getRaw().get(1);
+        //String player2Name = this.getParameters().getRaw().get(1);
 
         //wait the connection and initialize the game if it's the case
         try (ServerSocket serverSocket = new ServerSocket(5108)) {
@@ -38,11 +38,14 @@ public class ServerMain extends Application {
             Player localPlayer = new GraphicalPlayerAdapter();
             Player distantPlayer = new RemotePlayerProxy(socket);
 
+            String distantPlayerName = distantPlayer.receivePlayerName();
+            System.out.println(distantPlayerName);
+
             //playerNames
             Map<PlayerId, String> playerNames = new EnumMap<PlayerId, String>(
                     PlayerId.class);
             playerNames.put(PLAYER_1, player1Name);
-            playerNames.put(PLAYER_2, player2Name);
+            playerNames.put(PLAYER_2, distantPlayerName);
 
             Map<PlayerId, Player> player = new EnumMap<PlayerId, Player>(
                     PlayerId.class);

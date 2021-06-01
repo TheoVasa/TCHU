@@ -6,7 +6,6 @@ import ch.epfl.tchu.game.*;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -193,6 +192,11 @@ public final class RemotePlayerProxy implements Player {
         String receiveMessage = receiveMessage();
 
         return Serdes.SORTED_BAG_CARD_SERDE.deserialize(receiveMessage);
+    }
+
+    @Override
+    public String receivePlayerName(){
+        return Serdes.STRING_SERDE.deserialize(receiveMessage());
     }
 
     //Send a message to the player that isn't on the same machine as the server

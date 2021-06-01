@@ -17,7 +17,7 @@ public class TestClient {
         RemotePlayerClient playerClient =
                 new RemotePlayerClient(new TestPlayer(),
                         "localhost",
-                        5107);
+                        5107, "name");
         playerClient.run();
         System.out.println("Client done!");
     }
@@ -181,5 +181,9 @@ public class TestClient {
             return addCards;
         }
 
+        @Override
+        public String receivePlayerName() {
+            return null;
+        }
     }
 }
