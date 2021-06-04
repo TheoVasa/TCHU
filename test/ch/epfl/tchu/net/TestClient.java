@@ -12,15 +12,15 @@ import java.util.Random;
 import static ch.epfl.tchu.game.Player.TurnKind.CLAIM_ROUTE;
 
 public class TestClient {
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         System.out.println("Starting client!");
-        RemotePlayerClient playerClient =
+        //RemotePlayerClient playerClient =
                 new RemotePlayerClient(new TestPlayer(),
                         "localhost",
                         5107, 5108, "name");
         playerClient.runGame();
         System.out.println("Client done!");
-    }
+    }*/
 
     private final static class TestPlayer implements Player {
         private final List<Ticket> alltickets = ChMap.tickets();

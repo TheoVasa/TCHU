@@ -1,154 +1,261 @@
 package ch.epfl.tchu.gui;
 
+import ch.epfl.tchu.Preconditions;
+import ch.epfl.tchu.SortedBag;
+import ch.epfl.tchu.game.ChMap;
+import ch.epfl.tchu.game.Game;
+import ch.epfl.tchu.game.Player;
+import ch.epfl.tchu.game.PlayerId;
+import ch.epfl.tchu.net.RemotePlayerProxy;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.io.UncheckedIOException;
+import java.net.*;
+import java.util.EnumMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 
-public class Main extends Application {
+import static ch.epfl.tchu.game.PlayerId.PLAYER_1;
+import static ch.epfl.tchu.game.PlayerId.PLAYER_2;
 
-    //Useful to enable or disable the button for the server/client menu
-    private SimpleBooleanProperty isServerMenu = new SimpleBooleanProperty(false);
-    private SimpleBooleanProperty isConnectable = new SimpleBooleanProperty(false);
+public final class Main extends Application {
 
+    // Start the menu on the server
+    private static final boolean START_ON_SERVER_MENU = true;
+    private static final String GAME_PORT = "5108";
+    private static final String CHAT_PORT = "5109";
+
+    // To call only once the main because sometimes the .setOnAction() of a button is
+    // called multiple times even if the button was pressed only once...
     private boolean launched = false;
 
-    //Effectively final
-    private VBox center = new VBox();
-    private BorderPane borderPane = new BorderPane();
+    // Useful to enable or disable the button for the server/client menu
+    private final SimpleBooleanProperty isOnServerMenuProperty = new SimpleBooleanProperty();
+    private final SimpleBooleanProperty isConnectedProperty = new SimpleBooleanProperty(false);
+    private final SimpleBooleanProperty isTryingToConnect = new SimpleBooleanProperty(false);
+    private final SimpleBooleanProperty isTryingToHost = new SimpleBooleanProperty(false);
 
-    /*public static void main(String[] args) {
+    /**
+     * Main function of the game. It will launch a JavaFx window with a menu.
+     *
+     * @param args the arguments of the game
+     */
+    public static void main(String[] args) {
         launch(args);
-    }*/
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Stage stage = new Stage();
 
-        //Top of the borderPane
+        // Create Stage BorderPane and Scene
         HBox top = new HBox();
+        VBox center = new VBox();
+        HBox bottom = new HBox();
+        VBox right = new VBox();
+        BorderPane borderPane = new BorderPane(center, top, right, bottom, null);
+        Scene scene = new Scene(borderPane);
+        scene.getStylesheets().add("menu.css");
+        Stage menu = new Stage();
+        menu.setScene(scene);
+
+        // Construct the required node for the top of the borderPane
+        top.getStyleClass().add("top");
         Text title = new Text("TCHU - Menu de connection");
         title.setId("title");
         top.getChildren().add(title);
-        top.getStyleClass().add("top");
 
-        //Bottom of the borderPane
-        HBox bottom = new HBox();
-        Button connectBtn = new Button("Connect");
-        connectBtn.getStyleClass().add("buttonConnection");
-        Text connectionState = new Text();
-        bottom.getChildren().addAll(connectBtn, connectionState);
+        // Construct the required node for the bottom of the BorderPane
+        Label connectionState = new Label();
+        Label hostState = new Label();
+        Button connectionBtn = createButton("Connection", "Connection");
+        Button hostBtn = createButton("Host", "Connection");
+        HBox connectionBox = new HBox(connectionBtn, connectionState);
+        HBox hostBox = new HBox(hostBtn, hostState);
         bottom.getStyleClass().add("bottom");
 
-
-        //Left of the borderPane
-        VBox right = new VBox();
-        Button serverMenuBtn = new Button("Server");
-        serverMenuBtn.setOnAction((event -> {
-            isServerMenu.setValue(true);
-            borderPane.setCenter(centerServerMenu(connectBtn));
-            connectBtn.setText("Host");
-        }));
-        serverMenuBtn.disableProperty().bind(isServerMenu);
-        serverMenuBtn.getStyleClass().add("button");
-        Button clientMenuButton = new Button("Client");
-        clientMenuButton.setOnAction((event -> {
-            isServerMenu.setValue(false);
-            borderPane.setCenter(centerClientMenu(connectBtn));
-            connectBtn.setText("Connect");
-        }));
-        clientMenuButton.disableProperty().bind(isServerMenu.not());
-        clientMenuButton.getStyleClass().add("button");
-        right.getChildren().addAll(serverMenuBtn, clientMenuButton);
-        right.getStyleClass().add("right");
-
-        //Center of the borderPane
-        center = centerClientMenu(connectBtn);
+        // Construct the required node for the center of the border pane
+        Label nameLabel = new Label("Sesissez votre nom : ");
+        nameLabel.getStyleClass().add("label");
+        TextField nameField = new TextField();
+        nameField.getStyleClass().add("textArea");
+        HBox nameBox = new HBox(nameLabel, nameField);
+        Label serverTextLabel = new Label("L'adresse IP du serveur : ");
+        serverTextLabel.getStyleClass().add("label");
+        TextField serverIpField = new TextField( (!generateIP().isEmpty()) // TextFiel so that we can copy its content !
+                                         ? generateIP()
+                                         : "IP INACCESSIBLE !");
+        serverIpField.getStyleClass().add("textArea");
+        serverIpField.setEditable(false);
+        //serverIpLabel.getStyleClass().add("label");
+        HBox serverBox = new HBox(serverTextLabel, serverIpField);
+        Label ipLabel = new Label("Sesissez l'adresse IP du serveur : ");
+        ipLabel.getStyleClass().add("label");
+        TextField ipField = new TextField();
+        ipField.getStyleClass().add("textArea");
+        HBox ipBox = new HBox(ipLabel, ipField);
+        center.getChildren().add(nameBox);
         center.getStyleClass().add("center");
 
-        //BorderPane
-        borderPane = new BorderPane(center, top, right, bottom, null);
-        Scene scene = new Scene(borderPane);
-        scene.getStylesheets().add("menu.css");
-        stage.setScene(scene);
-        stage.show();
-    }
+        // Construct the required node for the right of the BorderPane
+        Button serverBtn = createButton("Server", "button");
+        serverBtn.disableProperty().bind(isOnServerMenuProperty);
+        serverBtn.getStyleClass().add("button");
+        Button clientBtn = createButton("Client", "button");
+        clientBtn.disableProperty().bind(isOnServerMenuProperty.not());
+        clientBtn.getStyleClass().add("button");
+        right.getChildren().addAll(serverBtn, clientBtn);
+        right.getStyleClass().add("right");
 
-
-    private VBox centerServerMenu(Button hostButton){
-        String ipAddress = new String();
-        try{
-            InetAddress inetadr = InetAddress.getLocalHost();
-            //adresse ip sur le réseau
-            ipAddress = (String) inetadr.getHostAddress();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        VBox vBox = new VBox();
-        HBox hBoxIp = new HBox();
-        Label ipTextLabel = new Label("L'addresse ip du server :");
-        ipTextLabel.getStyleClass().add("label");
-        Label ipLabel = new Label(ipAddress);
-        ipLabel.getStyleClass().add("label");
-        hBoxIp.getChildren().addAll(ipTextLabel, ipLabel);
-        TextField nameArea = new TextField();
-        HBox hBoxName = textAreaCreator("Choisissez votre nom :    ", nameArea);
-        hostButton.setOnAction((event) -> {
+        // Events of the buttons
+        EventHandler<ActionEvent> hostBtnEventHandler = (event) -> {
+            if (!launched) {
+                hostState.setText("En attente du client");
+                Platform.runLater(() -> runServer(new String[]{nameField.getText(), GAME_PORT, CHAT_PORT},
+                        isConnectedProperty,
+                        isTryingToHost));
+                launched = true;
+            }
+        };
+        EventHandler<ActionEvent> connectionBtnEventHandler = (event) -> {
             if (!launched) {
                 Platform.runLater(() -> {
-                        try{
-                            ServerMain.main(new String[]{nameArea.getText()});
-                        } catch (IOException e) {
-                        }
+                    connectionState.setText("En attente de connection...");
+                    ClientMain.run(new String[]{ipField.getText(), GAME_PORT, CHAT_PORT, nameField.getText()},
+                                    isConnectedProperty,
+                                    isTryingToConnect);
+                    launched = true;
                 });
-                launched = true;
             }
+        };
+        EventHandler<ActionEvent> serverBtnEventHandler = (event) -> isOnServerMenuProperty.setValue(true);
+        EventHandler<ActionEvent> clientBtnEventHandler = (event) -> isOnServerMenuProperty.setValue(false);
+
+        //Add the action handler to the respective buttons
+        connectionBtn.setOnAction(connectionBtnEventHandler);
+        hostBtn.setOnAction(hostBtnEventHandler);
+        serverBtn.setOnAction(serverBtnEventHandler);
+        clientBtn.setOnAction(clientBtnEventHandler);
+
+        // Start the menu on the server menu and change the center & bottom
+        // when there is a switch of menu type (client or server)
+        isOnServerMenuProperty.addListener((p, o, n) -> {
+                if (center.getChildren().size() > 1)
+                    center.getChildren().remove((o) ? serverBox : ipBox);
+                center.getChildren().add(0, (n) ? serverBox : ipBox);
+                if (bottom.getChildren().size() > 0)
+                    bottom.getChildren().removeAll((o) ? hostBox : connectionBox);
+                bottom.getChildren().add((n) ? hostBox : connectionBox);
+        });
+        isConnectedProperty.addListener((p, o, n) -> menu.hide());
+        isTryingToConnect.addListener((p, o, n) -> {
+            if (n)
+                connectionState.setText("Connection au serveur...");
+            else
+                connectionState.setText(new StringBuilder()
+                        .append("Echec à la connection au serveur ! \n ")
+                        .append("Êtes-vous bien connecté au bon réseau local ?")
+                        .toString());
+        });
+        isTryingToHost.addListener((p, o, n) -> {
+            if (n)
+                hostState.setText("En attente du client");
+            else
+                hostState.setText("Le serveur a été intéremnpu !");
         });
 
-        vBox.getChildren().addAll(hBoxIp, hBoxName);
-        return vBox;
+        //Start on the server menu
+        isOnServerMenuProperty.setValue(START_ON_SERVER_MENU);
+
+        // Show the menu window
+        menu.show();
     }
 
-    private VBox centerClientMenu(Button connectionButton){
-        VBox vBox = new VBox();
-        TextField ipField = new TextField();
-        HBox hBoxIP = textAreaCreator("Sesissez l'adresse ip du server    ", ipField);
-        TextField nameField = new TextField();
-        HBox hBoxName = textAreaCreator("Choisissez votre nom :             ", nameField);
-        vBox.getChildren().addAll(hBoxIP, hBoxName);
-        connectionButton.setOnAction((event) -> {
-            if (!launched){
-                try {
-                    ClientMain.main(new String[]{ipField.getText(), "5108", "5109", nameField.getText()});
-                } catch (IOException e) {
-                }
-                launched = true;
-            }
-        });
-        return vBox;
+    // Generate th IP address for the server
+    private String generateIP() throws IOException{
+        StringBuilder ip = new StringBuilder();
+        NetworkInterface.networkInterfaces()
+                .filter(i -> {
+                    try { return i.isUp() && !i.isLoopback(); }
+                    catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                })
+                .flatMap(NetworkInterface::inetAddresses)
+                .filter(a -> a instanceof Inet4Address)
+                .map(InetAddress::getCanonicalHostName)
+                .forEachOrdered(ip::append);
+        return ip.toString();
     }
 
-    private HBox textAreaCreator(String strLabel, TextField textFiel){
-        HBox hBox = new HBox();
-        hBox.setFillHeight(false);
-        Label nameLabel = new Label(strLabel);
-        nameLabel.getStyleClass().add("label");
-        textFiel.getStyleClass().add("textArea");
-        hBox.getChildren().addAll(nameLabel, textFiel);
-        return hBox;
+    // Create a button with the given text, style and event
+    private Button createButton(String buttonText, String styleClass){
+        Button button = new Button();
+        button.setText(buttonText);
+        button.getStyleClass().add(styleClass);
+        return button;
+    }
+
+    public void runServer(String[] parameters, SimpleBooleanProperty isConnectedProperty, SimpleBooleanProperty isTryingToHost){
+
+        // Check correctness of the argument
+        Preconditions.checkArgument(parameters.length == 3);
+
+        // Is trying to host
+        isTryingToHost.setValue(true);
+
+        // get the arguments of the program
+        String player1Name = parameters[0];
+        int serverGamePort = Integer.parseInt(parameters[1]);
+        int serverChatPort = Integer.parseInt(parameters[2]);
+
+        // wait the connection and initialize the game if it's the case
+        try (ServerSocket gameServerSocket = new ServerSocket(serverGamePort);
+             ServerSocket chatServerSocket = new ServerSocket(serverChatPort)) {
+
+            Socket gameSocket = gameServerSocket.accept();
+            Socket chatSocket = chatServerSocket.accept();
+
+            // the players
+            Player localPlayer = new GraphicalPlayerAdapter();
+            Player distantPlayer = new RemotePlayerProxy(gameSocket, chatSocket);
+            String distantPlayerName = distantPlayer.receivePlayerName();
+
+            // playerNames
+            Map<PlayerId, String> playerNames = new EnumMap<PlayerId, String>(
+                    PlayerId.class);
+            playerNames.put(PLAYER_1, player1Name);
+            playerNames.put(PLAYER_2, distantPlayerName);
+
+            Map<PlayerId, Player> player = new EnumMap<PlayerId, Player>(
+                    PlayerId.class);
+            player.put(PLAYER_1, localPlayer);
+            player.put(PLAYER_2, distantPlayer);
+
+            // launch the game
+            new Thread(() -> Game
+                    .play(player, playerNames, SortedBag.of(ChMap.tickets()), new Random()))
+                    .start();
+            isConnectedProperty.setValue(true);
+        } catch (IOException e) {
+            isTryingToHost.setValue(false);
+        }
     }
 }
+
+

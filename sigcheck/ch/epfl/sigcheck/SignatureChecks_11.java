@@ -10,18 +10,18 @@ final class SignatureChecks_11 {
 
     void checkClientMain() throws Exception {
         v01 = new ch.epfl.tchu.gui.ClientMain();
-        ch.epfl.tchu.gui.ClientMain.main(v02);
+        //ch.epfl.tchu.gui.ClientMain.main(v02);
         //v01.start(v03);
     }
 
     void checkServerMain() throws Exception {
-        v04 = new ch.epfl.tchu.gui.ServerMain();
-        ch.epfl.tchu.gui.ServerMain.main(v02);
+        //v04 = new ch.epfl.tchu.gui.ServerMain();
+        //ch.epfl.tchu.gui.ServerMain.run(v02);
         //v04.start(v03);
     }
 
     ch.epfl.tchu.gui.ClientMain v01;
     java.lang.String[] v02;
     javafx.stage.Stage v03;
-    ch.epfl.tchu.gui.ServerMain v04;
+    //ch.epfl.tchu.gui.ServerMain v04;
 }

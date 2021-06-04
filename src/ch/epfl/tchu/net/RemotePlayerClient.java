@@ -54,7 +54,11 @@ public final class RemotePlayerClient {
      * @param chatPort to connect to properly communicate with the proxy
      * @param playerName the name of the player that will be send to the server just after the connection
      */
-    public RemotePlayerClient(Player player, String serverName, int gamePort, int chatPort, String playerName){
+    public RemotePlayerClient(Player player,
+                              String serverName,
+                              int gamePort,
+                              int chatPort,
+                              String playerName)  throws IOException{
         this.player = player;
         this.serverName = serverName;
         this.gamePort = gamePort;
@@ -156,24 +160,19 @@ public final class RemotePlayerClient {
     }
 
     //connect the client to the server.
-    private void connect(){
-        try{
-            gameSocket = new Socket(serverName, gamePort);
-            chatSocket = new Socket(serverName, chatPort);
+    private void connect() throws IOException{
+        gameSocket = new Socket(serverName, gamePort);
+        chatSocket = new Socket(serverName, chatPort);
 
-            gameReceiver = new BufferedReader(
-                            new InputStreamReader(gameSocket.getInputStream(), StandardCharsets.US_ASCII));
-            chatReceiver = new BufferedReader(
-                            new InputStreamReader(chatSocket.getInputStream(), StandardCharsets.US_ASCII));
+        gameReceiver = new BufferedReader(
+                        new InputStreamReader(gameSocket.getInputStream(), StandardCharsets.US_ASCII));
+        chatReceiver = new BufferedReader(
+                        new InputStreamReader(chatSocket.getInputStream(), StandardCharsets.US_ASCII));
 
-            gameSender = new BufferedWriter(
-                            new OutputStreamWriter(gameSocket.getOutputStream(), StandardCharsets.US_ASCII));
-            chatSender = new BufferedWriter(
-                            new OutputStreamWriter(chatSocket.getOutputStream(), StandardCharsets.US_ASCII));
-
-        }catch (IOException e){
-            throw new UncheckedIOException(e);
-        }
+        gameSender = new BufferedWriter(
+                        new OutputStreamWriter(gameSocket.getOutputStream(), StandardCharsets.US_ASCII));
+        chatSender = new BufferedWriter(
+                        new OutputStreamWriter(chatSocket.getOutputStream(), StandardCharsets.US_ASCII));
         //Send player name
         sendMessage(Serdes.STRING_SERDE.serialize(playerName), gameSender);
     }
