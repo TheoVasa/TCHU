@@ -126,7 +126,7 @@ public final class Main extends Application {
         EventHandler<ActionEvent> hostBtnEventHandler = (event) -> {
             if (!launched) {
                 hostState.setText("En attente du client");
-                Platform.runLater(() -> runServer(new String[]{nameField.getText(), GAME_PORT, CHAT_PORT},
+                Platform.runLater(() -> ServerMain.run(new String[]{nameField.getText(), GAME_PORT, CHAT_PORT},
                         isConnectedProperty,
                         isTryingToHost));
                 launched = true;
@@ -162,7 +162,6 @@ public final class Main extends Application {
                     bottom.getChildren().removeAll((o) ? hostBox : connectionBox);
                 bottom.getChildren().add((n) ? hostBox : connectionBox);
         });
-        isConnectedProperty.addListener((p, o, n) -> menu.hide());
         isTryingToConnect.addListener((p, o, n) -> {
             if (n)
                 connectionState.setText("Connection au serveur...");
@@ -211,51 +210,6 @@ public final class Main extends Application {
         return button;
     }
 
-    public void runServer(String[] parameters, SimpleBooleanProperty isConnectedProperty, SimpleBooleanProperty isTryingToHost){
-
-        // Check correctness of the argument
-        Preconditions.checkArgument(parameters.length == 3);
-
-        // Is trying to host
-        isTryingToHost.setValue(true);
-
-        // get the arguments of the program
-        String player1Name = parameters[0];
-        int serverGamePort = Integer.parseInt(parameters[1]);
-        int serverChatPort = Integer.parseInt(parameters[2]);
-
-        // wait the connection and initialize the game if it's the case
-        try (ServerSocket gameServerSocket = new ServerSocket(serverGamePort);
-             ServerSocket chatServerSocket = new ServerSocket(serverChatPort)) {
-
-            Socket gameSocket = gameServerSocket.accept();
-            Socket chatSocket = chatServerSocket.accept();
-
-            // the players
-            Player localPlayer = new GraphicalPlayerAdapter();
-            Player distantPlayer = new RemotePlayerProxy(gameSocket, chatSocket);
-            String distantPlayerName = distantPlayer.receivePlayerName();
-
-            // playerNames
-            Map<PlayerId, String> playerNames = new EnumMap<PlayerId, String>(
-                    PlayerId.class);
-            playerNames.put(PLAYER_1, player1Name);
-            playerNames.put(PLAYER_2, distantPlayerName);
-
-            Map<PlayerId, Player> player = new EnumMap<PlayerId, Player>(
-                    PlayerId.class);
-            player.put(PLAYER_1, localPlayer);
-            player.put(PLAYER_2, distantPlayer);
-
-            // launch the game
-            new Thread(() -> Game
-                    .play(player, playerNames, SortedBag.of(ChMap.tickets()), new Random()))
-                    .start();
-            isConnectedProperty.setValue(true);
-        } catch (IOException e) {
-            isTryingToHost.setValue(false);
-        }
-    }
 }
 
 
